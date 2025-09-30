@@ -13,12 +13,6 @@ public class Indexer {
     // you can "quick spin" to shoot all 3 balls quickly
 
 
-    private final int ANGLE_ONE = 0;
-    private final int ANGLE_TWO = 120;
-    private final int ANGLE_THREE = 240;
-    private final int ANGLE_ALT = 360;
-
-
     private IndexerState state;
 
     public enum IndexerState
@@ -34,6 +28,7 @@ public class Indexer {
     public Indexer (HardwareMap hardwareMap)
     {
         indexerServo = new SimpleServo(hardwareMap, "index",0,360);
+        state = IndexerState.one;
     }
 
     public void quickSpin()
@@ -64,6 +59,7 @@ public class Indexer {
     public void moveTo(IndexerState newState)
     {
         indexerServo.turnToAngle((stateToNum(newState) - 1) * 120);
+        state = newState;
     }
 
     public IndexerState numToState(int num)
