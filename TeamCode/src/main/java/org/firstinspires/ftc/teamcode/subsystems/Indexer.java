@@ -56,6 +56,8 @@ public class Indexer {
         }
     }
 
+    //for state 1: will turn to 0
+    //for state oneAlt: stateToNum returns 4, so turns to 360
     public void moveTo(IndexerState newState)
     {
         indexerServo.turnToAngle((stateToNum(newState) - 1) * 120);
@@ -76,6 +78,7 @@ public class Indexer {
         return null;
     }
 
+    //returns 4 for oneAlt (useful for turning functions as you can see in comments)
     public int stateToNum(IndexerState newState)
     {
         switch (newState)
@@ -92,11 +95,13 @@ public class Indexer {
         return 0;
     }
 
+    //im not gonna bother explaining this because ur lowkey cooked if you dont understand this math
     public IndexerState nextState()
     {
         return numToState((stateToNum(state) % 3) + 1);
     }
 
+    //returns the closest 0 state
     public IndexerState closestZero()
     {
         if(state == IndexerState.two) {
