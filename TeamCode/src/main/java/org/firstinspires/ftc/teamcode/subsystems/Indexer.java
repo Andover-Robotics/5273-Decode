@@ -4,6 +4,8 @@ import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 public class Indexer {
 
     //TODO: Optimize the algorithms, it'll work as is though
@@ -17,10 +19,21 @@ public class Indexer {
     private final int ANGLE_TWO = 120;
     private final int ANGLE_THREE = 240;
     private final int ANGLE_ALT = 360;
+    private final IndexerState COLOR_SENSOR_POSITION = IndexerState.one;
+    private ArtifactColor[] artifacts = {
+            ArtifactColor.unknown,
+            ArtifactColor.unknown,
+            ArtifactColor.unknown
+    };
+    private final ColorSensorSystem colorSensor;
 
+    private IndexerState state = IndexerState.one;
 
-    private IndexerState state;
-
+    public enum ArtifactColor {
+        unknown,
+        purple,
+        green
+    }
     public enum IndexerState
     {
         //i swear these names are temporary we'll do some color coding or sum
@@ -34,8 +47,46 @@ public class Indexer {
     public Indexer (HardwareMap hardwareMap)
     {
         indexerServo = new SimpleServo(hardwareMap, "index",0,360);
+        colorSensor = new ColorSensorSystem(hardwareMap);
     }
 
+    public ArtifactColor stateToColor(IndexerState colorState) {
+        ArtifactColor color = ArtifactColor.unknown;
+        int stateNum = stateToNum(colorState);
+        if (stateNum == 4) stateNum = 1;
+        stateNum -= 1;
+        color = artifacts[stateNum];
+        return color;
+    }
+    public void scanArtifact() {
+        ArtifactColor scannedColor = colorSensor.getColor();
+        int stateNum = stateToNum(COLOR_SENSOR_POSITION);
+        if (stateNum == 4) stateNum = 1;
+        artifacts[stateNum] = scannedColor;
+    }
+    public void shiftArtifacts(IndexerState oldState, IndexerState newState) {
+        int oldNum = stateToNum(oldState) - 1;
+        if (oldNum == 3) oldNum = 0;
+        int newNum = stateToNum(newState) - 1;
+        if (newNum == 3) newNum = 0;
+
+        int difference = newNum - oldNum;
+        for (int i = 0; i < Math.abs(difference); i++) {
+            if (difference < 0) {
+                artifacts = new ArtifactColor[]{artifacts[1],artifacts[2],artifacts[0]};
+            } else {
+                artifacts = new ArtifactColor[]{artifacts[2],artifacts[0],artifacts[1]};
+            }
+        }
+    }
+    public void moveToColor(ArtifactColor color) {
+        ArtifactColor checkingColor = stateToColor(IndexerState.one);
+        if (checkingColor == color) {moveTo(IndexerState.one); return;}
+        checkingColor = stateToColor(IndexerState.three);
+        if (checkingColor == color) {moveTo(IndexerState.three); return;}
+        checkingColor = stateToColor(IndexerState.two);
+        if (checkingColor == color) {moveTo(IndexerState.two);}
+    }
     public void quickSpin()
     {
         switch(state)
@@ -56,15 +107,34 @@ public class Indexer {
     }
 
     public void moveInOrder(int[] arr) {
-        for(int i : arr){
-            moveTo(numToState(i));
-        }
+        Thread moveThread = new Thread(() -> {
+            for(int i : arr){
+                moveTo(numToState(i));
+            }
+        });
+        moveThread.start();
     }
 
     public void moveTo(IndexerState newState)
     {
-        indexerServo.turnToAngle((stateToNum(newState) - 1) * 120);
+        shiftArtifacts(state, newState);
+        state = newState;
+        double newAngle = stateToAngle(newState);
+        indexerServo.turnToAngle(newAngle);
+        while (indexerServo.getAngle() > newAngle - 5 && indexerServo.getAngle() < newAngle + 5) {
+            try {
+                // Simulate the blocking operation of the servo
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        scanArtifact();
     }
+    public double stateToAngle(IndexerState newState) {
+        return (stateToNum(newState) - 1) * 120;
+    }
+
 
     public IndexerState numToState(int num)
     {
