@@ -14,11 +14,9 @@ public class Indexer {
     // since 0 and 360 are the same ball, no matter where you are,
     // you can "quick spin" to shoot all 3 balls quickly
 
+    private IndexerState state;
+    private boolean intaking = true;
 
-    private final int ANGLE_ONE = 0;
-    private final int ANGLE_TWO = 120;
-    private final int ANGLE_THREE = 240;
-    private final int ANGLE_ALT = 360;
     private final IndexerState COLOR_SENSOR_POSITION = IndexerState.one;
     private ArtifactColor[] artifacts = {
             ArtifactColor.unknown,
@@ -27,13 +25,12 @@ public class Indexer {
     };
     private final ColorSensorSystem colorSensor;
 
-    private IndexerState state = IndexerState.one;
-
     public enum ArtifactColor {
         unknown,
         purple,
         green
     }
+
     public enum IndexerState
     {
         //i swear these names are temporary we'll do some color coding or sum
@@ -46,8 +43,34 @@ public class Indexer {
 
     public Indexer (HardwareMap hardwareMap)
     {
+        state = IndexerState.one;
         indexerServo = new SimpleServo(hardwareMap, "index",0,360);
         colorSensor = new ColorSensorSystem(hardwareMap);
+    }
+
+    public void setIntaking(boolean isIntaking)
+    {
+        intaking = isIntaking;
+    }
+
+    public void startIntake()
+    {
+        setIntaking(true);
+        //intakes from a closer container instead of the one currently at outtake
+        moveTo(nextState());
+    }
+
+    public void startOuttake()
+    {
+        setIntaking(false);
+        //moves to a closer state instead of turning the full 180 degrees
+        moveTo(nextState());
+    }
+
+    public boolean getIntaking()
+    {
+        return intaking;
+
     }
 
     public ArtifactColor stateToColor(IndexerState colorState) {
@@ -115,12 +138,20 @@ public class Indexer {
         moveThread.start();
     }
 
+    //for state 1: will turn to 0
+    //for state oneAlt: stateToNum returns 4, so turns to 360
     public void moveTo(IndexerState newState)
     {
         shiftArtifacts(state, newState);
-        state = newState;
         double newAngle = stateToAngle(newState);
-        indexerServo.turnToAngle(newAngle);
+        if(intaking)
+        {
+            newAngle = 360%((stateToNum(newState)-1)*120+180);
+            indexerServo.turnToAngle(newAngle);
+        } else {
+            indexerServo.turnToAngle(newAngle);
+        }
+        state = newState;
         while (indexerServo.getAngle() > newAngle - 5 && indexerServo.getAngle() < newAngle + 5) {
             try {
                 // Simulate the blocking operation of the servo
@@ -150,6 +181,7 @@ public class Indexer {
         return null;
     }
 
+    //returns 4 for oneAlt (useful for turning functions as you can see in comments)
     public int stateToNum(IndexerState newState)
     {
         switch (newState)
@@ -166,11 +198,13 @@ public class Indexer {
         return 0;
     }
 
+    //im not gonna bother explaining this because ur lowkey cooked if you dont understand this math
     public IndexerState nextState()
     {
         return numToState((stateToNum(state) % 3) + 1);
     }
 
+    //returns the closest 0 state
     public IndexerState closestZero()
     {
         if(state == IndexerState.two) {
