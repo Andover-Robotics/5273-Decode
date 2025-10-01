@@ -12,7 +12,6 @@ public class Indexer {
     // since 0 and 360 are the same ball, no matter where you are,
     // you can "quick spin" to shoot all 3 balls quickly
 
-
     private IndexerState state;
     private boolean intaking = true;
 
@@ -94,6 +93,7 @@ public class Indexer {
         }
         indexerServo.turnToAngle((stateToNum(newState) - 1) * 120);
         state = newState;
+        indexerServo.turnToAngle((stateToNum(newState) - 1) * 120);
     }
 
     public IndexerState numToState(int num)
