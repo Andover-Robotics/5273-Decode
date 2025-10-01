@@ -33,6 +33,32 @@ public class Indexer {
         state = IndexerState.one;
     }
 
+    public void setIntaking(boolean isIntaking)
+    {
+        intaking = isIntaking;
+    }
+
+    public void startIntake()
+    {
+        setIntaking(true);
+        //intakes from a closer container instead of the one currently at outtake
+        moveTo(nextState());
+    }
+
+    public void startOuttake()
+    {
+        setIntaking(false);
+        //moves to a closer state instead of turning the full 180 degrees
+        moveTo(nextState());
+    }
+
+    public boolean getIntaking()
+    {
+        return intaking;
+
+    }
+
+
     public void quickSpin()
     {
         switch(state)
