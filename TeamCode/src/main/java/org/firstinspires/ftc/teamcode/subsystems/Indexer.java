@@ -12,14 +12,9 @@ public class Indexer {
     // since 0 and 360 are the same ball, no matter where you are,
     // you can "quick spin" to shoot all 3 balls quickly
 
-
-    private final int ANGLE_ONE = 0;
-    private final int ANGLE_TWO = 120;
-    private final int ANGLE_THREE = 240;
-    private final int ANGLE_ALT = 360;
-
-
     private IndexerState state;
+    private boolean intaking = true;
+
 
     public enum IndexerState
     {
@@ -34,7 +29,34 @@ public class Indexer {
     public Indexer (HardwareMap hardwareMap)
     {
         indexerServo = new SimpleServo(hardwareMap, "index",0,360);
+        state = IndexerState.one;
     }
+
+    public void setIntaking(boolean isIntaking)
+    {
+        intaking = isIntaking;
+    }
+
+    public void startIntake()
+    {
+        setIntaking(true);
+        //intakes from a closer container instead of the one currently at outtake
+        moveTo(nextState());
+    }
+
+    public void startOuttake()
+    {
+        setIntaking(false);
+        //moves to a closer state instead of turning the full 180 degrees
+        moveTo(nextState());
+    }
+
+    public boolean getIntaking()
+    {
+        return intaking;
+
+    }
+
 
     public void quickSpin()
     {
@@ -61,8 +83,16 @@ public class Indexer {
         }
     }
 
+    //for state 1: will turn to 0
+    //for state oneAlt: stateToNum returns 4, so turns to 360
     public void moveTo(IndexerState newState)
     {
+        if(intaking)
+        {
+            indexerServo.turnToAngle(360%((stateToNum(newState)-1)*120+180));
+        }
+        indexerServo.turnToAngle((stateToNum(newState) - 1) * 120);
+        state = newState;
         indexerServo.turnToAngle((stateToNum(newState) - 1) * 120);
     }
 
@@ -80,6 +110,7 @@ public class Indexer {
         return null;
     }
 
+    //returns 4 for oneAlt (useful for turning functions as you can see in comments)
     public int stateToNum(IndexerState newState)
     {
         switch (newState)
@@ -96,11 +127,13 @@ public class Indexer {
         return 0;
     }
 
+    //im not gonna bother explaining this because ur lowkey cooked if you dont understand this math
     public IndexerState nextState()
     {
         return numToState((stateToNum(state) % 3) + 1);
     }
 
+    //returns the closest 0 state
     public IndexerState closestZero()
     {
         if(state == IndexerState.two) {
