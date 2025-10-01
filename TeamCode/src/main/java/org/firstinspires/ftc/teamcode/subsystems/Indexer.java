@@ -14,6 +14,8 @@ public class Indexer {
 
 
     private IndexerState state;
+    private boolean intaking = true;
+
 
     public enum IndexerState
     {
@@ -60,6 +62,10 @@ public class Indexer {
     //for state oneAlt: stateToNum returns 4, so turns to 360
     public void moveTo(IndexerState newState)
     {
+        if(intaking)
+        {
+            indexerServo.turnToAngle(360%((stateToNum(newState)-1)*120+180));
+        }
         indexerServo.turnToAngle((stateToNum(newState) - 1) * 120);
         state = newState;
     }
