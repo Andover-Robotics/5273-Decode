@@ -15,8 +15,9 @@ public class AprilTagTester extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         AprilTag aprilTag = new AprilTag(hardwareMap);
-        AprilTagAimer aprilAimer = new AprilTagAimer(hardwareMap);
         Movement movement = new Movement(hardwareMap);
+        // Outtake outtake = new Outtake(hardwareMap);
+        AprilTagAimer aprilAimer = new AprilTagAimer(hardwareMap, movement); // Pass in outtake when possible
         GamepadEx gamePadOne = new GamepadEx(gamepad1);
         GamepadEx gamePadTwo = new GamepadEx(gamepad2);
 
@@ -38,7 +39,7 @@ public class AprilTagTester extends LinearOpMode {
                 double bearing = aprilTag.getBearing();
                 aprilAimer.startTurnToAprilTag(bearing);
 
-                while (!aprilAimer.updateTurn()) {
+                while (aprilAimer.updateTurn()) {
                     telemetry.addData("Turning towards angle", bearing);
                     telemetry.update();
                     sleep(10);
@@ -54,7 +55,7 @@ public class AprilTagTester extends LinearOpMode {
                 double bearing = aprilTag.getBearing();
                 aprilAimer.startTurnToAprilTag(bearing);
 
-                while (!aprilAimer.updateTurn()) {
+                while (aprilAimer.updateTurn()) {
                     telemetry.addData("Turning towards angle", bearing);
                     telemetry.update();
                     sleep(10);
