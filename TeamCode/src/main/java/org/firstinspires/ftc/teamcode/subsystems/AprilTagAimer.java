@@ -144,7 +144,7 @@ public class AprilTagAimer {
     final double rFlywheel = 0;                 // UNKNOWN flywheel radius (m)
     final double Cd = 0.6;                      // drag coefficient
     final double rho = 1.21;                    // air density (kg/m^3)
-    final double ballRadius = 0.0635;           // 5-inch diameter ball
+    final double ballRadius = 0.061341;         // 4.83-inch diameter ball
     final double A = Math.PI * ballRadius * ballRadius;  // cross-sectional area (m²)
     final double maxRPM = 0;                    // UNKNOWN max RPM of flywheel motor
     final double Pmax = 0;                      // UNKNOWN max mechanical power output of motor (W)
