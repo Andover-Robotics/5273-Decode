@@ -40,12 +40,14 @@ public class Indexer {
         oneAlt
     }
     private final SimpleServo indexerServo;
+    private final Actuator actuator;
 
     public Indexer (HardwareMap hardwareMap)
     {
         state = IndexerState.one;
         indexerServo = new SimpleServo(hardwareMap, "index",0,360);
         colorSensor = new ColorSensorSystem(hardwareMap);
+        actuator = new Actuator(hardwareMap);
     }
 
     public void setIntaking(boolean isIntaking)
@@ -85,6 +87,7 @@ public class Indexer {
         ArtifactColor scannedColor = colorSensor.getColor();
         int stateNum = stateToNum(COLOR_SENSOR_POSITION);
         if (stateNum == 4) stateNum = 1;
+        stateNum -= 1;
         artifacts[stateNum] = scannedColor;
     }
     public void shiftArtifacts(IndexerState oldState, IndexerState newState) {
@@ -100,6 +103,12 @@ public class Indexer {
             } else {
                 artifacts = new ArtifactColor[]{artifacts[2],artifacts[0],artifacts[1]};
             }
+        }
+        if (actuator.isActivated()) { //  && !getIntaking() not ever set to false yet
+            int stateNum = stateToNum(state);
+            if (stateNum == 4) stateNum = 1;
+            stateNum -= 1;
+            artifacts[stateNum] = ArtifactColor.unknown;
         }
     }
     public void moveToColor(ArtifactColor color) {
@@ -143,10 +152,10 @@ public class Indexer {
     public void moveTo(IndexerState newState)
     {
         shiftArtifacts(state, newState);
-        double newAngle = stateToAngle(newState);
+        double newAngle = (stateToNum(newState) - 1) * 120; // outtake angle calculation
         if(intaking)
         {
-            newAngle = 360%((stateToNum(newState)-1)*120+180);
+            newAngle = 360%((stateToNum(newState)-1)*120+180); // intake angle calculation
             indexerServo.turnToAngle(newAngle);
         } else {
             indexerServo.turnToAngle(newAngle);
@@ -161,9 +170,6 @@ public class Indexer {
             }
         }
         scanArtifact();
-    }
-    public double stateToAngle(IndexerState newState) {
-        return (stateToNum(newState) - 1) * 120;
     }
 
 
