@@ -6,10 +6,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class Outtake {
     private final MotorEx motor;
     private double power;
+    final double TICKS_PER_REV = 112.0;
 
     public Outtake(HardwareMap hardwareMap)
     {
         motor = new MotorEx(hardwareMap, "outtake");
+
     }
 
     public void stop()
