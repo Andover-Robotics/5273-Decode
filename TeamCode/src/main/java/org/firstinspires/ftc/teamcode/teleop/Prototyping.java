@@ -20,8 +20,8 @@ public class Prototyping extends LinearOpMode {
     //private Intake intake;
     //private Indexer indexer;
     //private Actuator actuator;
-    //private Outtake outtake;
-    private Movement movement;
+    private Outtake outtake;
+    //private Movement movement;
 
 
     @Override
@@ -29,8 +29,8 @@ public class Prototyping extends LinearOpMode {
         // intake = new Intake(hardwareMap);
         // indexer = new Indexer(hardwareMap);
         // actuator = new Actuator(hardwareMap);
-        movement = new Movement(hardwareMap);
-        //outtake = new Outtake(hardwareMap);
+        //movement = new Movement(hardwareMap);
+        outtake = new Outtake(hardwareMap);
         GamepadEx gamePadOne = new GamepadEx(gamepad1);
         GamepadEx gamePadTwo = new GamepadEx(gamepad2);
 
@@ -45,9 +45,8 @@ public class Prototyping extends LinearOpMode {
     }
 
     public void teleopTick(GamepadEx padOne, GamepadEx padTwo, Telemetry telemetry) {
-        movement.teleopTick(padOne.getLeftX(),padOne.getLeftY(),padOne.getRightX());//,padOne.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER),telemetry);
-
-        //telemetry.addData("Outtake Power: ",outtake.getPower());
+        //movement.teleopTick(padOne.getLeftX(),padOne.getLeftY(),padOne.getRightX());//,padOne.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER),telemetry);
+        telemetry.addData("Outtake RPM: ",outtake.getRPM());
         if(padTwo.wasJustPressed(GamepadKeys.Button.A))
         {
             //intake.run(!intake.isRunning());
@@ -65,18 +64,18 @@ public class Prototyping extends LinearOpMode {
             //indexer.quickSpin();
         }
         if(padTwo.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>0.01){
-            //outtake.run();
+            outtake.run();
         }
         else {
-            //outtake.stop();
+            outtake.stop();
         }
-        if(padTwo.isDown(GamepadKeys.Button.DPAD_UP))
+        if(padTwo.wasJustPressed(GamepadKeys.Button.DPAD_UP))
         {
-            //outtake.setPower(outtake.getPower()+0.0005);
+            outtake.setRPM(outtake.getRPM()+250);
         }
-        else if(padTwo.isDown(GamepadKeys.Button.DPAD_DOWN))
+        else if(padTwo.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
         {
-            //outtake.setPower(outtake.getPower()-0.0005);
+            outtake.setRPM(outtake.getRPM()-250);
         }
 
   }
