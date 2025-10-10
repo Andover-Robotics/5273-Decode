@@ -18,7 +18,7 @@ public class AprilTagAimer {
     private final double kP = 0.01; // Full PID can be done later
     private Double targetAngle = null;
 
-    public AprilTagAimer(HardwareMap hardwareMap, Movement movement, Outtake outtake) { 
+    public AprilTagAimer(HardwareMap hardwareMap, Movement movement, Outtake outtake) {
         leftFront = movement.getLeftFront();
         rightFront = movement.getRightFront();
         leftBack = movement.getLeftBack();
@@ -28,7 +28,7 @@ public class AprilTagAimer {
         power = outtake.getPower();
     }
 
-    public AprilTagAimer(HardwareMap hardwareMap, Movement movement) { 
+    public AprilTagAimer(HardwareMap hardwareMap, Movement movement) {
         leftFront = movement.getLeftFront();
         rightFront = movement.getRightFront();
         leftBack = movement.getLeftBack();
@@ -144,7 +144,7 @@ public class AprilTagAimer {
     final double rFlywheel = 0;                 // UNKNOWN flywheel radius (m)
     final double Cd = 0.6;                      // drag coefficient
     final double rho = 1.21;                    // air density (kg/m^3)
-    final double ballRadius = 0.0635;           // 5-inch diameter ball
+    final double ballRadius = 0.061341;         // 4.83-inch diameter ball
     final double A = Math.PI * ballRadius * ballRadius;  // cross-sectional area (m²)
     final double maxRPM = 0;                    // UNKNOWN max RPM of flywheel motor
     final double Pmax = 0;                      // UNKNOWN max mechanical power output of motor (W)
@@ -169,7 +169,7 @@ public class AprilTagAimer {
     // Required initial velocity
     double vInit = Math.sqrt((g * range * range) / denominator);
 
-    // Drag Force and power 
+    // Drag Force and power
     double Fdrag = 0.5 * Cd * rho * A * vInit * vInit;  // drag force at launch
     double Pdrag = Fdrag * vInit;                      // instantaneous drag power loss
 
