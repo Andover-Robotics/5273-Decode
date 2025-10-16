@@ -14,6 +14,12 @@ public class LimeLight {
     LimeLight(HardwareMap hardwareMap)
     {
         init(hardwareMap);
+        limelight.start();            // Start the vision processing loop
+        LLResult result = limelight.getLatestResult();
+        Pose3D botPose = result.getBotpose();
+        pitch = botPose.getOrientation().getPitch();
+        yaw = botPose.getOrientation().getYaw();
+        roll = botPose.getOrientation().getRoll();
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);  // Select pipeline 0, adjust if needed (configure in interface)
     }
@@ -32,15 +38,7 @@ public class LimeLight {
     {
         return roll;
     }
-    public void start()
-    {
-        limelight.start();            // Start the vision processing loop
-        LLResult result = limelight.getLatestResult();
-        Pose3D botPose = result.getBotpose();
-        pitch = botPose.getOrientation().getPitch();
-        yaw = botPose.getOrientation().getYaw();
-        roll = botPose.getOrientation().getRoll();
-    }
+
 
 
 
