@@ -54,7 +54,7 @@ public class AprilTagTester extends LinearOpMode {
                 telemetry.addData("This is probably only for auto,", "as we can just memorize the 3 possible patterns for teleop");
                 telemetry.addData("Obelisk apriltag ID: ", aprilTag.getObeliskId());
             }
-             
+
             if (gamePadTwo.wasJustPressed(GamepadKeys.Button.A)) {
                 continuousAprilTagLock = true;
 
@@ -63,10 +63,10 @@ public class AprilTagTester extends LinearOpMode {
                 telemetry.addData("Goal tag elevation", aprilTag.getElevation());
                 telemetry.addData("Goal tag range", aprilTag.getRange());
             }
-            
+
             if (gamePadTwo.wasJustPressed(GamepadKeys.Button.B)) {
                 continuousAprilTagLock = false;
-            
+
                 telemetry.addData("Stopped continuous lock in on", "apriltag");
             }
 
