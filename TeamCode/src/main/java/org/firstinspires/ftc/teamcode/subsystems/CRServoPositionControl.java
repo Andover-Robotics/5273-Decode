@@ -11,9 +11,9 @@ public class CRServoPositionControl {
 
     public static double kp = 0.15;
     public static double ki = 0.0;
-    public static double kd = 0.02;
+    public static double kd = 0.005;
     public static double kf = 0.1;
-
+    public static double filterAlpha = 0.2;
     private double integral = 0.0;
     private double lastError = 0.0;
     private double filteredVoltage = 0;
@@ -26,7 +26,7 @@ public class CRServoPositionControl {
     }
 
     private double getFilteredVoltage() {
-        filteredVoltage = 0.9 * filteredVoltage + 0.1 * encoder.getVoltage();
+        filteredVoltage = (1 - filterAlpha) * filteredVoltage + filterAlpha * encoder.getVoltage();
         return filteredVoltage;
     }
 
