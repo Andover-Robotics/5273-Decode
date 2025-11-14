@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class Indexer {
     private IndexerState state;
     private boolean intaking = true;
-
+    Thread updateThread;
     private final IndexerState COLOR_SENSOR_POSITION = IndexerState.one;
 
     private ArtifactColor[] artifacts = {
@@ -38,6 +38,11 @@ public class Indexer {
         actuator = new Actuator(hardwareMap);
         indexerServoControl = new CRServoPositionControl(indexerServo, indexerAnalog);
         colorSensor = new ColorSensorSystem(hardwareMap);
+    }
+    private void start()
+    {
+        updateThread = new Thread(new UpdateThread());
+        updateThread.start();
     }
 
     public enum ArtifactColor {
@@ -235,5 +240,16 @@ public class Indexer {
 
     public boolean isBusy() {
         return scanPending;
+    }
+    private class UpdateThread implements Runnable
+    {
+
+        @Override
+        public void run() {
+            while(true)
+            {
+                update();
+            }
+        }
     }
 }
