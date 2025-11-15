@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class Indexer {
     private IndexerState state;
     private boolean intaking = true;
-    Thread updateThread;
+
     private final IndexerState COLOR_SENSOR_POSITION = IndexerState.one;
     public static int hz = 100;
 
@@ -27,8 +27,10 @@ public class Indexer {
     private final double msPerDegree = 0.6;
     private final double minWait = 100;
     private final double maxWait = 300;
-    private double lastAngle = 0;
     public static double targetAngle = 0;
+    public static double offsetAngle = 105;
+    public static double outtakeOffsetAngle = 5;
+    private double lastAngle = offsetAngle;
     Actuator actuator;
     AnalogInput indexerAnalog;
 
@@ -39,11 +41,6 @@ public class Indexer {
         actuator = new Actuator(hardwareMap);
         indexerServoControl = new CRServoPositionControl(indexerServo, indexerAnalog);
         colorSensor = new ColorSensorSystem(hardwareMap);
-    }
-    private void start()
-    {
-        updateThread = new Thread(new UpdateThread());
-        updateThread.start();
     }
 
     public enum ArtifactColor {
@@ -56,13 +53,12 @@ public class Indexer {
         one,
         two,
         three,
-        oneAlt
     }
 
     public void setIntaking(boolean isIntaking) {
         if (this.intaking != isIntaking) {
             this.intaking = isIntaking;
-            moveTo(nextState());
+            moveTo(state);
         }
     }
 
@@ -142,9 +138,6 @@ public class Indexer {
             case three:
                 moveInOrder(new int[]{3, 2, 1});
                 break;
-            case oneAlt:
-                moveInOrder(new int[]{1, 3, 2});
-                break;
         }
     }
 
@@ -166,6 +159,7 @@ public class Indexer {
         } else {
             targetAngle = (stateToNum(newState) - 1) * 120;
         }
+        targetAngle = (targetAngle + offsetAngle) % 360;
         double angleDelta = Math.abs(targetAngle - oldAngle);
         if (angleDelta > 180) angleDelta = 360 - angleDelta;
 
@@ -192,43 +186,24 @@ public class Indexer {
     }
 
     public IndexerState numToState(int num) {
-        switch (num) {
-            case 1:
-                return closestZero();
-            case 2:
-                return IndexerState.two;
-            case 3:
-                return IndexerState.three;
-        }
-        return null;
+        return switch (num) {
+            case 1 -> IndexerState.one;
+            case 2 -> IndexerState.two;
+            case 3 -> IndexerState.three;
+            default -> null;
+        };
     }
 
     public int stateToNum(IndexerState newState) {
-        switch (newState) {
-            case one:
-                return 1;
-            case two:
-                return 2;
-            case three:
-                return 3;
-            case oneAlt:
-                return 4;
-        }
-        return 0;
+        return switch (newState) {
+            case one -> 1;
+            case two -> 2;
+            case three -> 3;
+        };
     }
 
     public IndexerState nextState() {
         return numToState((stateToNum(state) % 3) + 1);
-    }
-
-    public IndexerState closestZero() {
-        if (state == IndexerState.two) {
-            return IndexerState.one;
-        }
-        if (state == IndexerState.three) {
-            return IndexerState.oneAlt;
-        }
-        return state;
     }
 
     public double getVoltageAnalog() {
@@ -239,9 +214,6 @@ public class Indexer {
         return state;
     }
 
-    public boolean isBusy() {
-        return scanPending;
-    }
     private class UpdateThread implements Runnable
     {
 
@@ -258,5 +230,8 @@ public class Indexer {
                 }
             }
         }
+
+    public boolean notBusy() {
+        return !scanPending;
     }
 }

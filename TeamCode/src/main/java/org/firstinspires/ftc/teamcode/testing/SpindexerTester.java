@@ -34,19 +34,19 @@ public class SpindexerTester extends LinearOpMode {
             telemetry.addData("NextState: ", indexer.nextState());
 
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-                if (!indexer.isBusy()) {
+                if (indexer.notBusy()) {
                     indexer.moveTo(indexer.nextState());
                 }
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.A)) {
-                if (!indexer.isBusy()) {
+                if (indexer.notBusy()) {
                     indexer.setIntaking(true);
                 }
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.B)) {
-                if (!indexer.isBusy()) {
+                if (indexer.notBusy()) {
                     indexer.setIntaking(false);
                 }
             }
