@@ -33,7 +33,7 @@ public class SpindexerTester extends LinearOpMode {
             telemetry.addData("CurrentState: ", indexer.getState());
             telemetry.addData("NextState: ", indexer.nextState());
 
-            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
                 if (indexer.notBusy()) {
                     indexer.moveTo(indexer.nextState());
                 }

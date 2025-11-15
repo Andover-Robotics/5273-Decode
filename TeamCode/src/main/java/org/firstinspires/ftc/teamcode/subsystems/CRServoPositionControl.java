@@ -11,41 +11,47 @@ public class CRServoPositionControl {
 
     public static double kp = 0.41;
     public static double ki = 0.0;
-    public static double kd = 0.0;
-    public static double kf = 0.01;
-    public static double filterAlpha = 0.9;
+    public static double kd = 0.0; // should 0
+    public static double kf = 0.015; // overcome deadband
+    public static double filterAlpha = 0.90;
+    public static double angleDeadband = 1.67; // degrees
     private double integral = 0.0;
     private double lastError = 0.0;
-    private double filteredVoltage = 0;
+    private Double filteredVoltage = null;
+    public final double MAX_VOLTAGE;
     private ElapsedTime timer = new ElapsedTime();
 
     public CRServoPositionControl(CRServo servo, AnalogInput encoder) {
         this.crServo = servo;
         this.encoder = encoder;
+        MAX_VOLTAGE = encoder.getMaxVoltage();
         timer.reset();
     }
 
     private double getFilteredVoltage() {
-        filteredVoltage = (1 - filterAlpha) * filteredVoltage + filterAlpha * encoder.getVoltage();
+        if (filteredVoltage == null) {
+            filteredVoltage = encoder.getVoltage();  // initialize to first reading
+        } else {
+            filteredVoltage = (1 - filterAlpha) * filteredVoltage + filterAlpha * encoder.getVoltage();
+        }
         return filteredVoltage;
     }
 
-
-    private double angleToVoltage(double angleDegrees) {
-        angleDegrees = Math.max(0, Math.min(360, angleDegrees)); // Clamp
-        return (angleDegrees / 360.0) * 3.3;
-        // REV Through-Bore analog encoders output 0–3.3V, not 0–3.2V apparently but we measured 3.2 so we will try
+    private double getAngle() {
+        return (getFilteredVoltage() / MAX_VOLTAGE) * 360.0;
     }
 
     public void moveToAngle(double targetAngleDegrees) {
-        double targetVoltage = angleToVoltage(targetAngleDegrees);
-        double currentVoltage = getFilteredVoltage();
 
-        double error = targetVoltage - currentVoltage;
+        double currentAngle = getAngle();
+        double error = ((targetAngleDegrees - currentAngle + 540) % 360) - 180; // shortest path
 
-        // Shortest path wrap handling, for continuous rotation (optional)
-        if (error > 1.65) { error -= 3.3; }
-        if (error < -1.65) { error += 3.3; }
+        if (Math.abs(error) < angleDeadband) {
+            crServo.setPower(0);
+            integral = 0;
+            lastError = error;
+            return;
+        }
 
         double deltaTime = timer.seconds();
         timer.reset();
@@ -53,10 +59,12 @@ public class CRServoPositionControl {
 
         integral += error * deltaTime;
         integral = Math.max(-2, Math.min(2, integral));
+
         double derivative = (error - lastError) / deltaTime;
 
         double output = kp * error + ki * integral + kd * derivative + kf * Math.signum(error);
         output = Math.max(-1.0, Math.min(1.0, output));
+
         crServo.setPower(output);
         lastError = error;
     }
