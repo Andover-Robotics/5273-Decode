@@ -251,13 +251,10 @@ public class Indexer {
             while(!Thread.currentThread().isInterrupted())
             {
                 update();
-                try
-                {
-                    Thread.sleep(delay);
-                }
-                catch (Exception e)
-                {
-                    break;
+                try {
+                    Thread.sleep(delay); // 50 Hz
+                } catch (InterruptedException e) {
+                    break; // thread stops safely
                 }
             }
         }
