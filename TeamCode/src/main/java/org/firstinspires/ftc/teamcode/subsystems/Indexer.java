@@ -12,6 +12,7 @@ public class Indexer {
     private boolean intaking = true;
     Thread updateThread;
     private final IndexerState COLOR_SENSOR_POSITION = IndexerState.one;
+    public static int hz = 100;
 
     private ArtifactColor[] artifacts = {
             ArtifactColor.unknown,
@@ -246,9 +247,18 @@ public class Indexer {
 
         @Override
         public void run() {
-            while(true)
+            int delay = 1000 / hz;
+            while(!Thread.currentThread().isInterrupted())
             {
                 update();
+                try
+                {
+                    Thread.sleep(delay);
+                }
+                catch (Exception e)
+                {
+                    break;
+                }
             }
         }
     }
