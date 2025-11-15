@@ -51,8 +51,6 @@ public class CRServoPositionControl {
             integral = 0;
             lastError = error;
             return;
-        }
-
         double deltaTime = timer.seconds();
         timer.reset();
         if (deltaTime <= 0.0001) deltaTime = 0.0001;
