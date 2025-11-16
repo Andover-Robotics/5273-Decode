@@ -34,21 +34,22 @@ public class SpindexerTester extends LinearOpMode {
             telemetry.addData("NextState: ", indexer.nextState());
 
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-                if (indexer.notBusy()) {
-                    indexer.moveTo(indexer.nextState());
-                }
+                indexer.queueMove(indexer.nextState());
+            }
+
+            if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+                indexer.actuatorDown();
+            }
+            else if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+                indexer.actuatorUp();
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.A)) {
-                if (indexer.notBusy()) {
-                    indexer.setIntaking(true);
-                }
+                indexer.startIntake();
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.B)) {
-                if (indexer.notBusy()) {
-                    indexer.setIntaking(false);
-                }
+                indexer.startOuttake();
             }
 
             if (gp2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01) {
@@ -58,7 +59,6 @@ public class SpindexerTester extends LinearOpMode {
             }
 
             // Call update each loop to continuously control the servo position
-            indexer.update();
             telemetry.addData("Indexer Voltage: ", indexer.getVoltageAnalog());
 
             // Update color scanning timing and sensor reading

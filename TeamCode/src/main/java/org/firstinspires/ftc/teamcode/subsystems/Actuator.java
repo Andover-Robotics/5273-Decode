@@ -29,12 +29,4 @@ public class Actuator {
     {
         return activated;
     }
-
-    public void set(boolean activate)
-    {
-        if (activate)
-            up();
-        else
-            down();
-    }
 }
