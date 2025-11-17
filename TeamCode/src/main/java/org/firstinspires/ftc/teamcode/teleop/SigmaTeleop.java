@@ -113,9 +113,11 @@ public class SigmaTeleop extends LinearOpMode {
 
         //outtake control
         if (g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01) {
+            indexer.lockAngle(Indexer.targetAngle);
             outtake.run();
         } else {
             outtake.stop();
+            indexer.unlockAngle();
         }
 
         // spindexer control

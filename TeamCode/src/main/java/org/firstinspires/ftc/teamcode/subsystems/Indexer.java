@@ -184,8 +184,13 @@ public class Indexer {
             scanArtifact();
             scanPending = false;
         }
+    }
 
-
+    public void lockAngle(double targetAngleDegrees) {
+        indexerServoControl.lockAngle(targetAngleDegrees);
+    }
+    public void unlockAngle() {
+        indexerServoControl.unlockAngle();
     }
 
     public IndexerState numToState(int num) {
