@@ -201,29 +201,33 @@ public class Indexer {
     }
 
     private class UpdateThread implements Runnable {
+
         @Override
+
         public void run() {
-            int delay = 1000 / hz;
-            while (!Thread.currentThread().isInterrupted()) {
-                IndexerState next = null;
-                try {
-                    next = moveQueue.take();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                moveTo(next);
-
-                while (!Thread.currentThread().isInterrupted() && !isServoAtTarget()) {
-                    indexerServoControl.moveToAngle(targetAngle);
-
-                    if (scanPending && isServoAtTarget()) {
-                        scanPending = false;
-                        scanArtifact();
-                    }
+            synchronized (artifactLock) {
+                int delay = 1000 / hz;
+                while (!Thread.currentThread().isInterrupted()) {
+                    IndexerState next = null;
                     try {
-                        Thread.sleep(delay);
+                        next = moveQueue.take();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
+                    }
+                    moveTo(next);
+
+                    while (!Thread.currentThread().isInterrupted() && !isServoAtTarget()) {
+                        indexerServoControl.moveToAngle(targetAngle);
+
+                        if (scanPending && isServoAtTarget()) {
+                            scanPending = false;
+                            scanArtifact();
+                        }
+                        try {
+                            Thread.sleep(delay);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
                     }
                 }
             }
@@ -247,4 +251,5 @@ public class Indexer {
     public void stopThread() {
         if (thread != null && thread.isAlive()) thread.interrupt();
     }
+
 }
