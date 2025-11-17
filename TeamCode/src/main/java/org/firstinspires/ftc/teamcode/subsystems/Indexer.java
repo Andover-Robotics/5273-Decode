@@ -234,6 +234,13 @@ public class Indexer {
         }
     }
 
+    public void lockAngle(double targetAngleDegrees) {
+        indexerServoControl.lockAngle(targetAngleDegrees);
+    }
+    public void unlockAngle() {
+        indexerServoControl.unlockAngle();
+    }
+
     public void actuatorUp() {
         actuator.up();
 

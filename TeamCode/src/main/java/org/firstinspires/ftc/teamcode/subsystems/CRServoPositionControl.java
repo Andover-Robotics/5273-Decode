@@ -10,10 +10,16 @@ public class CRServoPositionControl {
     private final CRServo crServo;
     private final AnalogInput encoder;
 
+    private static boolean angleIsLocked = false;
+    private static double lockedAngle;
     public static double kp = 0.41;
     public static double ki = 0.0;
     public static double kd = 0.0;
     public static double kf = 0.015;
+    public static double lockedkp = 0.41;
+    public static double lockedki = 0.0;
+    public static double lockedkd = 0.0;
+    public static double lockedkf = 0.01;
     public static double filterAlpha = 0.90;
     public static double angleDeadband = 1.67;
 
@@ -47,7 +53,27 @@ public class CRServoPositionControl {
         return (getFilteredVoltage() / MAX_VOLTAGE) * 360.0;
     }
 
+    public void lockAngle(double targetAngleDegrees) {
+        angleIsLocked = true;
+        lockedAngle = targetAngleDegrees;
+    }
+    public void unlockAngle() {
+        angleIsLocked = false;
+    }
+
     public void moveToAngle(double targetAngleDegrees) {
+        double tempkp = kp;
+        double tempki = ki;
+        double tempkd = kd;
+        double tempkf = kf;
+        if (angleIsLocked) {
+            targetAngleDegrees = lockedAngle;
+            tempkp = lockedkp;
+            tempki = lockedki;
+            tempkd = lockedkd;
+            tempkf = lockedkf;
+        }
+
         double currentAngle = getAngle();
         double error = ((targetAngleDegrees - currentAngle + 540) % 360) - 180;
 
@@ -67,7 +93,7 @@ public class CRServoPositionControl {
 
         double derivative = (error - lastError) / deltaTime;
 
-        double output = kp * error + ki * integral + kd * derivative + kf * Math.signum(error);
+        double output = tempkp * error + tempki * integral + tempkd * derivative + tempkf * Math.signum(error);
 
         // Dynamic speed scaling, speeds up if distance is further
         double distanceFactor = Math.min(Math.abs(error) / maxErrorForScaling, 1.0);

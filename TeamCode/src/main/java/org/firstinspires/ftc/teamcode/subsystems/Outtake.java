@@ -11,7 +11,7 @@ public class Outtake {
     public Outtake(HardwareMap hardwareMap)
     {
         motor = new MotorEx(hardwareMap, "outtake");
-
+        power = -1;
     }
 
     public void stop()

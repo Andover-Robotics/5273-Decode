@@ -53,9 +53,9 @@ public class SpindexerTester extends LinearOpMode {
             }
 
             if (gp2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01) {
-                intake.run(true);
+                intake.run();
             } else {
-                intake.run(false);
+                intake.stop();
             }
 
             // Call update each loop to continuously control the servo position

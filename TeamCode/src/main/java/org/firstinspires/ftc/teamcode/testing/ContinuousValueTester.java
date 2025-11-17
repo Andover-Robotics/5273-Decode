@@ -21,7 +21,7 @@ public class ContinuousValueTester extends LinearOpMode {
           waitForStart();
           while (opModeIsActive())
           {
-              indexerServo.setPower(1);
+              indexerServo.setPower(0.1);
               telemetry.addData("voltage", signal.getVoltage());
               telemetry.update();
           }
