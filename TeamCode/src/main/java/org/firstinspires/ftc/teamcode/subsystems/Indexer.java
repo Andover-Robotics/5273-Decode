@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -25,6 +27,7 @@ TODO: At some point maybe implement some advanced things, like:
 */
 @Config
 public class Indexer {
+    private Telemetry telemetry;
     private IndexerState state;
     private boolean intaking = true;
 
@@ -59,7 +62,8 @@ public class Indexer {
     private Thread thread;
     private final Object artifactLock = new Object(); // prevent race conditions
 
-    public Indexer(HardwareMap hardwareMap) {
+    public Indexer(HardwareMap hardwareMap, Telemetry telemetry) {
+        this.telemetry = telemetry;
         state = IndexerState.one;
         CRServo indexerServo = hardwareMap.get(CRServo.class, "index");
         indexerAnalogEncoder = hardwareMap.get(AnalogInput.class, "indexAnalog");
@@ -206,6 +210,7 @@ public class Indexer {
 
         public void run() {
             synchronized (artifactLock) {
+                telemetry.addData("Skib", "it runs");
                 int delay = 1000 / hz;
                 while (!Thread.currentThread().isInterrupted()) {
                     IndexerState next = null;
@@ -213,6 +218,7 @@ public class Indexer {
                         next = moveQueue.take();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
+                        break;
                     }
                     moveTo(next);
 

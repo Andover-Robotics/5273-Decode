@@ -9,17 +9,20 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 
 @TeleOp(name = "SpindexerTest", group = "Teleop")
 public class SpindexerTester extends LinearOpMode {
 
+    Actuator actuator;
     Indexer indexer;
     Intake intake;
     GamepadEx gp2;
 
     @Override
     public void runOpMode() {
-        indexer = new Indexer(hardwareMap);
+        actuator = new Actuator(hardwareMap);
+        indexer = new Indexer(hardwareMap, telemetry);
         intake = new Intake(hardwareMap);
         gp2 = new GamepadEx(gamepad2);
 
@@ -38,10 +41,12 @@ public class SpindexerTester extends LinearOpMode {
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-                indexer.actuatorDown();
+                //indexer.actuatorDown();
+                actuator.down();
             }
             else if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-                indexer.actuatorUp();
+                //indexer.actuatorUp();
+                actuator.up();
             }
 
             if (gp2.wasJustPressed(GamepadKeys.Button.A)) {
@@ -66,6 +71,8 @@ public class SpindexerTester extends LinearOpMode {
 
             telemetry.update();
         }
+
+        indexer.stopThread();
     }
 
     @NonNull
