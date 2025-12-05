@@ -21,7 +21,7 @@ public class IntakeValueTester extends LinearOpMode {
         gp1 = new GamepadEx(gamepad1);
         gp2 = new GamepadEx(gamepad2);
         // intake;
-        outtake = new Outtake(hardwareMap);
+        outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         boolean start = false;
         waitForStart();
         while(opModeIsActive()){

@@ -1,37 +1,96 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static androidx.core.math.MathUtils.clamp;
+
+import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+/**
+ * POWER mode  → set(x) sets power 0–1
+ * RPM mode    → set(x) sets RPM target and uses PIDF control
+ */
+
+@Config
 public class Outtake {
-    private final MotorEx motor;
-    private double power;
 
-    public Outtake(HardwareMap hardwareMap)
-    {
-        motor = new MotorEx(hardwareMap, "outtake");
+    public enum Mode {
+        POWER,
+        RPM
     }
 
-    public void stop()
-    {
-        motor.stopMotor();
+    private final MotorEx shooter;
+
+    // FTCLib PID controller (P, I, D only)
+    private final PIDController controller;
+
+    // Dashboard-tunable gains
+    public static double p = 0.0002;
+    public static double i = 0.0;
+    public static double d = 0.0;
+    public static double f = 0.0003;   // feedforward from earlier code
+
+    // Mode + state
+    public Mode mode;
+    private double motorPower = 0.0;
+    private double targetRPM = 0.0;
+    private double currentRPM = 0.0;
+
+    private final double TPR = 28.0;   // encoder ticks per rotation
+
+    public Outtake(HardwareMap hardwareMap, Mode mode) {
+        shooter = new MotorEx(hardwareMap, "outtake");
+        shooter.setInverted(true);
+
+        this.mode = mode;
+        controller = new PIDController(p, i, d);
     }
 
-    public void run()
-    {
-        motor.set(power);
+    public void stop() {
+        shooter.stopMotor();
+        motorPower = 0.0;
+        targetRPM = 0.0;
     }
 
-    public void setPower(double newPower)
-    {
-        power = newPower;
-        motor.set(power);
+    /** Unified setter */
+    public void set(double x) {
+        if (mode == Mode.POWER) {
+            motorPower = clamp(x, 0.0, 1.0);
+        } else { // RPM MODE
+            targetRPM = x;
+        }
     }
 
-    public double getPower()
-    {
-        return power;
-    }
+    public double getRPM() { return currentRPM; }
+    public double getTargetRPM() { return targetRPM; }
+    public double getPower() { return motorPower; }
 
-    //TODO: Make algorithm to determine power needed based on distance
+    public void periodic() {
+        // Update current RPM from motor encoder
+        currentRPM = shooter.getVelocity() / TPR * 60.0;
+
+        if (mode == Mode.POWER) {
+            // Open-loop mode
+            shooter.set(motorPower);
+            return;
+        }
+
+        // Update PID gains live from dashboard
+        controller.setPID(p, i, d);
+
+        // Compute PID term
+        double pid = controller.calculate(currentRPM, targetRPM);
+
+        // Compute feedforward term from earlier code
+        double ff = targetRPM * f;
+
+        // Combined PIDF output
+        motorPower = pid + ff;
+
+        // Constrain power
+        motorPower = clamp(motorPower, 0.0, 1.0);
+
+        shooter.set(motorPower);
+    }
 }
