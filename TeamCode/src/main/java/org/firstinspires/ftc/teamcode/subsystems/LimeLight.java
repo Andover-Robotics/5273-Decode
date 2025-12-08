@@ -32,13 +32,10 @@ public class LimeLight {
         hasPose = false;
 
         if (result != null && result.isValid()) {
-            Pose3D botPose = result.getBotpose(); // or getBotpose_MT2()
-            if (botPose != null) {
-                pitch = botPose.getOrientation().getPitch();
-                yaw   = botPose.getOrientation().getYaw();
-                roll  = botPose.getOrientation().getRoll();
+                pitch = result.getTx();
+                yaw   = result.getTy();
+                roll  = result.getTa();
                 hasPose = true;
-            }
         }
     }
     public boolean detected() { return hasPose; }
