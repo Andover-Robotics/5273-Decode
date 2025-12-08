@@ -41,9 +41,10 @@ public class CRServoPositionControl
 
         double error = targetVoltage - currentVoltage;
 
-        // Shortest path wrap handling, for continuous rotation (optional)
-        if (error > (ticksPerRev /2)) { error -= ticksPerRev; }
-        if (error < -(ticksPerRev /2)) { error += ticksPerRev; }
+        // Shortest path wrap handling, with offset to avoid error spikes
+        double wrapPoint = (ticksPerRev / 2) + (ticksPerRev / 4); // Add offset
+        if (error > wrapPoint) { error -= ticksPerRev; }
+        if (error < -wrapPoint) { error += ticksPerRev; }
 
         double deltaTime = timer.seconds();
         timer.reset();
