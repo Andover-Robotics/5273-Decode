@@ -11,9 +11,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 public class LimeLight {
     private Limelight3A limelight;
     private double pitch,yaw,roll;
-    LLResult result;
     private boolean hasPose;
-    LimeLight(HardwareMap hardwareMap)
+    public LimeLight(HardwareMap hardwareMap)
     {
         init(hardwareMap);
         limelight.pipelineSwitch(0); // adjust in the limelight app/interface thingy 
@@ -23,7 +22,7 @@ public class LimeLight {
     {
         limelight.start();
     }
-    public void init(HardwareMap hardwareMap) {
+    private void init(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
     }
@@ -42,6 +41,7 @@ public class LimeLight {
             }
         }
     }
+    public boolean detected() { return hasPose; }
     public double getPitch()
     {
         return pitch;

@@ -20,8 +20,6 @@ public class AprilTag {
     private double bearing;
     private double elevation;
     private double range;
-    private final VisionPortal portal;
-    private final AprilTagProcessor processor;
     LimeLight limeLight;
     public AprilTag(HardwareMap hardwareMap) {
         limeLight = new LimeLight(hardwareMap);
@@ -43,13 +41,13 @@ public class AprilTag {
 
     public void scanObeliskTag() {
         id = -1;
-        List<AprilTagDetection> detectionList = processor.getDetections();
+        /*List<AprilTagDetection> detectionList = processor.getDetections();
 
         for (AprilTagDetection detection : detectionList) {
             if (detection.id >= 21 && detection.id <= 23) {
                 obeliskId = detection.id;
             }
-        }
+        }*/
     }
 
     public void scanGoalTag() {
@@ -59,7 +57,7 @@ public class AprilTag {
         range = Double.NaN;
 
         // If camera is facing to the right of the center of the cam (if it needs to move to the left) the bearing is positive.
-        List<AprilTagDetection> detectionList = processor.getDetections();
+        /*List<AprilTagDetection> detectionList = processor.getDetections();
         for (AprilTagDetection detection : detectionList) {
             cameraScannedId = detection.id;
             // goalTagID should be gotten before round/during auto
@@ -71,6 +69,7 @@ public class AprilTag {
                 break;
             }
         }
+        */
     }
 
     public void setGoalTagID(int allianceTagID) {
