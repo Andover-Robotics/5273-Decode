@@ -11,20 +11,36 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 public class LimeLight {
     private Limelight3A limelight;
     private double pitch,yaw,roll;
+    LLResult result;
+    private boolean hasPose;
     LimeLight(HardwareMap hardwareMap)
     {
         init(hardwareMap);
-        limelight.start();            // Start the vision processing loop
-        LLResult result = limelight.getLatestResult();
-        Pose3D botPose = result.getBotpose();
-        pitch = botPose.getOrientation().getPitch();
-        yaw = botPose.getOrientation().getYaw();
-        roll = botPose.getOrientation().getRoll();
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(0);  // Select pipeline 0, adjust if needed (configure in interface)
+        limelight.pipelineSwitch(0); // adjust in the limelight app/interface thingy 
+
+    }
+    public void start()
+    {
+        limelight.start();
     }
     public void init(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+    }
+    public void update() {
+        LLResult result = limelight.getLatestResult();
+
+        hasPose = false;
+
+        if (result != null && result.isValid()) {
+            Pose3D botPose = result.getBotpose(); // or getBotpose_MT2()
+            if (botPose != null) {
+                pitch = botPose.getOrientation().getPitch();
+                yaw   = botPose.getOrientation().getYaw();
+                roll  = botPose.getOrientation().getRoll();
+                hasPose = true;
+            }
+        }
     }
     public double getPitch()
     {

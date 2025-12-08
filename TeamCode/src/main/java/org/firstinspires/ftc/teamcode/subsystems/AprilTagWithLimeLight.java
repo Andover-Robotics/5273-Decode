@@ -12,7 +12,7 @@ import java.util.List;
 
 // TODO IMPORTANT NOTES: For goalTagID, just have separate teleops one for red alliance one for blue where blue teleop can setGoalTagID(20) and red teleop can setGoalTagID(24)
 // TODO We will see whether we want separate auto for either alliance, probably yes its just easier that way and there may be some functionality requiring that.
-public class AprilTag {
+public class AprilTagWithLimeLight {
     private int id;
     private int obeliskId;
     private int goalTagID; // our current alliance goal
@@ -23,9 +23,10 @@ public class AprilTag {
     private final VisionPortal portal;
     private final AprilTagProcessor processor;
     LimeLight limeLight;
-    public AprilTag(HardwareMap hardwareMap) {
+
+    public AprilTagWithLimeLight(HardwareMap hardwareMap) {
         limeLight = new LimeLight(hardwareMap);
-       /* AprilTagLibrary library = AprilTagGameDatabase.getCurrentGameTagLibrary();
+        AprilTagLibrary library = AprilTagGameDatabase.getCurrentGameTagLibrary();
 
         processor = new AprilTagProcessor.Builder()
                 .setTagLibrary(library)
@@ -33,12 +34,10 @@ public class AprilTag {
 
         WebcamName webcamname = hardwareMap.get(WebcamName.class, "webcam");
         portal = VisionPortal.easyCreateWithDefaults(webcamname, processor);
-
-        */
     }
 
     public void toggle(boolean bool) {
-        limeLight.start();
+        portal.setProcessorEnabled(processor, bool);
     }
 
     public void scanObeliskTag() {
