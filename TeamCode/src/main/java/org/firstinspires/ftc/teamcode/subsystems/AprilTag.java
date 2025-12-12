@@ -1,13 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
-import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 
 // TODO IMPORTANT NOTES: For goalTagID, just have separate teleops one for red alliance one for blue where blue teleop can setGoalTagID(20) and red teleop can setGoalTagID(24)
@@ -20,34 +15,29 @@ public class AprilTag {
     private double bearing;
     private double elevation;
     private double range;
-    LimeLight limeLight;
+    private final Limelight3A limelight;
+
     public AprilTag(HardwareMap hardwareMap) {
-        limeLight = new LimeLight(hardwareMap);
-       /* AprilTagLibrary library = AprilTagGameDatabase.getCurrentGameTagLibrary();
-
-        processor = new AprilTagProcessor.Builder()
-                .setTagLibrary(library)
-                .build();
-
-        WebcamName webcamname = hardwareMap.get(WebcamName.class, "webcam");
-        portal = VisionPortal.easyCreateWithDefaults(webcamname, processor);
-
-        */
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        limelight.start();
     }
 
     public void toggle(boolean bool) {
-        limeLight.start();
+        if (bool) { limelight.start(); }
+        else { limelight.stop(); }
     }
 
     public void scanObeliskTag() {
         id = -1;
-        /*List<AprilTagDetection> detectionList = processor.getDetections();
+        List<LLResultTypes.FiducialResult> scanned = limelight.getLatestResult().getFiducialResults();
 
-        for (AprilTagDetection detection : detectionList) {
-            if (detection.id >= 21 && detection.id <= 23) {
-                obeliskId = detection.id;
+        for (LLResultTypes.FiducialResult detection: scanned) {
+            int id = detection.getFiducialId();
+            if (id >= 21 && id <= 23) {
+                obeliskId = id;
             }
-        }*/
+        }
     }
 
     public void scanGoalTag() {
@@ -57,35 +47,36 @@ public class AprilTag {
         range = Double.NaN;
 
         // If camera is facing to the right of the center of the cam (if it needs to move to the left) the bearing is positive.
-        /*List<AprilTagDetection> detectionList = processor.getDetections();
-        for (AprilTagDetection detection : detectionList) {
-            cameraScannedId = detection.id;
+        List<LLResultTypes.FiducialResult> scanned = limelight.getLatestResult().getFiducialResults();
+        for (LLResultTypes.FiducialResult detection: scanned) {
+            cameraScannedId = detection.getFiducialId();
             // goalTagID should be gotten before round/during auto
-            if (detection.id == goalTagID && detection.ftcPose != null) {
-                id = detection.id;
-                bearing = detection.ftcPose.bearing;
-                elevation = detection.ftcPose.elevation;
-                range = detection.ftcPose.range;
+            if (cameraScannedId == goalTagID) {
+                id = cameraScannedId;
+                bearing = detection.getTargetXDegrees();
+                elevation = detection.getTargetYDegrees();
+                range = detection.getTargetArea();
                 break;
             }
         }
-        */
     }
 
     public void setGoalTagID(int allianceTagID) {
         goalTagID = allianceTagID;
     }
-    public int getCurrentId() { return cameraScannedId;}
-    public int getObeliskId(){
+    public int getCurrentId() {
+        return cameraScannedId;
+    }
+    public int getObeliskId() {
         return obeliskId;
     }
-    public double getElevation(){
+    public double getElevation() {
         return elevation;
     }
-    public double getRange(){
+    public double getRange() {
         return range;
     }
-    public double getBearing(){
+    public double getBearing() {
         return bearing;
     }
     public void setCurrentCameraScannedId(int i) {
