@@ -3,14 +3,12 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-
 
 // to configure pipline for apriltags you have to configure the physicial limelight via the limelight web interface
 
 public class LimeLight {
     private Limelight3A limelight;
-    private double pitch,yaw,roll;
+    private double xOffset, yOffset, size;
     private boolean hasPose;
     public LimeLight(HardwareMap hardwareMap)
     {
@@ -30,26 +28,25 @@ public class LimeLight {
         LLResult result = limelight.getLatestResult();
 
         hasPose = false;
-
         if (result != null && result.isValid()) {
-                pitch = result.getTx();
-                yaw   = result.getTy();
-                roll  = result.getTa();
-                hasPose = true;
+            xOffset = result.getTx();
+            yOffset = result.getTy();
+            size = result.getTa();
+            hasPose = true;
         }
     }
     public boolean detected() { return hasPose; }
-    public double getPitch()
+    public double getXOffset()
     {
-        return pitch;
+        return xOffset;
     }
-    public double getYaw()
+    public double getYOffset()
     {
-        return yaw;
+        return yOffset;
     }
-    public double getRoll()
+    public double getSize()
     {
-        return roll;
+        return size;
     }
 
 
