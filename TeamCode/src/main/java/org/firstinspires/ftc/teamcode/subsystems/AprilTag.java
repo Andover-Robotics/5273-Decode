@@ -53,7 +53,7 @@ public class AprilTag {
             // goalTagID should be gotten before round/during auto
             if (cameraScannedId == goalTagID) {
                 id = cameraScannedId;
-                bearing = detection.getTargetXDegrees();
+                bearing = -detection.getTargetXDegrees();
                 elevation = detection.getTargetYDegrees();
                 range = detection.getTargetArea();
                 break;
