@@ -21,6 +21,7 @@ public class AprilTag {
     private final double LIMELIGHT_HEIGHT = 20;
     private final double LIMELIGHT_ANGLE = 20;
     private final double TARGET_HEIGHT = 60;
+    private final double LIMELIGHT_TO_CENTER = 20;
 
     public AprilTag(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -49,6 +50,15 @@ public class AprilTag {
         return (TARGET_HEIGHT - LIMELIGHT_HEIGHT) * Math.sin(Math.toRadians(elevation + LIMELIGHT_ANGLE));
     }
 
+    private double getBotAngle(double cameraAngle) {
+        double a = range;
+        double b = LIMELIGHT_TO_CENTER;
+        double x = Math.toRadians(90 - cameraAngle);
+        double c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(x));
+        double y = Math.asin(Math.sin(x) * a / c);
+        return 90 - Math.toDegrees(y);
+    }
+
     public void scanGoalTag() {
         id = -1;
         bearing = Double.NaN;
@@ -62,10 +72,10 @@ public class AprilTag {
             // goalTagID should be gotten before round/during auto
             if (cameraScannedId == goalTagID) {
                 id = cameraScannedId;
-                bearing = -detection.getTargetXDegrees();
                 elevation = detection.getTargetYDegrees();
                 range = calculateDistance(elevation);
                 tagSize = detection.getTargetArea();
+                bearing = getBotAngle(detection.getTargetXDegrees());
                 break;
             }
         }
