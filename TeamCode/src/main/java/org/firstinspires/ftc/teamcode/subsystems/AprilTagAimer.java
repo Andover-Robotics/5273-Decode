@@ -1,14 +1,16 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+@Config
 public class AprilTagAimer {
-    private final double kP = 0.025;
-    private final double kI = 0.0005;
-    private final double kD = 0.002;
-    private final double kF = 0.04;
-    private final double alpha = 0.8;  // smoothing factor (0 = no filtering, 1 = very heavy smoothing)
-    private final double maxIntegral = 1.0;
+    public static double kP = 0.025;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
+    public static double kF = 0.0067;
+    public static double filter = 0.867;  // smoothing factor (1 = no filtering, 0 = very heavy smoothing)
+    public static double maxIntegral = 1.0;
     private double integral = 0;
     private double lastDerivative = 0.0;
     private double lastError = 0;
@@ -65,7 +67,7 @@ public class AprilTagAimer {
 
         // Derivative with smoothing
         double rawDerivative = (error - lastError) / deltaTime;
-        double derivative = alpha * lastDerivative + (1 - alpha) * rawDerivative;
+        double derivative = (1 - filter) * lastDerivative + filter * rawDerivative;
         lastDerivative = derivative;
         lastError = error;
 
