@@ -18,10 +18,10 @@ public class AprilTag {
     private double tagSize;
     private final Limelight3A limelight;
 
-    private final double LIMELIGHT_HEIGHT = 20;
-    private final double LIMELIGHT_ANGLE = 20;
-    private final double TARGET_HEIGHT = 60;
-    private final double LIMELIGHT_TO_CENTER = 20;
+    private final double LIMELIGHT_HEIGHT = 11.5;
+    private final double LIMELIGHT_ANGLE = 75;
+    private final double TARGET_HEIGHT = 29.5;
+    private final double LIMELIGHT_TO_CENTER = 4;
 
     public AprilTag(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
