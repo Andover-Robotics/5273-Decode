@@ -1,0 +1,96 @@
+name: SpotBugs (TeamCode)
+
+on:
+  pull_request:
+    paths:
+      - "TeamCode/**"
+      - "build.gradle"
+      - "build.common.gradle"
+      - "build.dependencies.gradle"
+      - "settings.gradle"
+      - "gradle.properties"
+      - "gradle/**"
+      - "gradlew"
+      - "gradlew.bat"
+      - ".github/workflows/spotbugs-teamcode.yml"
+  push:
+    branches: ["Quali-1"]
+    paths:
+      - "TeamCode/**"
+      - "build.gradle"
+      - "build.common.gradle"
+      - "build.dependencies.gradle"
+      - "settings.gradle"
+      - "gradle.properties"
+      - "gradle/**"
+      - "gradlew"
+      - "gradlew.bat"
+      - ".github/workflows/spotbugs-teamcode.yml"
+
+concurrency:
+  group: spotbugs-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  spotbugs_teamcode:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # FTC/Android Gradle builds typically need the Android SDK present even for analysis tasks
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle (with caching)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Run SpotBugs on TeamCode
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Trying SpotBugs tasks for :TeamCode (Android projects differ by plugin/config)..."
+
+          # Try a few common task names. Use the first one that exists and succeeds.
+          if ./gradlew -q :TeamCode:tasks --all | grep -qE '(^|\s)spotbugsDebug(\s|$)'; then
+            ./gradlew --no-daemon --stacktrace :TeamCode:spotbugsDebug
+          elif ./gradlew -q :TeamCode:tasks --all | grep -qE '(^|\s)spotbugsRelease(\s|$)'; then
+            ./gradlew --no-daemon --stacktrace :TeamCode:spotbugsRelease
+          elif ./gradlew -q :TeamCode:tasks --all | grep -qE '(^|\s)spotbugsMain(\s|$)'; then
+            ./gradlew --no-daemon --stacktrace :TeamCode:spotbugsMain
+          elif ./gradlew -q :TeamCode:tasks --all | grep -qE '(^|\s)spotbugs(\s|$)'; then
+            ./gradlew --no-daemon --stacktrace :TeamCode:spotbugs
+          else
+            echo "::error::No SpotBugs task found for :TeamCode. Make sure the SpotBugs Gradle plugin is applied/configured for TeamCode."
+            echo "Here are any spotbugs-related tasks Gradle sees:"
+            ./gradlew -q :TeamCode:tasks --all | grep -i spotbugs || true
+            exit 1
+          fi
+
+      - name: Upload SpotBugs reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spotbugs-teamcode-reports
+          if-no-files-found: warn
+          path: |
+            TeamCode/build/reports/spotbugs/**
+            **/build/reports/spotbugs/**
+

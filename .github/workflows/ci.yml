@@ -1,0 +1,87 @@
+name: CI (Build + Lint + Tests)
+
+on:
+  pull_request:
+    paths:
+      - "TeamCode/**"
+      - "FtcRobotController/**"
+      - "libs/**"
+      - "gradle/**"
+      - "build.gradle"
+      - "build.common.gradle"
+      - "build.dependencies.gradle"
+      - "settings.gradle"
+      - "gradle.properties"
+      - "gradlew"
+      - "gradlew.bat"
+      - ".github/workflows/**"
+  push:
+    # Keep this narrow so you don't burn minutes on every branch.
+    # Add/remove branches to match how your team works.
+    branches:
+      - "Quali-1"
+    paths:
+      - "TeamCode/**"
+      - "FtcRobotController/**"
+      - "libs/**"
+      - "gradle/**"
+      - "build.gradle"
+      - "build.common.gradle"
+      - "build.dependencies.gradle"
+      - "settings.gradle"
+      - "gradle.properties"
+      - "gradlew"
+      - "gradlew.bat"
+      - ".github/workflows/**"
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build_lint_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle (with caching)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build (Debug)
+        run: ./gradlew --no-daemon --stacktrace assembleDebug
+
+      - name: Android Lint
+        run: ./gradlew --no-daemon --stacktrace lint
+
+      - name: Unit tests (if present)
+        run: ./gradlew --no-daemon --stacktrace test
+
+      - name: Upload reports (lint/tests)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          if-no-files-found: warn
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
