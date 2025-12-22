@@ -14,6 +14,7 @@
 // Include common definitions from above.
 apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
+apply plugin: "com.github.spotbugs"
 
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
@@ -23,8 +24,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_16
+        targetCompatibility JavaVersion.VERSION_16
     }
 }
 
@@ -48,4 +49,53 @@ dependencies {
     implementation "com.acmerobotics.roadrunner:core:1.0.1"
     implementation "com.acmerobotics.roadrunner:actions:1.0.1"
     implementation "com.acmerobotics.dashboard:dashboard:0.5.1"
+}
+
+import com.github.spotbugs.snom.SpotBugsTask
+
+// Create a stable task name we can call from CI: :TeamCode:spotbugsTeamCodeDebug
+afterEvaluate {
+    def variants =
+            (project.plugins.hasPlugin("com.android.library") && android.hasProperty("libraryVariants")) ? android.libraryVariants :
+            (project.plugins.hasPlugin("com.android.application") && android.hasProperty("applicationVariants")) ? android.applicationVariants :
+            null
+
+    if (variants == null) {
+        logger.lifecycle("SpotBugs: No Android variants found in :TeamCode (is it an Android module?)")
+        return
+    }
+
+    variants.all { variant ->
+        if (variant.name != "debug") return
+
+        def javaCompile = variant.hasProperty("javaCompileProvider") ? variant.javaCompileProvider.get() : variant.javaCompile
+
+        // AGP versions differ on where compiled classes live:
+        def classesDir = javaCompile.hasProperty("destinationDirectory")
+                ? javaCompile.destinationDirectory.asFile.get()
+                : javaCompile.destinationDir
+
+        tasks.register("spotbugsTeamCodeDebug", SpotBugsTask) {
+            group = "verification"
+            description = "Run SpotBugs on TeamCode (debug variant)"
+            dependsOn javaCompile
+
+            // SpotBugs inputs
+            classes = files(classesDir)
+            // TeamCode Java sources (variant source sets)
+            sourceDirs = files(variant.sourceSets.collectMany { it.java.srcDirs })
+
+            reports.create("html") {
+                required = true
+                outputLocation = file("$buildDir/reports/spotbugs/teamcode-debug.html")
+            }
+            reports.create("xml") {
+                required = true
+                outputLocation = file("$buildDir/reports/spotbugs/teamcode-debug.xml")
+            }
+        }
+
+        // Make `./gradlew check` run it too (optional but handy)
+        tasks.named("check").configure { dependsOn("spotbugsTeamCodeDebug") }
+    }
 }
