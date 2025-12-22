@@ -24,6 +24,11 @@ allprojects {
     }
 }
 
+plugins {
+    id "com.github.spotbugs" version "6.4.4" apply false
+}
+
+
 repositories {
     mavenCentral()
 }
