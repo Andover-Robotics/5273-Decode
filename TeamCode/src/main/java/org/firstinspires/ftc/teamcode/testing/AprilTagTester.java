@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.testing;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -21,12 +23,14 @@ public class AprilTagTester extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        AprilTag aprilTag = new AprilTag(hardwareMap);
+        AprilTag aprilTag = new AprilTag(hardwareMap,telemetry);
         AprilTagAimer aprilAimer = new AprilTagAimer(hardwareMap);
         Movement movement = new Movement(hardwareMap);
         GamepadEx gamePadOne = new GamepadEx(gamepad1);
         GamepadEx gamePadTwo = new GamepadEx(gamepad2);
         boolean continuousAprilTagLock = false;
+
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         telemetry.addData("Gamepad 2 Y:", "Scan obelisk apriltag");
         telemetry.addData("Gamepad 2 A:", "Continuously lock into apriltag");
@@ -86,14 +90,16 @@ public class AprilTagTester extends LinearOpMode {
 
             if (gamePadTwo.wasJustPressed(GamepadKeys.Button.A)) {
                 continuousAprilTagLock = true;
+                aprilTag.setCurrentCameraScannedId(0);
+            }
 
+            if (continuousAprilTagLock) {
                 telemetry.addData("Button A to update", "telemetry");
                 telemetry.addData("Continuously locked in on", "apriltag");
                 telemetry.addData("Last detected tag ID", aprilTag.getCurrentId());
                 telemetry.addData("Goal tag bearing", aprilTag.getBearing());
                 telemetry.addData("Goal tag elevation", aprilTag.getElevation());
                 telemetry.addData("Goal tag range", aprilTag.getRange());
-                aprilTag.setCurrentCameraScannedId(0);
             }
 
             if (gamePadTwo.wasJustPressed(GamepadKeys.Button.B)) {

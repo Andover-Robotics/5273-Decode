@@ -41,7 +41,7 @@ public class SigmaTeleop extends LinearOpMode {
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         movement = new Movement(hardwareMap);
 
-        aprilTag = new AprilTag(hardwareMap);
+        aprilTag = new AprilTag(hardwareMap,telemetry);
         aprilAimer = new AprilTagAimer(hardwareMap);
 
         GamepadEx gp1 = new GamepadEx(gamepad1);
