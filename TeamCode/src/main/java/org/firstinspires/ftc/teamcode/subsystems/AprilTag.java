@@ -61,7 +61,7 @@ public class AprilTag {
         double x = Math.toRadians(90 - cameraAngle); // angle between line that goes from limelight to apriltag and the front of the robot
         double c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(x)); // range from center front of robot to apriltag
         double y = Math.asin(Math.sin(x) * a / c); // angle between line that goes from center front of robot to apriltag and front of the robot
-        if (b * b + c * c < a * a) y = Math.PI / 2 - y;
+        if (b * b + c * c < a * a) y = Math.PI - y;
         telemetry.addData("cameraAngle",cameraAngle);
         telemetry.addData("a",a);
         telemetry.addData("b",b);
