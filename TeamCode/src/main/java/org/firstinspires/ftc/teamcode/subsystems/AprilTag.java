@@ -47,16 +47,16 @@ public class AprilTag {
     }
 
     private double calculateDistance(double elevation) {
-        return (TARGET_HEIGHT - LIMELIGHT_HEIGHT) * Math.sin(Math.toRadians(elevation + LIMELIGHT_ANGLE));
+        return (TARGET_HEIGHT - LIMELIGHT_HEIGHT) / Math.sin(Math.toRadians(elevation + LIMELIGHT_ANGLE));
     }
 
-    private double getBotAngle(double cameraAngle) {
-        double a = range;
-        double b = LIMELIGHT_TO_CENTER;
-        double x = Math.toRadians(90 - cameraAngle);
-        double c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(x));
-        double y = Math.asin(Math.sin(x) * a / c);
-        return 90 - Math.toDegrees(y);
+    private double getBotAngle(double cameraAngle) { // cameraAngle = angle from limelight looking forward line to line that goes from limelight to april tag
+        double a = range; // range from limelight to april tag
+        double b = LIMELIGHT_TO_CENTER; // distance from limelight to center front of robot
+        double x = Math.toRadians(90 - cameraAngle); // angle between line that goes from limelight to apriltag and the front of the robot
+        double c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(x)); // range from center front of robot to apriltag
+        double y = Math.asin(Math.sin(x) * a / c); // angle between line that goes from center front of robot to apriltag and front of the robot
+        return Math.toDegrees(y) - 90; // angle from center front of robot to april tag
     }
 
     public void scanGoalTag() {
