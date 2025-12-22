@@ -15,6 +15,10 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.github.spotbugs" version "6.4.4" apply false
+}
+
 // This is now required because aapt2 has to be downloaded from the
 // google() repository beginning with version 3.2 of the Android Gradle Plugin
 allprojects {
@@ -22,10 +26,6 @@ allprojects {
         mavenCentral()
         google()
     }
-}
-
-plugins {
-    id "com.github.spotbugs" version "6.4.4" apply false
 }
 
 
