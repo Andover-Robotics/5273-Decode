@@ -84,8 +84,6 @@ afterEvaluate {
             classes = files(classesDir)
             // TeamCode Java sources (variant source sets)
             sourceDirs = files(variant.sourceSets.collectMany { it.java.srcDirs })
-            // Classpath is optional for many checks; keep it empty to avoid Android classpath pain.
-            classpath = files()
 
             reports.create("html") {
                 required = true
