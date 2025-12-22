@@ -27,12 +27,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
-
+          java-version: "21"
+      - name: Show java version
+        run: java -version
       # This action can either “check” or “format then show diff”.
       # We choose “format then diff” so the PR shows exactly what would change.
       - name: Run google-java-format (TeamCode)
