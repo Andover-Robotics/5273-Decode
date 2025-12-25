@@ -55,20 +55,43 @@ public class AprilTag {
         return (TARGET_HEIGHT - LIMELIGHT_HEIGHT) / Math.sin(Math.toRadians(elevation + LIMELIGHT_ANGLE));
     }
 
-    private double getBotAngle(double cameraAngle) { // cameraAngle = angle from limelight looking forward line to line that goes from limelight to april tag
-        double a = range; // range from limelight to april tag
-        double b = LIMELIGHT_TO_CENTER; // distance from limelight to center front of robot
-        double x = Math.toRadians(90 - cameraAngle); // angle between line that goes from limelight to apriltag and the front of the robot
-        double c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(x)); // range from center front of robot to apriltag
-        double y = Math.asin(Math.sin(x) * a / c); // angle between line that goes from center front of robot to apriltag and front of the robot
+    // cameraAngle = angle from limelight looking forward line to line that goes from limelight to april tag
+    private double getBotAngle(double cameraAngle) {
+        /* See diagram (CA = camera angle, BA = bot angle or output angle)
+                        B (AprilTag)
+                       / \
+                      /   \
+          a (range)  /     \  c (Robot center to AprilTag center)
+                    /       \
+             D     /         \     E
+             |    /           \    |
+             |CA /             \ BA|
+             |  /               \  |
+             | /                 \ |
+             |/ x               y \|
+             C (Limelight) --------A (Robot center)
+                         b (LIMELIGHT_TO_CENTER)
+
+          <ACD is a right angle since the camera faces perpendicular to the robot
+          CA is a signed angle where right is positive (from the LimeLight)
+          From this, x + CA = <ACD -> x = <ACD - CA -> x = 90 - CA
+
+          c is calculated using the Law of Cosines
+          y is calculated using the Law of Sines
+          - However, y is incorrect whenever it is obtuse
+          - Pythagorean inequality is used to detect this case
+            and generate the supplemental angle instead
+
+          <CAE is a right angle for the same reason <ACD is
+          Then BA = y - 90, where BA is a signed angle and right is positive (like CA)
+         */
+        double a = range;
+        double b = LIMELIGHT_TO_CENTER;
+        double x = Math.toRadians(90 - cameraAngle);
+        double c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(x));
+        double y = Math.asin(Math.sin(x) * a / c);
         if (b * b + c * c < a * a) y = Math.PI - y;
-        telemetry.addData("cameraAngle",cameraAngle);
-        telemetry.addData("a",a);
-        telemetry.addData("b",b);
-        telemetry.addData("x",x);
-        telemetry.addData("c",c);
-        telemetry.addData("y",y);
-        return Math.toDegrees(y) - 90; // angle from center front of robot to april tag
+        return Math.toDegrees(y) - 90;
     }
 
     public void scanGoalTag() {
