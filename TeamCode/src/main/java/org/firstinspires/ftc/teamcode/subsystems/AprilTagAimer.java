@@ -35,7 +35,7 @@ public class AprilTagAimer {
         imu.initialize(
                 new IMU.Parameters(
                         new RevHubOrientationOnRobot(
-                                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                                 RevHubOrientationOnRobot.UsbFacingDirection.UP
                         )
                 )
