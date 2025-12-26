@@ -20,6 +20,7 @@ public class AprilTagTester extends LinearOpMode {
     private double lastTurnCorrection = 0;
     private boolean fieldCentric = false;
     private static final long AIM_UPDATE_INTERVAL_MS = 50;  // update every 50 ms (~20 Hz)
+    private static int goalTagID;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -55,10 +56,10 @@ public class AprilTagTester extends LinearOpMode {
                     aprilTag.scanGoalTag();
                     double bearing = aprilTag.getBearing();
 
-                    if (Double.isNaN(bearing)) {
-                        lastTurnCorrection = 0;
+                    if (!Double.isNaN(bearing)) {
+                        lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
                     } else {
-                        lastTurnCorrection = aprilAimer.calculateTurnPowerToBearing(bearing);
+                        lastTurnCorrection = aprilAimer.calculateIMUTurnPower(goalTagID);
                     }
                 }
 
@@ -109,11 +110,13 @@ public class AprilTagTester extends LinearOpMode {
             }
 
             if(gamePadTwo.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-                aprilTag.setGoalTagID(20);
+                goalTagID = 20; // blue
+                aprilTag.setGoalTagID(goalTagID);
                 telemetry.addData("Set to", "Blue Alliance") ;
             }
             if(gamePadTwo.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-                aprilTag.setGoalTagID(24);
+                goalTagID = 24; // red
+                aprilTag.setGoalTagID(goalTagID);
                 telemetry.addData("Set to", "Red Alliance");
             }
 

@@ -1,7 +1,13 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
 
 @Config
 public class AprilTagAimer {
@@ -15,6 +21,7 @@ public class AprilTagAimer {
     private double lastDerivative = 0.0;
     private double lastError = 0;
     private long lastTimestamp = 0;
+    private final IMU imu;
 
     /* When and why to tune these
     P (Proportional) Changes core power of turns, its proportional
@@ -23,13 +30,39 @@ public class AprilTagAimer {
     F (Feedforward)	Maybe, its a constant, increase to help overcome drivetrain static friction and give better response when error is small.
     */
     public AprilTagAimer(HardwareMap hardwareMap) {
+        // Initialize IMU directly
+        imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(
+                new IMU.Parameters(
+                        new RevHubOrientationOnRobot(
+                                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                                RevHubOrientationOnRobot.UsbFacingDirection.UP
+                        )
+                )
+        );
+    }
+
+    public double calculateIMUTurnPower(int tagID) {
+        YawPitchRollAngles robotOrientation;
+        robotOrientation = imu.getRobotYawPitchRollAngles();
+
+        double Yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
+
+        if (tagID == 20) {
+            return calculateTurnPowerFromBearing(135 - Yaw);
+        }
+        else if (tagID == 24) {
+            return calculateTurnPowerFromBearing(45 - Yaw);
+        }
+
+        return 0;
     }
 
     private double angleWrapDegrees(double angle) {
         return (angle + 180) % 360 - 180;
     }
 
-    public double calculateTurnPowerToBearing(double bearing) {
+    public double calculateTurnPowerFromBearing(double bearing) {
         // If apriltag lost - reset PID state and return no correction
         if (Double.isNaN(bearing)) {
             integral = 0;

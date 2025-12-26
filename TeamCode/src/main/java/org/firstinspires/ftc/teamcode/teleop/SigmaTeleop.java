@@ -32,6 +32,7 @@ public class SigmaTeleop extends LinearOpMode {
     private FtcDashboard dash = FtcDashboard.getInstance();
 
     private static final long AIM_UPDATE_INTERVAL_MS = 50;
+    private static int goalTagID;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -80,9 +81,9 @@ public class SigmaTeleop extends LinearOpMode {
                 double bearing = aprilTag.getBearing();
 
                 if (!Double.isNaN(bearing)) {
-                    lastTurnCorrection = aprilAimer.calculateTurnPowerToBearing(bearing);
+                    lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
                 } else {
-                    lastTurnCorrection = 0;
+                    lastTurnCorrection = aprilAimer.calculateIMUTurnPower(goalTagID);
                 }
             }
 
@@ -173,11 +174,15 @@ public class SigmaTeleop extends LinearOpMode {
         }
 
         // Alliance selection
-        if (g2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER))
-            aprilTag.setGoalTagID(20); // blue
-        if (g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER))
-            aprilTag.setGoalTagID(24); // red
+        if (g2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+            goalTagID = 20;
+            aprilTag.setGoalTagID(goalTagID); // blue
+        }
 
+        if (g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+            goalTagID = 24;
+            aprilTag.setGoalTagID(goalTagID); // red
+        }
 
 
         // ========== TELEMETRY ==========
