@@ -72,7 +72,7 @@ public class AprilTagAimer {
             return 0.0;
         }
 
-        double error = -angleWrapDegrees(bearing);
+        double error = angleWrapDegrees(bearing);
         if (Math.abs(error) < 1.0) {
             integral = 0;
             lastError = error;
