@@ -22,7 +22,7 @@ public class CRServoPositionControl {
     public static double brakeZoneDeg = 20.0;
 
     // deadbands
-    public static double deadbandDeg = 1.5;
+    public static double deadbandDeg = 3.0;
     public static boolean rotateClockwise = true;
 
     // Preset gains
