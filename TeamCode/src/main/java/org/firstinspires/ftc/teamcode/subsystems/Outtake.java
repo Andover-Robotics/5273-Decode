@@ -101,10 +101,8 @@ public class Outtake {
         shooter2.set(motorPower);
     }
 
-    public double regressionRPM()
+    public double getRegressionRPM(double range)
     {
-        //uses limelight vision data to estimate the required RPM to hit the target
-        //regression line here found using desmos
-        return 0.0;
+        return 0.000875923 * Math.pow(range,3)-0.340484 * Math.pow(range,2) + 46.76218 * range + 1914.04505;
     }
 }
