@@ -38,8 +38,8 @@ public class Movement {
 
         imu.initialize(parameters);
 
-        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
-        //leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -52,7 +52,7 @@ public class Movement {
     public void teleopTick(double leftStickX, double leftStickY, double rightStickX, double turnCorrection){
         double axial = -leftStickY * STRAFE_MULTIPLIER;
         double lateral = -leftStickX * STRAFE_MULTIPLIER;
-        double yaw = -(rightStickX * ROTATION_MULTIPLIER + turnCorrection);
+        double yaw = -(rightStickX * ROTATION_MULTIPLIER - turnCorrection);
 
         double leftFrontPower  = axial + lateral + yaw;
         double rightFrontPower = axial - lateral - yaw;
@@ -77,7 +77,7 @@ public class Movement {
     public void teleopTickFieldCentric(double leftStickX, double leftStickY, double rightStickX, double turnCorrection, boolean start){
         double axial = -leftStickY * STRAFE_MULTIPLIER;
         double lateral = -leftStickX * STRAFE_MULTIPLIER;
-        double yaw = -(rightStickX * ROTATION_MULTIPLIER + turnCorrection);
+        double yaw = -(rightStickX * ROTATION_MULTIPLIER - turnCorrection);
 
         // This button choice was made so that it is hard to hit on accident,
         // it can be freely changed based on preference.
