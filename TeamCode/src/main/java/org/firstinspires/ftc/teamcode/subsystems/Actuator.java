@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Config
 public class Actuator {
     public static double DOWN = 0.0;      // flush with the floor of platform
-    public static double UP_QUICK = 0.17; // used for quick (non-indexed) outtake
+    public static double UP_QUICK = 0.20; // used for quick (non-indexed) outtake
     public static double UP_INDEXED = 0.34; // used for indexed outtake
 
     private boolean activated;

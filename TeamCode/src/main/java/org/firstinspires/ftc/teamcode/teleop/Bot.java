@@ -43,10 +43,10 @@ public class Bot {
     public FSM state;
 
     public static double TRIGGER_DEADZONE = 0.05;
-    public static double SHOOTER_RPM = 5000;
+    public static double SHOOTER_RPM = 2900;
     public static double NON_INDEX_SPIN_TIME = 6;//seconds of full-power indexer blast
     public static double SHOOTER_SPINUP = 2.0;
-    public static double FULL_BLAST_POWER =1.0;
+    public static double FULL_BLAST_POWER =0.6;
 
     public Bot(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
         intake = new Intake(hardwareMap);
@@ -163,8 +163,7 @@ public class Bot {
 
     private Action actionNonIndexedDump() {
         return new SequentialAction(
-                new InstantAction(() -> indexer.setIntaking(false)),
-                new InstantAction(actuator::upQuick),                 // lower up position for quick dump
+                new InstantAction(actuator::upQuick),// lower up position for quick dump
                 new InstantAction(() -> outtake.set(SHOOTER_RPM)),
                 new SleepAction(SHOOTER_SPINUP),                      // spin up shooter
                 new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),// full blast
