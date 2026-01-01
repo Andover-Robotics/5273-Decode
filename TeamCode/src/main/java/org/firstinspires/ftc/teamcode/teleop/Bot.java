@@ -107,7 +107,7 @@ public class Bot {
         telemetry.addData("Actuator up?", actuator.isActivated());
         telemetry.addData("Indexer Loaded?", indexer.isLoaded());
         telemetry.addData("April Lock", continuousAprilTagLock);
-        telemetry.addData("Bot Centerline Range", aprilTag.getBotCenterlineRange());
+        telemetry.addData("Bot Centerline Range", aprilTag.range());
         for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
             telemetry.addData(
                     "Slot " + s.index,
@@ -288,7 +288,7 @@ public class Bot {
     }
 
     private double getTargetRpm() {
-        double range = aprilTag.getBotCenterlineRange();
+        double range = aprilTag.getRange();
         if (Double.isNaN(range) || range <= 0) {
             return SHOOTER_RPM;
         }
