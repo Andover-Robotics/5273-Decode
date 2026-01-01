@@ -25,8 +25,8 @@ public class AprilTagTester extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         AprilTag aprilTag = new AprilTag(hardwareMap,telemetry);
-        AprilTagAimer aprilAimer = new AprilTagAimer(hardwareMap);
         Movement movement = new Movement(hardwareMap);
+        AprilTagAimer aprilAimer = new AprilTagAimer(hardwareMap, movement.getImu(), movement.getTwoDeadWheelLocalizer());
         GamepadEx gamePadOne = new GamepadEx(gamepad1);
         GamepadEx gamePadTwo = new GamepadEx(gamepad2);
         boolean continuousAprilTagLock = false;
@@ -59,7 +59,7 @@ public class AprilTagTester extends LinearOpMode {
                     if (!Double.isNaN(bearing)) {
                         lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
                     } else {
-                        lastTurnCorrection = aprilAimer.calculateIMUTurnPower(goalTagID);
+                        lastTurnCorrection = aprilAimer.calculateLocalizedTurnPower(goalTagID)[0];
                     }
                 }
 

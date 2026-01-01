@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 
 /**
  * Represents the drivetrain.
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class Movement {
     private final DcMotor leftFront, leftBack, rightFront, rightBack;
     private final IMU imu;
+    private final TwoDeadWheelLocalizer deadWheelLocalizer;
     private final double STRAFE_MULTIPLIER = 1.0, ROTATION_MULTIPLIER = 0.8;
 
     /**
@@ -37,6 +39,14 @@ public class Movement {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
 
         imu.initialize(parameters);
+
+        deadWheelLocalizer =
+                new TwoDeadWheelLocalizer(
+                        map,
+                        imu,
+                        0.00195844,
+                        new Pose2d(0, 0, 0)
+                );
 
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -129,6 +139,14 @@ public class Movement {
 
     public IMU getImu() {
         return imu;
+    }
+    public TwoDeadWheelLocalizer getTwoDeadWheelLocalizer() {return deadWheelLocalizer;}
+
+    public void resetIMU() {
+        imu.resetYaw();
+    }
+    public void resetOdometry(Pose2d newPose) {
+        deadWheelLocalizer.setPose(newPose);
     }
 }
 

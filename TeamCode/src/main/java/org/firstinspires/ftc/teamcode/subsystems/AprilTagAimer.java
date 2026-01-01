@@ -1,27 +1,31 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 
 
 @Config
 public class AprilTagAimer {
-    public static double kP = 0.025;
+    public static double kP = 0.03;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.0067;
+    public static double kF = 0.0167;
     public static double filter = 0.867;  // smoothing factor (1 = no filtering, 0 = very heavy smoothing)
     public static double maxIntegral = 1.0;
+    public static double deadband = 1.0;
     private double integral = 0;
     private double lastDerivative = 0.0;
     private double lastError = 0;
     private long lastTimestamp = 0;
     private final IMU imu;
+    private final TwoDeadWheelLocalizer deadWheelLocalizer;
+    public static Pose2d TAG_POSE = new Pose2d(0, 132, Math.toRadians(0));
+    public static double cameraHeight = 6767;  // inches
+    public static double goalAprilTagHeight = 29.5;     // inches
 
     /* When and why to tune these
     P (Proportional) Changes core power of turns, its proportional
@@ -29,7 +33,10 @@ public class AprilTagAimer {
     D (Derivative) Increase to dampen motion and reduce overshoot. Good for smoothing quick heading corrections.
     F (Feedforward)	Maybe, its a constant, increase to help overcome drivetrain static friction and give better response when error is small.
     */
-    public AprilTagAimer(HardwareMap hardwareMap) {
+    public AprilTagAimer(HardwareMap hardwareMap, IMU imu, TwoDeadWheelLocalizer deadWheelLocalizer) {
+        this.imu = imu;
+        this.deadWheelLocalizer = deadWheelLocalizer;
+        /*
         // Initialize IMU directly
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(
@@ -40,22 +47,52 @@ public class AprilTagAimer {
                         )
                 )
         );
+
+        TwoDeadWheelLocalizer deadWheelLocalizer =
+                new TwoDeadWheelLocalizer(
+                        hardwareMap,
+                        imu,
+                        0.00195844,
+                        new Pose2d(0, 0, 0)
+                );
+
+         */
+
     }
 
-    public double calculateIMUTurnPower(int tagID) {
-        YawPitchRollAngles robotOrientation;
-        robotOrientation = imu.getRobotYawPitchRollAngles();
-
-        double Yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
-
+    public double[] calculateLocalizedTurnPower(int tagID) {
+        Pose2d robotPose = deadWheelLocalizer.getPose();
+        Pose2d tagPose;
         if (tagID == 20) {
-            return calculateTurnPowerFromBearing(135 - Yaw);
-        }
-        else if (tagID == 24) {
-            return calculateTurnPowerFromBearing(45 - Yaw);
+            tagPose = new Pose2d(0, 132, Math.toRadians(0));
+        } else if (tagID == 24) {
+            tagPose = new Pose2d(0, 132, Math.toRadians(0));
+        } else {
+            return new double[]{Double.NaN, Double.NaN};
         }
 
-        return 0;
+        double dx = tagPose.position.x - robotPose.position.x;
+        double dy = tagPose.position.y - robotPose.position.y;
+
+        double horizontalDistance = Math.hypot(dx, dy);
+
+        // height difference
+        double dz = goalAprilTagHeight - cameraHeight;
+
+        // In 3d to get point-to-point distance
+        double range = Math.sqrt(horizontalDistance * horizontalDistance + dz * dz);
+
+        double desiredHeading = Math.atan2(dy, dx);
+        double currentHeading = robotPose.heading.toDouble();
+
+        double bearingError = Math.toDegrees(desiredHeading - currentHeading);
+        bearingError = angleWrapDegrees(bearingError);
+
+        double bearing = Math.toDegrees(desiredHeading - currentHeading);
+        bearing = angleWrapDegrees(bearing);
+
+        double turnPower = calculateTurnPowerFromBearing(bearing);
+        return new double[]{turnPower, range};
     }
 
     private double angleWrapDegrees(double angle) {
@@ -73,7 +110,7 @@ public class AprilTagAimer {
         }
 
         double error = angleWrapDegrees(bearing);
-        if (Math.abs(error) < 1.0) {
+        if (Math.abs(error) < deadband) {
             integral = 0;
             lastError = error;
             lastDerivative = 0;
