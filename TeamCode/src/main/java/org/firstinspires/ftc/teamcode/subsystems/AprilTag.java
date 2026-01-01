@@ -56,6 +56,7 @@ public class AprilTag {
         return (TARGET_HEIGHT - LIMELIGHT_HEIGHT) / Math.sin(Math.toRadians(elevation + LIMELIGHT_ANGLE));
     }
 
+    // USED IF LIMELIGHT IS OFF CENTER LINE
     // cameraAngle = angle from limelight looking forward line to line that goes from limelight to april tag
     private double getBotAngle(double cameraAngle) {
         /* See diagram (CA = camera angle, BA = bot angle or output angle)
@@ -112,7 +113,7 @@ public class AprilTag {
                 elevation = detection.getTargetYDegrees();
                 range = calculateDistance(elevation);
                 tagSize = detection.getTargetArea();
-                bearing = getBotAngle(detection.getTargetXDegrees());
+                bearing = detection.getTargetXDegrees();
                 break;
             }
         }

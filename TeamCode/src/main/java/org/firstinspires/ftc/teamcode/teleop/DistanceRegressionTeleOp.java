@@ -27,7 +27,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
     private long lastAimUpdate = 0;
     private double lastTurnCorrection = 0;
-    public static int shooterRPM = 5000;
+    public static int shooterRPM;
 
     private boolean continuousAprilTagLock = false;
     private boolean fieldCentric = false;
@@ -91,6 +91,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
                 }
             }
 
+            shooterRPM = (int)outtake.getRegressionRPM(aprilTag.getRange());
             turnCorrection = 0.9 * lastTurnCorrection;  // smooth decay
         }
 
@@ -187,7 +188,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
         // ========== TELEMETRY ==========
         telemetry.addData("Target RPM",outtake.getTargetRPM());
-        telemetry.addData("Bot Centerline Range", aprilTag.getBotCenterlineRange());
+        telemetry.addData("Bot Centerline Range", aprilTag.getRange()); // moved limelight
         telemetry.addData("measured RPM",outtake.getRPM());
         telemetry.addData("Outtake Power", outtake.getPower());
         telemetry.addData("April Lock", continuousAprilTagLock);
