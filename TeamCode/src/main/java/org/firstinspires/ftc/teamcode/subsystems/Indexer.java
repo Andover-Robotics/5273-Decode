@@ -106,6 +106,17 @@ public class Indexer {
         }
     }
 
+    public void initializeColors(ArtifactColor one, ArtifactColor two, ArtifactColor three) {
+        ArtifactColor[] colors = { one, two, three };
+        for (int i = 0; i < slots.length; i++) {
+            SlotState slot = slots[i];
+            slot.color = colors[i];
+            slot.obs.reset();
+            slot.wasEmpty = true;
+            slot.advanceConsumed = false;
+        }
+    }
+
     public double getMeasuredAngle() {
         return mod(servoControl.getCurrentAngle(), 360.0);
     }
