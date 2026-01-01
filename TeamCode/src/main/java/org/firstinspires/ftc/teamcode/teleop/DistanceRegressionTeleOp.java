@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import android.telephony.IccOpenLogicalChannelResponse;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -11,8 +13,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 @Config
-@TeleOp(name = "UnifiedTeleOp", group = "AA_main")
-public class SigmaTeleop extends LinearOpMode {
+@TeleOp(name = "DistanceRegressionTeleOp", group = "AA_main")
+public class DistanceRegressionTeleOp extends LinearOpMode {
 
     private Intake intake;
     private Indexer indexer;
@@ -25,7 +27,7 @@ public class SigmaTeleop extends LinearOpMode {
 
     private long lastAimUpdate = 0;
     private double lastTurnCorrection = 0;
-    private static int shooterRPM = 5000;
+    public static int shooterRPM = 5000;
 
     private boolean continuousAprilTagLock = false;
     private boolean fieldCentric = false;
@@ -33,6 +35,10 @@ public class SigmaTeleop extends LinearOpMode {
 
     private static final long AIM_UPDATE_INTERVAL_MS = 50;
     private static int goalTagID;
+<<<<<<< HEAD:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/SigmaTeleop.java
+=======
+    private static String colorGoalSelected;
+>>>>>>> Quali-1:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/DistanceRegressionTeleOp.java
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -42,8 +48,13 @@ public class SigmaTeleop extends LinearOpMode {
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         movement = new Movement(hardwareMap);
 
+<<<<<<< HEAD:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/SigmaTeleop.java
         aprilTag = new AprilTag(hardwareMap,telemetry);
         aprilAimer = new AprilTagAimer(hardwareMap, movement.getImu(), movement.getTwoDeadWheelLocalizer());
+=======
+        aprilTag = new AprilTag(hardwareMap, telemetry);
+        aprilAimer = new AprilTagAimer(hardwareMap);
+>>>>>>> Quali-1:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/DistanceRegressionTeleOp.java
 
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);
@@ -83,7 +94,12 @@ public class SigmaTeleop extends LinearOpMode {
                 if (!Double.isNaN(bearing)) {
                     lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
                 } else {
+<<<<<<< HEAD:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/SigmaTeleop.java
                     lastTurnCorrection = aprilAimer.calculateLocalizedTurnPower(goalTagID)[0];
+=======
+                    lastTurnCorrection = 0;
+                    //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
+>>>>>>> Quali-1:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/DistanceRegressionTeleOp.java
                 }
             }
 
@@ -132,7 +148,7 @@ public class SigmaTeleop extends LinearOpMode {
         // spindexer control
         // Advance state
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-            indexer.moveTo(indexer.nextState());
+            indexer.moveTo(indexer.getState().next());
             telemetry.addLine("Indexer moving");
         }
 
@@ -152,12 +168,7 @@ public class SigmaTeleop extends LinearOpMode {
 
         // Set intaking ON
         if (g2.wasJustPressed(GamepadKeys.Button.A) && !actuator.isActivated()) {
-            if (!indexer.isBusy()) indexer.setIntaking(true);
-        }
-
-        // Set intaking OFF
-        if (g2.wasJustPressed(GamepadKeys.Button.B)) {
-            if (!indexer.isBusy()) indexer.setIntaking(false);
+            indexer.setIntaking(!indexer.isIntaking());
         }
 
         indexer.update();
@@ -177,25 +188,30 @@ public class SigmaTeleop extends LinearOpMode {
         if (g2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             goalTagID = 20;
             aprilTag.setGoalTagID(goalTagID); // blue
+<<<<<<< HEAD:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/SigmaTeleop.java
         }
 
         if (g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
             goalTagID = 24;
             aprilTag.setGoalTagID(goalTagID); // red
+=======
+            colorGoalSelected = "Blue";
+>>>>>>> Quali-1:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/DistanceRegressionTeleOp.java
         }
 
+        if (g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+            goalTagID = 24;
+            aprilTag.setGoalTagID(goalTagID); // red
+            colorGoalSelected = "Red";
+        }
 
         // ========== TELEMETRY ==========
-        telemetry.addData("Field Centric", fieldCentric);
-        telemetry.addData("April Lock", continuousAprilTagLock);
-        telemetry.addData("Turn Correction", turnCorrection);
-        telemetry.addData("Indexer State", indexer.getState());
-        telemetry.addData("Next State", indexer.nextState());
-        telemetry.addData("Indexer Voltage", indexer.getVoltageAnalog());
-        telemetry.addData("target voltage", indexer.getTargetVoltage());
-        telemetry.addData("Outtake Power", outtake.getPower());
+        telemetry.addData("Target RPM",outtake.getTargetRPM());
+        telemetry.addData("Bot Centerline Range", aprilTag.getBotCenterlineRange());
         telemetry.addData("measured RPM",outtake.getRPM());
-        telemetry.addData("target RPM",outtake.getTargetRPM());
+        telemetry.addData("Outtake Power", outtake.getPower());
+        telemetry.addData("April Lock", continuousAprilTagLock);
+        telemetry.addData("Selected Goal Color:", colorGoalSelected);
         telemetry.update();
     }
 }

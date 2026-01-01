@@ -21,15 +21,16 @@ public class Outtake {
     }
 
     private final MotorEx shooter;
+    private final MotorEx shooter2;
 
     // FTCLib PID controller (P, I, D only)
     private final PIDController controller;
 
     // Dashboard-tunable gains
-    public static double p = 0.0002;
+    public static double p = 0.000267;
     public static double i = 0.0;
     public static double d = 0.0;
-    public static double f = 0.0003;   // feedforward from earlier code
+    public static double f = 0.00021;   // 1 / maxrpm and then tuned
 
     // Mode + state
     public Mode mode;
@@ -42,6 +43,9 @@ public class Outtake {
     public Outtake(HardwareMap hardwareMap, Mode mode) {
         shooter = new MotorEx(hardwareMap, "outtake");
         shooter.setInverted(true);
+        shooter2 = new MotorEx(hardwareMap, "outtake-2");
+        shooter2.setInverted(false);
+
 
         this.mode = mode;
         controller = new PIDController(p, i, d);
@@ -49,6 +53,7 @@ public class Outtake {
 
     public void stop() {
         shooter.stopMotor();
+        shooter2.stopMotor();
         motorPower = 0.0;
         targetRPM = 0.0;
     }
@@ -73,6 +78,7 @@ public class Outtake {
         if (mode == Mode.POWER) {
             // Open-loop mode
             shooter.set(motorPower);
+            shooter2.set(motorPower);
             return;
         }
 
@@ -89,8 +95,14 @@ public class Outtake {
         motorPower = pid + ff;
 
         // Constrain power
-        motorPower = clamp(motorPower, 0.0, 1.0);
+        motorPower = clamp(motorPower, -1.0, 1.0);
 
         shooter.set(motorPower);
+        shooter2.set(motorPower);
+    }
+
+    public double getRegressionRPM(double range)
+    {
+        return 0.000875923 * Math.pow(range,3)-0.340484 * Math.pow(range,2) + 46.76218 * range + 1914.04505;
     }
 }

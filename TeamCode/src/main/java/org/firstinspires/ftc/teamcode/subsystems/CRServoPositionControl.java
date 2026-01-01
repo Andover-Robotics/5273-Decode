@@ -1,191 +1,192 @@
 package org.firstinspires.ftc.teamcode.subsystems;
-import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-@Config
-public class CRServoPositionControl
-{
-    //objects
-    private final CRServo crServo;
-    private final AnalogInput encoder; // Analog input for position from 4th wire
-    private ElapsedTime timer = new ElapsedTime();
-
-    // tuning constants
-    public static double kp = 0.41;
-    public static double ki = 0.0;
-    public static double kf = 0.01;
-    public static double filterAlpha = 0.9;
-
-    // general constants
-    private static final double ticksPerRev = 3.3;
-    private static final double degreesPerRev = 360.0;
-
-    // usage variables
-    private double integral = 0.0;
-    private double filteredVoltage = 0;
-    private double targetVoltage;
-
-    public CRServoPositionControl(CRServo servo, AnalogInput encoder)
-    {
-        this.crServo = servo;
-        this.encoder = encoder;
-        timer.reset();
-    }
-
-    public void moveToAngle(double targetAngleDegrees)
-    {
-        targetVoltage = angleToVoltage(targetAngleDegrees);
-        double currentVoltage = getFilteredVoltage();
-
-        double error = targetVoltage - currentVoltage;
-
-        // Shortest path wrap handling, with offset to avoid error spikes
-        double wrapPoint = (ticksPerRev / 2) + (ticksPerRev / 4); // Add offset
-        if (error > wrapPoint) { error -= ticksPerRev; }
-        if (error < -wrapPoint) { error += ticksPerRev; }
-
-        double deltaTime = timer.seconds();
-        timer.reset();
-        if (deltaTime <= 0.0001) deltaTime = 0.0001;
-
-        integral += error * deltaTime;
-        integral = Math.max(-2, Math.min(2, integral));
-
-        double output = kp * error + ki * integral + kf * Math.signum(error);
-        output = Math.max(-1.0, Math.min(1.0, output));
-        crServo.setPower(output);
-    }
-
-    private double getFilteredVoltage()
-    {
-        filteredVoltage = (1 - filterAlpha) * filteredVoltage + filterAlpha * encoder.getVoltage();
-        return filteredVoltage;
-    }
-
-    private double angleToVoltage(double angleDegrees)
-    {
-        angleDegrees = Math.max(0, Math.min(degreesPerRev, angleDegrees)); // Clamp
-        return (angleDegrees / degreesPerRev) * ticksPerRev;
-    }
-
-    public double getTargetVoltage()
-    {
-        return targetVoltage;
-    }
-
-    public double getCurrentAngle()
-    {
-        return (getFilteredVoltage() / ticksPerRev) * degreesPerRev;
-    }
-}
-
-/*
-package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 public class CRServoPositionControl {
-    private final CRServo crServo;
+
+    // general constants
+    public static double maxVoltage = 3.26;
+    public static double degreesPerRev = 360.0;
+
+    // gains
+    public static double kP = 0.002;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
+    public static double kS = 0.07; //voerriden later
+
+    public static double maxPower = 1.0;
+    public static double stiffnessGain = 1.0; //1.0 is normal behavior
+    public static double brakeZoneDeg = 20.0;
+
+    // deadbands
+    public static double deadbandDeg = 3.0;
+    public static boolean rotateClockwise = true;
+
+    // Preset gains
+    public static double unloaded_kP = 0.002;
+    public static double unloaded_kI = 0.0;
+    public static double unloaded_kD = 0.0;
+    public static double unloaded_kS = 0.08;
+
+    public static double loaded_kP = 0.002;
+    public static double loaded_kI = 0.00009;
+    public static double loaded_kD = 0.0;
+    public static double loaded_kS = 0.08;
+
+    private boolean loaded = false;
+    private boolean manualOverride = false; // when true, update() does nothing (open-loop control active)
+
+    // hardware
+    private final CRServo servo;
     private final AnalogInput encoder;
 
-    private static boolean angleIsLocked = false;
-    private static double lockedAngle;
-    public static double kp = 0.341;
-    public static double ki = 0.0;
-    public static double kd = 0.0;
-    public static double kf = 0.0167;
-    public static double lockedkp = 0.341;
-    public static double lockedki = 0.0;
-    public static double lockedkd = 0.0;
-    public static double lockedkf = 0.0167;
-    public static double filterAlpha = 0.80;
-    public static double angleDeadband = 1.67;
+    // state
+    private double lastWrappedDeg;
+    private double continuousDeg;
+    private double targetDeg;
 
+    private double lastAngleDeg = 0.0;
+    private long lastTimeNs = 0;
 
-    // Dynamic speed parameters
-    public static double minSpeed = 0.15;           // minimal power to overcome deadband
-    public static double maxErrorForScaling = 90.0; // error threshold for full speed
-
-    private double integral = 0.0;
-    private double lastError = 0.0;
-    private Double filteredVoltage = null;
-    public final double MAX_VOLTAGE;
-    private ElapsedTime timer = new ElapsedTime();
     public CRServoPositionControl(CRServo servo, AnalogInput encoder) {
-        this.crServo = servo;
+        this.servo = servo;
         this.encoder = encoder;
-        this.MAX_VOLTAGE = encoder.getMaxVoltage();
-        timer.reset();
+
+        double initial = getWrappedAngle();
+        lastWrappedDeg = initial;
+        continuousDeg = initial;
+        targetDeg = initial;
+
+        lastAngleDeg = continuousDeg;
+        lastTimeNs = System.nanoTime();
     }
 
-    private double getFilteredVoltage() {
-        if (filteredVoltage == null) {
-            filteredVoltage = encoder.getVoltage();  // initialize to first reading
+    //mroe balls is more gains
+    public void setLoaded(boolean hasBalls) {
+        this.loaded = hasBalls;
+        if (hasBalls) {
+            kP = loaded_kP;
+            kI = loaded_kI;
+            kD = loaded_kD;
+            kS = loaded_kS;
         } else {
-            filteredVoltage = (1 - filterAlpha) * filteredVoltage + filterAlpha * encoder.getVoltage();
+            kP = unloaded_kP;
+            kI = unloaded_kI;
+            kD = unloaded_kD;
+            kS = unloaded_kS;
         }
-        return filteredVoltage;
     }
 
-    double getAngle() {
-        return (getFilteredVoltage() / MAX_VOLTAGE) * 360.0;
+    public boolean isLoaded() { return loaded; }
+
+    public void setOpenLoopPower(double power) {
+        manualOverride = true;
+        servo.setPower(clamp(power, -1.0, 1.0));
     }
 
-    public void lockAngle(double targetAngleDegrees) {
-        angleIsLocked = true;
-        lockedAngle = targetAngleDegrees;
-    }
-    public void unlockAngle() {
-        angleIsLocked = false;
+    public void clearOpenLoop() {
+        manualOverride = false;
     }
 
-    public void moveToAngle(double targetAngleDegrees) {
-        double tempkp = kp;
-        double tempki = ki;
-        double tempkd = kd;
-        double tempkf = kf;
-        if (angleIsLocked) {
-            targetAngleDegrees = lockedAngle;
-            tempkp = lockedkp;
-            tempki = lockedki;
-            tempkd = lockedkd;
-            tempkf = lockedkf;
-        }
+    public void update() {
+        if (manualOverride) return; // skip closed-loop when in override
 
-        double currentAngle = getAngle();
-        double error = ((targetAngleDegrees - currentAngle + 540) % 360) - 180;
+        updateContinuousAngle();
 
-        if (Math.abs(error) < angleDeadband) {
-            crServo.setPower(0);
-            integral = 0;
-            lastError = error;
+        double error = targetDeg - continuousDeg;
+        double absErr = Math.abs(error);
+
+        if (absErr < deadbandDeg) {
+            servo.setPower(0);
+            lastAngleDeg = continuousDeg;
+            lastTimeNs = System.nanoTime();
             return;
         }
 
-        double deltaTime = timer.seconds();
-        timer.reset();
-        if (deltaTime <= 0.0001) deltaTime = 0.0001;
+        long now = System.nanoTime();
+        double dt = (now - lastTimeNs) * 1e-9;
+        if (dt <= 0) dt = 1e-3;
 
-        integral += error * deltaTime;
-        integral = Math.max(-2, Math.min(2, integral));
+        double velocity = (continuousDeg - lastAngleDeg) / dt; // deg/s
 
-        double derivative = (error - lastError) / deltaTime;
+        lastAngleDeg = continuousDeg;
+        lastTimeNs = now;
 
-        double output = tempkp * error + tempki * integral + tempkd * derivative + tempkf * Math.signum(error);
+        double output = kP * error * stiffnessGain - kD * velocity + kI * error;
 
-        // Dynamic speed scaling, speeds up if distance is further
-        double distanceFactor = Math.min(Math.abs(error) / maxErrorForScaling, 1.0);
-        double scaledPower = minSpeed + (1.0 - minSpeed) * distanceFactor;
-        output = Math.signum(output) * Math.min(Math.abs(output), scaledPower);
+        // static friction compensation toward target
+        if (Math.signum(output) == Math.signum(error)) {
+            double sign = Math.signum(output);
+            output = sign * Math.max(Math.abs(output), kS);
+        }
 
-        crServo.setPower(output);
-        lastError = error;
+        output = clamp(output, -maxPower, maxPower);
+        servo.setPower(output);
     }
+
+    public void moveToAngle(double wrappedAngleDeg) {
+        updateContinuousAngle();
+
+        double currentWrapped = mod(continuousDeg, 360.0);
+
+        double delta = wrappedAngleDeg - currentWrapped;
+        if (delta > 180)  delta -= 360;
+        if (delta < -180) delta += 360;
+
+        // rotation direction
+        if (rotateClockwise && delta < 0) delta += 360;
+        if (!rotateClockwise && delta > 0) delta -= 360;
+
+        targetDeg = continuousDeg + delta;
+    }
+
+    public void moveBy(double deltaDeg) {
+        targetDeg += deltaDeg;
+    }
+
+    public void reset() {
+        double wrapped = getWrappedAngle();
+        lastWrappedDeg = wrapped;
+        continuousDeg = wrapped;
+        targetDeg = wrapped;
+        servo.setPower(0);
+    }
+
+    //bencoder
+    private void updateContinuousAngle() {
+        double wrapped = getWrappedAngle();
+        double delta = wrapped - lastWrappedDeg;
+
+        // unwrap
+        if (delta > 180)  delta -= 360;
+        if (delta < -180) delta += 360;
+
+        continuousDeg += delta;
+        lastWrappedDeg = wrapped;
+    }
+
+    private double getWrappedAngle() {
+        double v = clamp(encoder.getVoltage(), 0.0, maxVoltage);
+        return (v / maxVoltage) * degreesPerRev;
+    }
+
+    /* ================= UTIL ================= */
+    private double clamp(double v, double min, double max) { return Math.max(min, Math.min(max, v)); }
+    private double mod(double v, double m) {
+        double r = v % m;
+        return (r < 0) ? r + m : r;
+    }
+
+    /* ================= DEBUG ================= */
+    public double getCurrentAngle() { return continuousDeg; }
+    public double getTargetAngle() { return targetDeg; }
+    public double getTargetVoltage() {
+        double wrappedDeg = targetDeg % degreesPerRev;
+        if (wrappedDeg < 0) wrappedDeg += degreesPerRev;
+        return (wrappedDeg / degreesPerRev) * maxVoltage;
+    }
+    public double getVoltage() { return encoder.getVoltage(); }
 }
-*/

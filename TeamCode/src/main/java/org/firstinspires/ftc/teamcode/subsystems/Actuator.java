@@ -5,14 +5,16 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Config
-
 public class Actuator {
-    public final double DOWN = 0.0; // flush with the floor of platform
-    public final double UP = .17; // raised to push it into the flywheel
+    public static double DOWN = 0.0;      // flush with the floor of platform
+    public static double UP_QUICK = 0.20; // used for quick (non-indexed) outtake
+    public static double UP_INDEXED = 0.34; // used for indexed outtake
 
     private boolean activated;
 
     private final SimpleServo servo;
+
+    private double waitTime = 0.5; // seconds
 
     public Actuator(HardwareMap hardwareMap) {
         servo = new SimpleServo(hardwareMap, "actuator", 0, 360);
@@ -23,21 +25,31 @@ public class Actuator {
         activated = false;
     }
 
+    //default up is indexed
     public void up() {
-        servo.setPosition(UP);
+        upIndexed();
+    }
+
+    //highe rposition
+    public void upIndexed() {
+        servo.setPosition(UP_INDEXED);
         activated = true;
     }
 
-    public boolean isActivated()
-    {
-        return activated;
+    //lower position
+    public void upQuick() {
+        servo.setPosition(UP_QUICK);
+        activated = true;
     }
 
-    public void set(boolean activate)
-    {
-        if (activate)
-            up();
-        else
-            down();
+    public boolean isActivated() { return activated; }
+
+    public void set(boolean activate) {
+        if (activate) up();
+        else down();
+    }
+
+    public double getWaitTime() {
+        return waitTime; // seconds
     }
 }
