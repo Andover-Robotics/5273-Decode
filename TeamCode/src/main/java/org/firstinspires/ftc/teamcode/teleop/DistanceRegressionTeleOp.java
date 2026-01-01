@@ -33,7 +33,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
     private boolean fieldCentric = false;
     private FtcDashboard dash = FtcDashboard.getInstance();
 
-    private static final long AIM_UPDATE_INTERVAL_MS = 50;
+    private static final long AIM_UPDATE_INTERVAL_MS = 0;
     private static int goalTagID;
     private static String colorGoalSelected;
 

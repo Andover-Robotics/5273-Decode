@@ -23,7 +23,7 @@ public class AprilTag {
     private final Telemetry telemetry;
     private double botCenterlineRange;
 
-    private final double LIMELIGHT_HEIGHT = 11.5;
+    private final double LIMELIGHT_HEIGHT = 11.815;
     private final double LIMELIGHT_ANGLE = 15;
     private final double TARGET_HEIGHT = 29.5;
     private final double LIMELIGHT_TO_CENTER = 4;
@@ -53,7 +53,7 @@ public class AprilTag {
     }
 
     private double calculateDistance(double elevation) {
-        return (TARGET_HEIGHT - LIMELIGHT_HEIGHT) / Math.sin(Math.toRadians(elevation + LIMELIGHT_ANGLE));
+        return (TARGET_HEIGHT - LIMELIGHT_HEIGHT) / Math.sin(Math.toRadians(elevation/* + LIMELIGHT_ANGLE*/));
     }
 
     // USED IF LIMELIGHT IS OFF CENTER LINE
