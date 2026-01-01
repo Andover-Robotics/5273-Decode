@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -432,10 +433,14 @@ public class Indexer {
 
         void record(ArtifactColor c) {
             switch (c) {
-                case GREEN -> greenHits++;
-                case PURPLE -> purpleHits++;
-                case EMPTY -> emptyHits++;
-                case UNKNOWN -> unknownHits++;
+                case GREEN:
+                    greenHits++;
+                case PURPLE:
+                    purpleHits++;
+                case EMPTY:
+                    emptyHits++;
+                case UNKNOWN:
+                    unknownHits++;
             }
         }
 
