@@ -107,7 +107,7 @@ public class Bot {
         telemetry.addData("Actuator up?", actuator.isActivated());
         telemetry.addData("Indexer Loaded?", indexer.isLoaded());
         telemetry.addData("April Lock", continuousAprilTagLock);
-        telemetry.addData("Bot Centerline Range", aprilTag.range());
+        telemetry.addData("Bot Range", aprilTag.getRange());
         for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
             telemetry.addData(
                     "Slot " + s.index,

@@ -188,7 +188,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
         // ========== TELEMETRY ==========
         telemetry.addData("Target RPM",outtake.getTargetRPM());
-        telemetry.addData("Bot Centerline Range", aprilTag.getRange()); // moved limelight
+        telemetry.addData("Bot Range", aprilTag.getRange()); // moved limelight
         telemetry.addData("measured RPM",outtake.getRPM());
         telemetry.addData("Outtake Power", outtake.getPower());
         telemetry.addData("April Lock", continuousAprilTagLock);
