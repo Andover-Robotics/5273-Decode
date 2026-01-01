@@ -64,7 +64,7 @@ public class Bot {
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         movement = new Movement(hardwareMap);
         aprilTag = new AprilTag(hardwareMap, tele);
-        aprilAimer = new AprilTagAimer(hardwareMap);
+        aprilAimer = new AprilTagAimer(hardwareMap, movement.getImu(), movement.getTwoDeadWheelLocalizer());
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
         telemetry = tele;
