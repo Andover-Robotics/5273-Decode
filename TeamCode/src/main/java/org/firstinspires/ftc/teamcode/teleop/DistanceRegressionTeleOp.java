@@ -35,10 +35,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
     private static final long AIM_UPDATE_INTERVAL_MS = 50;
     private static int goalTagID;
-<<<<<<< HEAD:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/SigmaTeleop.java
-=======
     private static String colorGoalSelected;
->>>>>>> Quali-1:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/DistanceRegressionTeleOp.java
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -48,13 +45,8 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         movement = new Movement(hardwareMap);
 
-<<<<<<< HEAD:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/SigmaTeleop.java
-        aprilTag = new AprilTag(hardwareMap,telemetry);
-        aprilAimer = new AprilTagAimer(hardwareMap, movement.getImu(), movement.getTwoDeadWheelLocalizer());
-=======
         aprilTag = new AprilTag(hardwareMap, telemetry);
         aprilAimer = new AprilTagAimer(hardwareMap);
->>>>>>> Quali-1:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/DistanceRegressionTeleOp.java
 
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);
@@ -94,12 +86,8 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
                 if (!Double.isNaN(bearing)) {
                     lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
                 } else {
-<<<<<<< HEAD:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/SigmaTeleop.java
-                    lastTurnCorrection = aprilAimer.calculateLocalizedTurnPower(goalTagID)[0];
-=======
                     lastTurnCorrection = 0;
                     //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
->>>>>>> Quali-1:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/DistanceRegressionTeleOp.java
                 }
             }
 
@@ -188,15 +176,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         if (g2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             goalTagID = 20;
             aprilTag.setGoalTagID(goalTagID); // blue
-<<<<<<< HEAD:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/SigmaTeleop.java
-        }
-
-        if (g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-            goalTagID = 24;
-            aprilTag.setGoalTagID(goalTagID); // red
-=======
             colorGoalSelected = "Blue";
->>>>>>> Quali-1:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/DistanceRegressionTeleOp.java
         }
 
         if (g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
