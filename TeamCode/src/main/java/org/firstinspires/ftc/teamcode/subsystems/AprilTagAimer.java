@@ -24,8 +24,8 @@ public class AprilTagAimer {
     private final IMU imu;
     private final TwoDeadWheelLocalizer deadWheelLocalizer;
     public static Pose2d TAG_POSE = new Pose2d(0, 132, Math.toRadians(0));
-    public static double cameraHeight = 6767;  // inches
-    public static double goalAprilTagHeight = 29.5;     // inches
+    public static double cameraHeight = 11.815; // inches
+    public static double goalAprilTagHeight = 29.5; // inches
 
     /* When and why to tune these
     P (Proportional) Changes core power of turns, its proportional
@@ -36,40 +36,11 @@ public class AprilTagAimer {
     public AprilTagAimer(HardwareMap hardwareMap, IMU imu, TwoDeadWheelLocalizer deadWheelLocalizer) {
         this.imu = imu;
         this.deadWheelLocalizer = deadWheelLocalizer;
-        /*
-        // Initialize IMU directly
-        imu = hardwareMap.get(IMU.class, "imu");
-        imu.initialize(
-                new IMU.Parameters(
-                        new RevHubOrientationOnRobot(
-                                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                                RevHubOrientationOnRobot.UsbFacingDirection.UP
-                        )
-                )
-        );
-
-        TwoDeadWheelLocalizer deadWheelLocalizer =
-                new TwoDeadWheelLocalizer(
-                        hardwareMap,
-                        imu,
-                        0.00195844,
-                        new Pose2d(0, 0, 0)
-                );
-
-         */
-
     }
 
     public double[] calculateLocalizedTurnPower(int tagID) {
         Pose2d robotPose = deadWheelLocalizer.getPose();
-        Pose2d tagPose;
-        if (tagID == 20) {
-            tagPose = new Pose2d(0, 132, Math.toRadians(0));
-        } else if (tagID == 24) {
-            tagPose = new Pose2d(0, 132, Math.toRadians(0));
-        } else {
-            return new double[]{Double.NaN, Double.NaN};
-        }
+        Pose2d tagPose = TAG_POSE;
 
         double dx = tagPose.position.x - robotPose.position.x;
         double dy = tagPose.position.y - robotPose.position.y;
