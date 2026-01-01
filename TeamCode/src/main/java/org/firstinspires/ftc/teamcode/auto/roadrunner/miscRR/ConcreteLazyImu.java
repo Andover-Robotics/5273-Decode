@@ -25,7 +25,4 @@ public class ConcreteLazyImu implements LazyImu {
         return null;
     }
 
-    public void doImuInitialization() {
-        doImuInitialization();
-    }
 }

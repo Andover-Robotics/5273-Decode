@@ -21,7 +21,6 @@ public class AprilTag {
     private double tagSize;
     private final Limelight3A limelight;
     private final Telemetry telemetry;
-    private double botCenterlineRange;
 
     private final double LIMELIGHT_HEIGHT = 11.5;
     private final double LIMELIGHT_ANGLE = 15;
@@ -72,7 +71,7 @@ public class AprilTag {
              |/ x               y \|
              C (Limelight) --------A (Robot center)
                          b (LIMELIGHT_TO_CENTER)
-3
+
           <ACD is a right angle since the camera faces perpendicular to the robot
           CA is a signed angle where right is positive (from the LimeLight)
           From this, x + CA = <ACD -> x = <ACD - CA -> x = 90 - CA
@@ -92,7 +91,6 @@ public class AprilTag {
         double c = Math.sqrt(a * a + b * b - 2 * a * b * Math.cos(x));
         double y = Math.asin(Math.sin(x) * a / c);
         if (b * b + c * c < a * a) y = Math.PI - y;
-        botCenterlineRange = c;
         return Math.toDegrees(y) - 90;
     }
 
@@ -132,9 +130,6 @@ public class AprilTag {
     }
     public double getRange() {
         return range;
-    }
-    public double getBotCenterlineRange() {
-        return botCenterlineRange;
     }
     public double getBearing() {
         return bearing;
