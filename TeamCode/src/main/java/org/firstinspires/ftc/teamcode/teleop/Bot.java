@@ -301,9 +301,12 @@ public class Bot {
                     //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
                 }
             }
-
+        }
+        if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
             shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
-            turnCorrection = 0.9 * lastTurnCorrection;
+        }
+
+        turnCorrection = 0.9 * lastTurnCorrection;
         }
     }
 
