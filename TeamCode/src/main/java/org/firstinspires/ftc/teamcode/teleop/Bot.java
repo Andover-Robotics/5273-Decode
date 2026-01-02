@@ -97,10 +97,14 @@ public class Bot {
         }
 
         switch (state) {
-            case Intake -> handleIntakeState();
-            case QuickOuttake -> handleQuickOuttakeState();
-            case SortOuttake -> handleSortOuttakeState();
-            case Endgame -> handleEndgameState();
+            case Intake:
+                handleIntakeState();
+            case QuickOuttake:
+                handleQuickOuttakeState();
+            case SortOuttake:
+                handleSortOuttakeState();
+            case Endgame:
+                handleEndgameState();
         }
 
         outtake.periodic();
