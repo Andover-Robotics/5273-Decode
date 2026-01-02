@@ -271,6 +271,8 @@ public class Bot {
             indexer.update();
             outtake.periodic();
             g1.readButtons();
+            handleMovement();
+            handleAprilTagLock();
             return fireAction.run(packet);
         };
     }
