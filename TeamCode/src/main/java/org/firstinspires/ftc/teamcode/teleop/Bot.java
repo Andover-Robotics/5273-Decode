@@ -270,6 +270,7 @@ public class Bot {
         return packet -> {
             indexer.update();
             outtake.periodic();
+            g1.readButtons();
             return fireAction.run(packet);
         };
     }
