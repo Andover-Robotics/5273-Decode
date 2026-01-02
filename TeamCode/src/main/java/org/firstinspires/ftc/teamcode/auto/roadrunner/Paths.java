@@ -17,8 +17,14 @@ public class Paths {
             double outtakeHeading,
             double obeliskScanHeading
     ) {
-        Action.Builder builder = drive.actionBuilder(startPose);
+        TrajectoryActionBuilder builder = drive.actionBuilder(startPose);
+        builder.stopAndAdd(
+                new RaceAction(
+                        actions.actionPeriodic(), // keeps updating shooter/indexer
+                        builder.fresh()
+                                .build())
 
+        );
         for (int row = 2; row >= 0; row--) {
             // Move to the row's starting Y position for intake
             builder.strafeToSplineHeading(

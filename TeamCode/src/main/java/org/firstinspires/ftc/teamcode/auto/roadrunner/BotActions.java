@@ -97,17 +97,19 @@ public class BotActions {
         }
     }
 
+    // locks in for 1 sec, then runs actionOuttake while locked in, when that finishes stops locking in
     public Action actionShootWithLock(int tagID, double shootDuration) {
         return new Action() {
             private long startTime = -1;
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                long now = System.currentTimeMillis();
+
                 if (startTime < 0) {
-                    startTime = System.currentTimeMillis();
-                    continuousAprilTagLock = true;
+                    startTime = now;
+                    continuousAprilTagLock = true; // turn on lock mode
                 }
-                double turnCorrection;
 
                 // Update Limelight aiming continuously
                 aprilTag.scanGoalTag();
@@ -115,27 +117,23 @@ public class BotActions {
                 lastTurnCorrection = !Double.isNaN(bearing)
                         ? aprilAimer.calculateTurnPowerFromBearing(bearing)
                         : 0;
-                turnCorrection = 0.9 * lastTurnCorrection;
+                double turnCorrection = 0.9 * lastTurnCorrection;
 
                 // Set shooter RPM based on distance
                 int shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+                actionOuttake(tagID, shooterRPM).run(telemetryPacket);
 
-                actionOuttake(tagID, shooterRPM).run();
-            }
+                if (now - startTime >= shootDuration * 1000) {
+                    continuousAprilTagLock = false;
+                    return true;
+                }
 
-            @Override
-            public boolean isFinished() {
-                return System.currentTimeMillis() - startTime > shootDuration * 1000;
-            }
-
-            @Override
-            public void stop() {
-                continuousAprilTagLock = false;
+                return false;
             }
         };
     }
 
-    public Action actionScanObeliskUntilValid() {
+    public Action actionScanObelisk() {
         return new InstantAction(() -> {
             int scannedId = -1;
 
@@ -220,6 +218,18 @@ public class BotActions {
                 new InstantAction(() -> indexer.moveTo(indexer.getState().next()))
         );
     }
+
+    public Action actionPeriodic() {
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                outtake.periodic(); // PIDF shooter update
+                indexer.update(); // PIDF indexer update
+                return false;
+            }
+        };
+    }
+
 
     public Action actionPark() {
     // vert slides

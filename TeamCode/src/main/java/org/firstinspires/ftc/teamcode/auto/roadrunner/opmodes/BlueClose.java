@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.Paths;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
-@Autonomous(name = "Red-Close", group = "Autonomous")
+@Autonomous(name = "Blue-Close", group = "Autonomous")
 public class BlueClose extends LinearOpMode {
 
     @Override
@@ -56,20 +56,5 @@ public class BlueClose extends LinearOpMode {
         );
 
         waitForStart();
-
-        while (opModeIsActive() && !auto.isFinished()) {
-            // steps auto
-            auto.update();
-
-            // update subsystems
-            hardware.indexer.update();
-            hardware.outtake.periodic();
-
-            telemetry.addData("shooter rpm", hardware.outtake.getRPM());
-            telemetry.addData("indexer slot", hardware.indexer.debugClosestSlot());
-            telemetry.update();
-
-            sleep(10);
-        }
     }
 }
