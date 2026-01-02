@@ -192,7 +192,7 @@ public class Bot {
     }
 
     private Action actionNonIndexedDump() {
-        final double rpm = getTargetRpm() * 1.5;
+        final double rpm = getTargetRpm() * 1.7;
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),// lower up position for quick dump
                 new InstantAction(() -> outtake.set(rpm)),
@@ -309,7 +309,6 @@ public class Bot {
 
         turnCorrection = 0.9 * lastTurnCorrection;
         }
-    }
 
     private double getTargetRpm() {
         double range = aprilTag.getRange();
