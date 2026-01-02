@@ -44,7 +44,8 @@ public class Bot {
     private long lastAimUpdate = 0;
     private double lastTurnCorrection = 0.0;
     private double turnCorrection = 0.0;
-
+    private int goalTagID;
+    private String colorGoalSelected;
     public enum FSM {
         Intake,
         QuickOuttake,
@@ -92,19 +93,24 @@ public class Bot {
         handleAprilTagLock();
         handleMovement();
 
-        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
-            fieldCentric = !fieldCentric;
+        if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
+            goalTagID = 20;
+            aprilTag.setGoalTagID(goalTagID); // blue
+            colorGoalSelected = "Blue";
         }
 
+        if (g1.wasJustPressed(GamepadKeys.Button.START)) {
+            goalTagID = 24;
+            aprilTag.setGoalTagID(goalTagID); // red
+            colorGoalSelected = "Red";
+        }
+
+
         switch (state) {
-            case Intake:
-                handleIntakeState();
-            case QuickOuttake:
-                handleQuickOuttakeState();
-            case SortOuttake:
-                handleSortOuttakeState();
-            case Endgame:
-                handleEndgameState();
+            case Intake -> handleIntakeState();
+            case QuickOuttake -> handleQuickOuttakeState();
+            case SortOuttake -> handleSortOuttakeState();
+            case Endgame -> handleEndgameState();
         }
 
         outtake.periodic();
@@ -118,6 +124,7 @@ public class Bot {
         telemetry.addData("Indexer Loaded?", indexer.isLoaded());
         telemetry.addData("April Lock", continuousAprilTagLock);
         telemetry.addData("Bot Range", aprilTag.getRange());
+        telemetry.addData("Alliance selected:", colorGoalSelected);
         for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
             telemetry.addData(
                     "Slot " + s.index,
@@ -272,7 +279,7 @@ public class Bot {
         if (g1.wasJustPressed(GamepadKeys.Button.A)) {
             continuousAprilTagLock = true;
         }
-        else if(g1.wasJustPressed(GamepadKeys.Button.B)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.B)) {
             continuousAprilTagLock = false;
         }
 
