@@ -158,6 +158,31 @@ public class Indexer {
         state = newState;
     }
 
+    //sortedquickspin api
+    public boolean prepareQuickspin(ArtifactColor[] desiredOrder) {
+        // Validate input
+        if (desiredOrder == null || desiredOrder.length != 3) return false;
+        if (!isTwoPurpleOneGreen(desiredOrder)) return false;
+
+        // Validate stored slots
+        if (!storedSlotsValidForQuickspin()) return false;
+
+        // Quickspin must start in intaking mode
+        setIntaking(true);
+
+        // Find correct starting slot
+        for (IndexerState s : IndexerState.values()) {
+            int x = s.index;
+            if (matchesQuickspin(x, desiredOrder)) {
+                moveTo(s);
+                return true;
+            }
+        }
+        // Should never happen if validation passed
+        return false;
+    }
+
+
     /** Open-loop blast: full power until caller stops it (or sets another power). */
     public void setIndexerPower(double power) { servoControl.setOpenLoopPower(power); }
     public void stopIndexerPower() { servoControl.setOpenLoopPower(0); servoControl.clearOpenLoop(); }
@@ -479,4 +504,37 @@ public class Indexer {
             return ArtifactColor.UNKNOWN; // fallback if nothing crosses threshold
         }
     }
+
+    //quickspin helper
+    private boolean isTwoPurpleOneGreen(ArtifactColor[] arr) {
+        int purple = 0;
+        int green = 0;
+
+        for (ArtifactColor c : arr) {
+            if (c == ArtifactColor.PURPLE) purple++;
+            else if (c == ArtifactColor.GREEN) green++;
+            else return false;
+        }
+        return purple == 2 && green == 1;
+    }
+
+    private boolean storedSlotsValidForQuickspin() {
+        int purple = 0;
+        int green = 0;
+
+        for (SlotState slot : slots) {
+            if (slot.color == ArtifactColor.PURPLE) purple++;
+            else if (slot.color == ArtifactColor.GREEN) green++;
+            else return false;
+        }
+        return purple == 2 && green == 1;
+    }
+
+    //firing order:(x + 2) % 3, x, (x + 1) % 3
+    private boolean matchesQuickspin(int x, ArtifactColor[] desired) {
+        return slots[(x + 2) % 3].color == desired[0]
+                && slots[x].color == desired[1]
+                && slots[(x + 1) % 3].color == desired[2];
+    }
+
 }
