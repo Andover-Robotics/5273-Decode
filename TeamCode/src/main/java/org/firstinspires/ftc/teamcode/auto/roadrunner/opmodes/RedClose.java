@@ -5,8 +5,8 @@ import org.firstinspires.ftc.teamcode.*;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.Paths;
 
-@Autonomous(name = "Red-Far", group = "Autonomous")
-public class RedFar extends LinearOpMode {
+@Autonomous(name = "Red-Close", group = "Autonomous")
+public class RedClose extends LinearOpMode {
 
     @Override
     public void runOpMode() {
