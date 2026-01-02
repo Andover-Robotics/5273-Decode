@@ -18,21 +18,21 @@ public class Paths {
             double outtakeHeading,
             double obeliskScanHeading
     ) {
-        actions.initializeColors(Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE);
+        //actions.initializeColors(Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE);
 
         TrajectoryActionBuilder builder = mecanumDrive.actionBuilder(startPose);
-        builder.stopAndAdd(
+        /*builder.stopAndAdd(
                 new RaceAction(
                         actions.actionPeriodic(), // keeps updating shooter/indexer
                         builder.fresh()
                                 .build())
 
-        );
+        );*/
 
         builder.strafeToSplineHeading(obeliskScanPos, obeliskScanHeading)
-                .stopAndAdd(actions.actionScanObelisk());
+                /*.stopAndAdd(actions.actionScanObelisk())*/;
         builder.strafeToSplineHeading(shootPos, outtakeHeading)
-               .stopAndAdd(actions.actionShootWithLock(actions.aprilTag.getObeliskId(), 2.0, mecanumDrive));
+               /*.stopAndAdd(actions.actionShootWithLock(actions.aprilTag.getObeliskId(), 2.0, mecanumDrive))*/;
 
         for (int row = 2; row >= 0; row--) {
             // Move to the row's starting Y position for intake
@@ -43,7 +43,7 @@ public class Paths {
 
             for (int col = 0; col < 3; col++) {
                 builder.stopAndAdd(new ParallelAction(
-                        actions.actionIntakeOneCycle(),
+                        //actions.actionIntakeOneCycle(),
                         builder.fresh()
                                .strafeToSplineHeading(
                                        artifactPositions[row][col],
@@ -53,7 +53,7 @@ public class Paths {
                 ));
             }
 
-            builder.stopAndAdd(actions.actionShootWithLock(actions.aprilTag.getObeliskId(), 2.0, mecanumDrive));
+            //builder.stopAndAdd(actions.actionShootWithLock(actions.aprilTag.getObeliskId(), 2.0, mecanumDrive));
 
             // already turns off lock-in mode in action
             // builder.stopAndAdd(new InstantAction(() -> continuousAprilTagLock = false));
@@ -61,7 +61,7 @@ public class Paths {
 
         return builder
                 .strafeToSplineHeading(parkPos, outtakeHeading)
-                .stopAndAdd(actions.actionPark())
+                //.stopAndAdd(actions.actionPark())
                 .build();
     }
 }
