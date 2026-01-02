@@ -1,7 +1,3 @@
-/*
- * Action methods for use in Auto
- */
-
 package org.firstinspires.ftc.teamcode.auto.roadrunner;
 
 import androidx.annotation.NonNull;
