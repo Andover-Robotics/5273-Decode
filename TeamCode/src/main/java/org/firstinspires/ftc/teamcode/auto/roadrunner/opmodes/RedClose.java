@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.auto.roadrunner.opmodes;
 
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.*;
-import org.firstinspires.ftc.teamcode.*;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.Paths;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 @Autonomous(name = "Red-Close", group = "Autonomous")
 public class RedClose extends LinearOpMode {
@@ -52,21 +55,6 @@ public class RedClose extends LinearOpMode {
                 obeliskScanHeading
         );
 
-        waitforstart();
-
-        while (opmodeisactive() && !auto.isfinished()) {
-            // steps auto
-            auto.update();
-
-            // update subsystems
-            hardware.actions.indexer.update();
-            hardware.actions.outtake.periodic();
-
-            telemetry.adddata("shooter rpm", hardware.actions.outtake.getrpm());
-            telemetry.adddata("indexer slot", hardware.actions.indexer.debugclosestslot());
-            telemetry.update();
-
-            sleep(10);
-        }
+        waitForStart();
     }
 }
