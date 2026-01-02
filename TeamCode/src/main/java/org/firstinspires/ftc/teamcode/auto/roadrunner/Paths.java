@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.auto.roadrunner;
 
 import com.acmerobotics.roadrunner.*;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 public class Paths {
 
@@ -17,6 +18,8 @@ public class Paths {
             double outtakeHeading,
             double obeliskScanHeading
     ) {
+        actions.initializeColors(Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE);
+
         TrajectoryActionBuilder builder = drive.actionBuilder(startPose);
         builder.stopAndAdd(
                 new RaceAction(

@@ -47,6 +47,10 @@ public class BotActions {
         this.aprilAimer = aprilAimer;
     }
 
+    public void initializeColors(Indexer.ArtifactColor one, Indexer.ArtifactColor two, Indexer.ArtifactColor three) {
+        indexer.initializeColors(one, two, three);
+    }
+
     public Action actionNonIndexedDump(
             double rpm,
             double spinupTime,
