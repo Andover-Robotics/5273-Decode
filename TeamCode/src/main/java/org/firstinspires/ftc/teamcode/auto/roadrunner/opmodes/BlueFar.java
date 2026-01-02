@@ -53,10 +53,6 @@ public class BlueFar extends LinearOpMode {
     public void runOpMode() {
         // Initialize hardware and drive
         Hardware hardware = new Hardware(hardwareMap, telemetry);
-        MecanumDrive drive = new MecanumDrive(
-                hardwareMap,
-                new Pose2d(startX, startY, Math.toRadians(startHeadingDeg))
-        );
 
         // Convert dashboard fields to Pose2d/Vector2d
         Pose2d startPose = new Pose2d(startX, startY, Math.toRadians(startHeadingDeg));
@@ -77,7 +73,7 @@ public class BlueFar extends LinearOpMode {
 
         // Build autonomous path
         Action auto = Paths.buildPath(
-                drive,
+                hardware.mecanumDrive,
                 hardware.actions,
                 startPose,
                 shootPos,

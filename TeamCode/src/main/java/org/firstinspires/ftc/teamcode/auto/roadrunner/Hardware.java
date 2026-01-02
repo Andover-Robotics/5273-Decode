@@ -18,24 +18,18 @@ public class Hardware {
     public final AprilTag aprilTag;
     public final AprilTagAimer aprilAimer;
     public final BotActions actions;
+    public final MecanumDrive mecanumDrive;
     public final IMU imu;
     public final TwoDeadWheelLocalizer deadWheelLocalizer;
     public Hardware(HardwareMap hardwareMap, Telemetry telemetry) {
-        imu = hardwareMap.get(IMU.class, "imu");
+        mecanumDrive = new MecanumDrive(
+                hardwareMap,
+                new Pose2d(0, 0, 0)
+        );
 
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                RevHubOrientationOnRobot.UsbFacingDirection.UP));
+        imu = mecanumDrive.lazyImu.get();
+        deadWheelLocalizer = (TwoDeadWheelLocalizer) mecanumDrive.localizer;
 
-        imu.initialize(parameters);
-
-        deadWheelLocalizer =
-                new TwoDeadWheelLocalizer(
-                        hardwareMap,
-                        imu,
-                        0.00195844,
-                        new Pose2d(0, 0, 0)
-                );
         intake   = new Intake(hardwareMap);
         indexer  = new Indexer(hardwareMap);
         outtake  = new Outtake(hardwareMap, Outtake.Mode.RPM);
