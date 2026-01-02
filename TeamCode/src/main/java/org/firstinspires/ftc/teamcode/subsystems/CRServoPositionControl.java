@@ -35,7 +35,7 @@ public class CRServoPositionControl {
     public static double loaded_kI = 0.00009;
     public static double loaded_kD = 0.0;
     public static double loaded_kS = 0.08;
-    
+
     private boolean loaded = false;
     private boolean manualOverride = false; // when true, update() does nothing (open-loop control active)
 
