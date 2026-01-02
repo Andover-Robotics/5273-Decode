@@ -90,8 +90,9 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
                     //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
                 }
             }
-
-            shooterRPM = (int)outtake.getRegressionRPM(aprilTag.getRange());
+            if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
+                shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+            }
             turnCorrection = 0.9 * lastTurnCorrection;  // smooth decay
         }
 
