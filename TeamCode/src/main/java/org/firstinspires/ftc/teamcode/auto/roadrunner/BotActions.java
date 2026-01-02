@@ -120,7 +120,11 @@ public class BotActions {
                 double turnCorrection = 0.9 * lastTurnCorrection;
 
                 // Set shooter RPM based on distance
-                int shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+                int shooterRPM = 0;
+                if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
+                    shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+                }
+
                 actionOuttake(tagID, shooterRPM).run(telemetryPacket);
 
                 if (now - startTime >= shootDuration * 1000) {
