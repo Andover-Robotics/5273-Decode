@@ -11,8 +11,10 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 import org.firstinspires.ftc.teamcode.subsystems.AprilTag;
 import org.firstinspires.ftc.teamcode.subsystems.AprilTagAimer;
@@ -30,6 +32,8 @@ public class Bot {
     private final Movement movement;
     private final AprilTag aprilTag;
     private final AprilTagAimer aprilAimer;
+    private final IMU imu;
+    private final TwoDeadWheelLocalizer deadWheelLocalizer;
 
     private final GamepadEx g1;
     private final GamepadEx g2;
@@ -51,7 +55,7 @@ public class Bot {
     public FSM state;
 
     public static double TRIGGER_DEADZONE = 0.05;
-    public static double SHOOTER_RPM = 2900;
+    public static double shooterRPM = 2900;
     public static double NON_INDEX_SPIN_TIME = 6;//seconds of full-power indexer blast
     public static double SHOOTER_SPINUP = 2.0;
     public static double FULL_BLAST_POWER =0.6;
@@ -63,8 +67,10 @@ public class Bot {
         actuator = new Actuator(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         movement = new Movement(hardwareMap);
+        imu = movement.getImu();
+        deadWheelLocalizer = movement.getTwoDeadWheelLocalizer();
         aprilTag = new AprilTag(hardwareMap, tele);
-        aprilAimer = new AprilTagAimer(hardwareMap);
+        aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
         telemetry = tele;
@@ -107,7 +113,7 @@ public class Bot {
         telemetry.addData("Actuator up?", actuator.isActivated());
         telemetry.addData("Indexer Loaded?", indexer.isLoaded());
         telemetry.addData("April Lock", continuousAprilTagLock);
-        telemetry.addData("Bot Centerline Range", aprilTag.getBotCenterlineRange());
+        telemetry.addData("Bot Range", aprilTag.getRange());
         for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
             telemetry.addData(
                     "Slot " + s.index,
@@ -260,37 +266,34 @@ public class Bot {
     private void handleAprilTagLock() {
         // Toggle continuous lock with gamepad1 A
         if (g1.wasJustPressed(GamepadKeys.Button.A)) {
-            continuousAprilTagLock = !continuousAprilTagLock;
-            if (continuousAprilTagLock) {
-                lastTurnCorrection = 0;
-                turnCorrection = 0;
-            }
+            continuousAprilTagLock = true;
         }
 
-        if (!continuousAprilTagLock) {
+        if (continuousAprilTagLock) {
+            lastTurnCorrection = 0;
             turnCorrection = 0;
-            return;
-        }
-
-        long now = System.currentTimeMillis();
-        if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
-            lastAimUpdate = now;
-            aprilTag.scanGoalTag();
-            double bearing = aprilTag.getBearing();
-            if (Double.isNaN(bearing)) {
-                lastTurnCorrection = 0;
-            } else {
-                lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
+            long now = System.currentTimeMillis();
+            if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
+                lastAimUpdate = now;
+                aprilTag.scanGoalTag();
+                double bearing = aprilTag.getBearing();
+                if (!Double.isNaN(bearing)) {
+                    lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
+                } else {
+                    lastTurnCorrection = 0;
+                    //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
+                }
             }
+
+            shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+            turnCorrection = 0.9 * lastTurnCorrection;
         }
-        // mild smoothing/decay
-        turnCorrection = 0.9 * lastTurnCorrection;
     }
 
     private double getTargetRpm() {
-        double range = aprilTag.getBotCenterlineRange();
+        double range = aprilTag.getRange();
         if (Double.isNaN(range) || range <= 0) {
-            return SHOOTER_RPM;
+            return shooterRPM;
         }
         return outtake.getRegressionRPM(range);
     }

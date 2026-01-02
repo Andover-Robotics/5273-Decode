@@ -12,7 +12,7 @@ public class CRServoPositionControl {
     public static double degreesPerRev = 360.0;
 
     // gains
-    public static double kP = 0.002;
+    public static double kP = 0.004;
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kS = 0.07; //voerriden later
@@ -22,16 +22,16 @@ public class CRServoPositionControl {
     public static double brakeZoneDeg = 20.0;
 
     // deadbands
-    public static double deadbandDeg = 3.0;
+    public static double deadbandDeg = 6.0;
     public static boolean rotateClockwise = true;
 
     // Preset gains
-    public static double unloaded_kP = 0.002;
+    public static double unloaded_kP = 0.004;
     public static double unloaded_kI = 0.0;
     public static double unloaded_kD = 0.0;
     public static double unloaded_kS = 0.08;
 
-    public static double loaded_kP = 0.002;
+    public static double loaded_kP = 0.004;
     public static double loaded_kI = 0.00009;
     public static double loaded_kD = 0.0;
     public static double loaded_kS = 0.08;

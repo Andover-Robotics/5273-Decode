@@ -13,7 +13,7 @@ public class BetterCRControl {
     public static double ki = 0.0;
     public static double kd = 0.04;
 
-    public static double deadband = 1.5;    // degrees
+    public static double deadband = 3;    // degrees
     public static double minPower = 0.08;
     public static double holdPower = 0.05;
 

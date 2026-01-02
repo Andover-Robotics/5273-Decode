@@ -30,7 +30,7 @@ public class Outtake {
     public static double p = 0.000267;
     public static double i = 0.0;
     public static double d = 0.0;
-    public static double f = 0.00021;   // 1 / maxrpm and then tuned
+    public static double f = 0.0002;   // 1 / maxrpm and then tuned
 
     // Mode + state
     public Mode mode;
@@ -103,6 +103,6 @@ public class Outtake {
 
     public double getRegressionRPM(double range)
     {
-        return 0.000875923 * Math.pow(range,3)-0.340484 * Math.pow(range,2) + 46.76218 * range + 1914.04505;
+        return 0.00211836 * Math.pow(range, 3) - 0.614769 * Math.pow(range, 2) + 65.69185 * range + 1508.69255;
     }
 }

@@ -27,13 +27,13 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
     private long lastAimUpdate = 0;
     private double lastTurnCorrection = 0;
-    public static int shooterRPM = 5000;
+    public static int shooterRPM;
 
     private boolean continuousAprilTagLock = false;
     private boolean fieldCentric = false;
     private FtcDashboard dash = FtcDashboard.getInstance();
 
-    private static final long AIM_UPDATE_INTERVAL_MS = 50;
+    private static final long AIM_UPDATE_INTERVAL_MS = 0;
     private static int goalTagID;
     private static String colorGoalSelected;
 
@@ -46,7 +46,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         movement = new Movement(hardwareMap);
 
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aprilAimer = new AprilTagAimer(hardwareMap);
+        aprilAimer = new AprilTagAimer(hardwareMap, movement.getImu(), movement.getTwoDeadWheelLocalizer());
 
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);
@@ -90,7 +90,9 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
                     //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
                 }
             }
-
+            if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
+                shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+            }
             turnCorrection = 0.9 * lastTurnCorrection;  // smooth decay
         }
 
@@ -187,7 +189,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
         // ========== TELEMETRY ==========
         telemetry.addData("Target RPM",outtake.getTargetRPM());
-        telemetry.addData("Bot Centerline Range", aprilTag.getBotCenterlineRange());
+        telemetry.addData("Bot Range", aprilTag.getRange()); // moved limelight
         telemetry.addData("measured RPM",outtake.getRPM());
         telemetry.addData("Outtake Power", outtake.getPower());
         telemetry.addData("April Lock", continuousAprilTagLock);
