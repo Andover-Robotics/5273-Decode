@@ -15,6 +15,7 @@ import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 import com.acmerobotics.roadrunner.ftc.RawEncoder;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -28,8 +29,8 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.messages.TwoDeadWheelInput
 @Config
 public final class TwoDeadWheelLocalizer implements Localizer {
     public static class Params {
-        public double parYTicks = 1878.6550166819254; // y position of the parallel encoder (in tick units)
-        public double perpXTicks = 3314.5281267923797; // x position of the perpendicular encoder (in tick units)
+        public double parYTicks = 0; // y position of the parallel encoder (in tick units)
+        public double perpXTicks = 2582.086621; // x position of the perpendicular encoder (in tick units)
     }
 
     public static Params PARAMS = new Params();
@@ -50,8 +51,19 @@ public final class TwoDeadWheelLocalizer implements Localizer {
         // TODO: make sure your config has **motors** with these names (or change them)
         //   the encoders should be plugged into the slot matching the named motor
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
-        par = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "rightFront")));
-        perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "rightBack")));
+        //todo: make sure its not reading the motor encoder it should be the deadwheel encoder
+        // get the DcMotorEx objects first
+        DcMotorEx parMotor = hardwareMap.get(DcMotorEx.class, "rightBack");
+        DcMotorEx perpMotor = hardwareMap.get(DcMotorEx.class, "leftBack");
+
+        // set them to RUN_WITHOUT_ENCODER so the motor controller just reports ticks
+        parMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        perpMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        // now wrap them in RawEncoder → OverflowEncoder
+        par = new OverflowEncoder(new RawEncoder(parMotor));
+        perp = new OverflowEncoder(new RawEncoder(perpMotor));
+
 
         // TODO: reverse encoder directions if needed
         par.setDirection(DcMotorSimple.Direction.REVERSE);
