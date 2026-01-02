@@ -5,10 +5,14 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.Vector2d;
 
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 import org.firstinspires.ftc.teamcode.subsystems.AprilTag;
 import org.firstinspires.ftc.teamcode.subsystems.AprilTagAimer;
@@ -98,7 +102,7 @@ public class BotActions {
     }
 
     // locks in for 1 sec, then runs actionOuttake while locked in, when that finishes stops locking in
-    public Action actionShootWithLock(int tagID, double shootDuration) {
+    public Action actionShootWithLock(int tagID, double shootDuration, MecanumDrive mecanumDrive) {
         return new Action() {
             private long startTime = -1;
 
@@ -118,6 +122,10 @@ public class BotActions {
                         ? aprilAimer.calculateTurnPowerFromBearing(bearing)
                         : 0;
                 double turnCorrection = 0.9 * lastTurnCorrection;
+
+                mecanumDrive.setDrivePowers(
+                        new PoseVelocity2d(new Vector2d(0, 0), turnCorrection)
+                );
 
                 // Set shooter RPM based on distance
                 int shooterRPM = 0;
@@ -227,8 +235,22 @@ public class BotActions {
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                outtake.periodic(); // PIDF shooter update
-                indexer.update(); // PIDF indexer update
+
+                outtake.periodic();
+                indexer.update();
+
+                if (continuousAprilTagLock) {
+                    aprilTag.scanGoalTag();
+                    double bearing = aprilTag.getBearing();
+
+                    double turn = 0;
+                    if (!Double.isNaN(bearing)) {
+                        turn = aprilAimer.calculateTurnPowerFromBearing(bearing);
+                    }
+
+
+                }
+
                 return false;
             }
         };
