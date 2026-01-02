@@ -25,6 +25,12 @@ public class Paths {
                                 .build())
 
         );
+
+        builder.strafeToSplineHeading(obeliskScanPos, obeliskScanHeading)
+                .stopAndAdd(actions.actionScanObelisk());
+        builder.strafeToSplineHeading(shootPos, outtakeHeading)
+               .stopAndAdd(actions.actionShootWithLock(actions.aprilTag.getObeliskId(), 2.0));
+
         for (int row = 2; row >= 0; row--) {
             // Move to the row's starting Y position for intake
             builder.strafeToSplineHeading(
@@ -43,9 +49,6 @@ public class Paths {
                                .build()
                 ));
             }
-
-            builder.strafeToSplineHeading(obeliskScanPos, obeliskScanHeading)
-                   .stopAndAdd(actions.actionScanObelisk());
 
             builder.stopAndAdd(actions.actionShootWithLock(actions.aprilTag.getObeliskId(), 2.0));
 
