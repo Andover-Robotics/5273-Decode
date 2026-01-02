@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.auto.roadrunner.opmodes;
 
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.*;
-import org.firstinspires.ftc.teamcode.*;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.Paths;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
-@Autonomous(name = "Red-Far", group = "Autonomous")
-public class RedFar extends LinearOpMode {
+@Autonomous(name = "Red-Close", group = "Autonomous")
+public class BlueClose extends LinearOpMode {
 
     @Override
     public void runOpMode() {
@@ -52,18 +55,18 @@ public class RedFar extends LinearOpMode {
                 obeliskScanHeading
         );
 
-        waitforstart();
+        waitForStart();
 
-        while (opmodeisactive() && !auto.isfinished()) {
+        while (opModeIsActive() && !auto.isFinished()) {
             // steps auto
             auto.update();
 
             // update subsystems
-            hardware.actions.indexer.update();
-            hardware.actions.outtake.periodic();
+            hardware.indexer.update();
+            hardware.outtake.periodic();
 
-            telemetry.adddata("shooter rpm", hardware.actions.outtake.getrpm());
-            telemetry.adddata("indexer slot", hardware.actions.indexer.debugclosestslot());
+            telemetry.addData("shooter rpm", hardware.outtake.getRPM());
+            telemetry.addData("indexer slot", hardware.indexer.debugClosestSlot());
             telemetry.update();
 
             sleep(10);

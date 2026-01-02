@@ -268,6 +268,9 @@ public class Bot {
         if (g1.wasJustPressed(GamepadKeys.Button.A)) {
             continuousAprilTagLock = true;
         }
+        else if(g1.wasJustPressed(GamepadKeys.Button.B)) {
+            continuousAprilTagLock = false;
+        }
 
         if (continuousAprilTagLock) {
             lastTurnCorrection = 0;
