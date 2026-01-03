@@ -78,7 +78,7 @@ public class RedCloseSimpleMotif extends LinearOpMode {
         Action toShoot = new SequentialAction(
                 new ParallelAction(
                         drive.actionBuilder(obeliskPose)
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(-3)))
                                 .build(),
                         botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 0)
                 ),
