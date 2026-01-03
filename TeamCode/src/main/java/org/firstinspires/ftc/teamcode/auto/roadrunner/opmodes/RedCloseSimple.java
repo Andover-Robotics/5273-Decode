@@ -112,7 +112,7 @@ public class RedCloseSimple extends LinearOpMode {
         Action backToShoot1 = drive.actionBuilder(intake1Pose3)
                 .strafeToLinearHeading(
                         shootingPose.position,
-                        shootingPose.heading.plus(Math.toRadians(-1.5))
+                        shootingPose.heading
                 )
                 .stopAndAdd(botActions.actionOuttakeNoMotif(SHOOT_RPM))
                 .build();

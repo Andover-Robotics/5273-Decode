@@ -100,7 +100,7 @@ public class BlueCloseSimple extends LinearOpMode {
         );
 
         Action backToShoot1 = drive.actionBuilder(intake1Pose3)
-                .strafeToLinearHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(1.5)))
+                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                 //.stopAndAdd(botActions.actionOuttakeSimple(hardware.aprilTag.getObeliskId(), 1, SHOOT_RPM))
                 .stopAndAdd(botActions.actionOuttakeNoMotif(SHOOT_RPM))
                 .build();
