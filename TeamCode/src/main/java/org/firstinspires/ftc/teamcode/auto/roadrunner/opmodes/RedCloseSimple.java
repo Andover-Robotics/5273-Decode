@@ -17,9 +17,9 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 @Autonomous(name = "Simple Red Auto", group = "Autonomous")
 public class RedCloseSimple extends LinearOpMode {
 
-    public static double OBELISK_X = 0;
-    public static double OBELISK_Y = 38;
-    public static double OBELISK_HEADING_DEG = 300;
+    //public static double OBELISK_X = 0;
+    //public static double OBELISK_Y = 38;
+    //public static double OBELISK_HEADING_DEG = 300;
 
     public static double SHOOT_X = 0;
     public static double SHOOT_Y = 42;
@@ -48,11 +48,13 @@ public class RedCloseSimple extends LinearOpMode {
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(180));
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
 
+        /*
         Pose2d obeliskPose = new Pose2d(
                 OBELISK_X,
                 OBELISK_Y,
                 Math.toRadians(OBELISK_HEADING_DEG)
         );
+        */
 
         Pose2d shootingPose = new Pose2d(
                 SHOOT_X,
@@ -60,7 +62,6 @@ public class RedCloseSimple extends LinearOpMode {
                 Math.toRadians(SHOOT_HEADING_DEG)
         );
 
-        // === Intake poses (X mirrored, heading 180° instead of 0°) ===
         Pose2d intake1PoseStart = new Pose2d(INTAKE_X, INTAKE1_Y, Math.toRadians(180));
         Pose2d intake1Pose1 = new Pose2d(INTAKE_X - INTAKE_FORWARD_DIST, INTAKE1_Y, Math.toRadians(180));
         Pose2d intake1Pose2 = new Pose2d(INTAKE_X - 2 * INTAKE_FORWARD_DIST, INTAKE1_Y, Math.toRadians(180));
@@ -71,17 +72,19 @@ public class RedCloseSimple extends LinearOpMode {
         Pose2d intake2Pose2 = new Pose2d(INTAKE_X - 2 * INTAKE_FORWARD_DIST, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2Pose3 = new Pose2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST - 4.5, INTAKE2_Y, Math.toRadians(180));
 
+        /*
         Action toObelisk = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(obeliskPose.position, obeliskPose.heading)
                 .stopAndAdd(botActions.actionScanObelisk())
                 .build();
+        */
 
-        Action toShoot = drive.actionBuilder(obeliskPose)
+        Action toShoot = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(
                         shootingPose.position,
                         shootingPose.heading.plus(Math.toRadians(-3))
                 )
-                .stopAndAdd(botActions.actionOuttakeNoMotif(SHOOT_RPM))
+                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
                 .build();
 
         Action toIntakeStart1 = drive.actionBuilder(shootingPose)
@@ -114,7 +117,7 @@ public class RedCloseSimple extends LinearOpMode {
                         shootingPose.position,
                         shootingPose.heading
                 )
-                .stopAndAdd(botActions.actionOuttakeNoMotif(SHOOT_RPM))
+                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
                 .build();
 
         Action toIntakeStart2 = drive.actionBuilder(shootingPose)
@@ -144,7 +147,7 @@ public class RedCloseSimple extends LinearOpMode {
 
         Action backToShoot2 = drive.actionBuilder(intake2Pose3)
                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                .stopAndAdd(botActions.actionOuttakeNoMotif(SHOOT_RPM))
+                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
                 .build();
 
         waitForStart();
@@ -164,7 +167,6 @@ public class RedCloseSimple extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        toObelisk,
                         toShoot,
                         toIntakeStart1,
                         toIntake1_1,
