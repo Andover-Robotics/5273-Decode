@@ -192,7 +192,7 @@ public class Bot {
     }
 
     private Action actionNonIndexedDump() {
-        final double rpm = getTargetRpm();
+        final double rpm = getTargetRpm() * 1.5;
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),// lower up position for quick dump
                 new InstantAction(() -> outtake.set(rpm)),
@@ -270,6 +270,8 @@ public class Bot {
         return packet -> {
             indexer.update();
             outtake.periodic();
+            handleMovement();
+            g1.readButtons();
             return fireAction.run(packet);
         };
     }
