@@ -76,25 +76,101 @@ public class BotActions {
         );
     }
 
+    // No color sensor just logic
+    public Action actionOuttakeSimple(int tagID, int row, int rpm) {
+
+        int offset;
+
+        switch (row) {
+            case 0: // P P G
+                switch (tagID) {
+                    case 21: offset = 2; break; // GPP
+                    case 22: offset = 0; break; // PGP
+                    case 23: offset = 0; break; // PPG
+                default:
+                    return new InstantAction(() -> {});
+                }
+                break;
+            case 1: // P P G
+                switch (tagID) {
+                    case 21: offset = 2; break; // GPP
+                    case 22: offset = 0; break; // PGP
+                    case 23: offset = 0; break; // PPG
+                    default: return new InstantAction(() -> {});
+                }
+                break;
+
+            case 2: // P G P
+                switch (tagID) {
+                    case 21: offset = 1; break; // GPP
+                    case 22: offset = 0; break; // PGP
+                    case 23: offset = 2; break; // PPG
+                    default: return new InstantAction(() -> {});
+                }
+                break;
+
+            case 3: // G P P
+                switch (tagID) {
+                    case 21: offset = 0; break; // GPP
+                    case 22: offset = 1; break; // PGP
+                    case 23: offset = 2; break; // PPG
+                    default: return new InstantAction(() -> {});
+                }
+                break;
+
+            default:
+                return new InstantAction(() -> {});
+        }
+
+        return new SequentialAction(
+                new InstantAction(() -> indexer.setIntaking(false)),
+                new InstantAction(actuator::down),
+                new InstantAction(() -> outtake.set(rpm)),
+                new SleepAction(SHOOTER_SPINUP),
+
+                new InstantAction(() -> {
+                    for (int i = 0; i < offset; i++) {
+                        indexer.moveTo(indexer.getState().next(), true);
+                    }
+                }),
+
+                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
+                new SleepAction(0.25),
+                new InstantAction(actuator::upIndexed),
+
+                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
+                new SleepAction(0.25),
+                new InstantAction(actuator::upIndexed),
+
+                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
+                new SleepAction(0.25),
+                new InstantAction(actuator::upIndexed),
+
+                new InstantAction(actuator::down),
+                new InstantAction(outtake::stop),
+                new InstantAction(() -> indexer.setIntaking(true))
+        );
+    }
+
     public Action actionOuttake(int tagID, int rpm) {
         switch (tagID) {
             case 21:
                 return new SequentialAction(
-                        new InstantAction(() -> actionFireGreen(rpm)),
-                        new InstantAction(() -> actionFirePurple(rpm)),
-                        new InstantAction(() -> actionFirePurple(rpm))
+                        actionFireGreen(rpm),
+                        actionFirePurple(rpm),
+                        actionFirePurple(rpm)
                 );
             case 22:
                 return new SequentialAction(
-                        new InstantAction(() -> actionFirePurple(rpm)),
-                        new InstantAction(() -> actionFireGreen(rpm)),
-                        new InstantAction(() -> actionFirePurple(rpm))
+                        actionFirePurple(rpm),
+                        actionFireGreen(rpm),
+                        actionFirePurple(rpm)
                 );
             case 23:
                 return new SequentialAction(
-                        new InstantAction(() -> actionFirePurple(rpm)),
-                        new InstantAction(() -> actionFirePurple(rpm)),
-                        new InstantAction(() -> actionFireGreen(rpm))
+                        actionFirePurple(rpm),
+                        actionFirePurple(rpm),
+                        actionFireGreen(rpm)
                 );
             default:
                 return new InstantAction(() -> {}); // do nothing if invalid
@@ -147,21 +223,11 @@ public class BotActions {
 
     public Action actionScanObelisk() {
         return new InstantAction(() -> {
-            int scannedId = -1;
-
-            // Keep scanning until we get a valid obelisk ID
+            int scannedId = -1; // Keep scanning until we get a valid obelisk ID
             while (scannedId < 21 || scannedId > 23) {
                 aprilTag.scanObeliskTag();
                 scannedId = aprilTag.getObeliskId();
-
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
             }
-
             aprilTag.setCurrentCameraScannedId(scannedId);
         });
     }
@@ -222,8 +288,8 @@ public class BotActions {
     public Action actionIntakeOneCycle() {
         return new SequentialAction(
                 new InstantAction(() -> {
-                    intake.run();
                     indexer.setIntaking(true);
+                    intake.run();
                 }),
                 new SleepAction(0.67),
                 new InstantAction(intake::stop),
