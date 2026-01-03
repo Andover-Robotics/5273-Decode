@@ -30,6 +30,9 @@ public class RedCloseSimpleMotif extends LinearOpMode {
     public static double INTAKE2_Y = 75;
     public static double INTAKE_FORWARD_DIST = 8;
 
+    public static double PARK_X = 10;
+    public static double PARK_Y = 80;
+
     public static int SHOOT_RPM = 3580;
 
     @Override
@@ -69,6 +72,7 @@ public class RedCloseSimpleMotif extends LinearOpMode {
         Pose2d intake2Pose1 = new Pose2d(INTAKE_X - INTAKE_FORWARD_DIST, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2Pose2 = new Pose2d(INTAKE_X - 2 * INTAKE_FORWARD_DIST, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2Pose3 = new Pose2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST - 4.5, INTAKE2_Y, Math.toRadians(180));
+        Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(180));
 
         Action toObelisk = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(obeliskPose.position, obeliskPose.heading)
@@ -145,6 +149,13 @@ public class RedCloseSimpleMotif extends LinearOpMode {
                 botActions.actionIntakeOneCycle(false)
         );
 
+        Action toPark = drive.actionBuilder(startPose)
+                .strafeToLinearHeading(
+                        parkPose.position,
+                        parkPose.heading
+                )
+                .build();
+
         Action backToShoot2 = new SequentialAction(
                 new ParallelAction(
                         drive.actionBuilder(intake2Pose3)
@@ -183,7 +194,8 @@ public class RedCloseSimpleMotif extends LinearOpMode {
                         toIntake2_1,
                         toIntake2_2,
                         toIntake2_3,
-                        backToShoot2
+                        backToShoot2,
+                        toPark
                 )
         );
 
