@@ -39,14 +39,14 @@ public class BlueClose extends LinearOpMode {
 
     // ARTIFACTS
     public static double[][] artifactX = {
-            {-5, 0, 5},  // Row 0
-            {-5, 0, 5},  // Row 1
-            {-5, 0, 5}   // Row 2
+            {-10, -5, 0, 5},  // Row 0
+            {-10, -5, 0, 5},  // Row 1
+            {-10, -5, 0, 5}   // Row 2
     };
     public static double[][] artifactY = {
-            {48, 48, 48},     // Row 0
-            {72, 72, 72},     // Row 1
-            {96, 96, 96}      // Row 2
+            {48, 48, 48, 48},     // Row 0
+            {72, 72, 72, 72},     // Row 1
+            {96, 96, 96, 96}      // Row 2
     };
 
     @Override
@@ -64,9 +64,9 @@ public class BlueClose extends LinearOpMode {
         double obeliskScanHeading = Math.toRadians(obeliskScanHeadingDeg);
 
         // Build artifacts array from dashboard values
-        Vector2d[][] artifacts = new Vector2d[3][3];
+        Vector2d[][] artifacts = new Vector2d[3][4];
         for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
+            for (int col = 0; col < 4; col++) {
                 artifacts[row][col] = new Vector2d(artifactX[row][col], artifactY[row][col]);
             }
         }
