@@ -471,12 +471,16 @@ public class Indexer {
             switch (c) {
                 case GREEN:
                     greenHits++;
+                    break;
                 case PURPLE:
                     purpleHits++;
+                    break;
                 case EMPTY:
                     emptyHits++;
+                    break;
                 case UNKNOWN:
                     unknownHits++;
+                    break;
             }
         }
 

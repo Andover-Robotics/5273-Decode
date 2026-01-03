@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.auto.roadrunner.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -28,11 +29,11 @@ public class BlueCl extends LinearOpMode {
     public static double SHOOT_HEADING_DEG = -45;
 
     // Intake
-    public static int INTAKE_X = -15;
+    public static int INTAKE_X = -10;
 
     public static int INTAKE1_Y = 50;
     public static int INTAKE2_Y = 75;
-    public static int INTAKE_FORWARD_DIST = 24;
+    public static int INTAKE_FORWARD_DIST = 8;
 
     public static int SHOOT_RPM = 2500;
 
@@ -120,7 +121,7 @@ public class BlueCl extends LinearOpMode {
                         shootingPose.position,
                         shootingPose.heading
                 )
-                .stopAndAdd(botActions.actionOuttake(hardware.aprilTag.getObeliskId(), SHOOT_RPM))
+                //.stopAndAdd(botActions.actionOuttakeSimple(hardware.aprilTag.getObeliskId(),0, SHOOT_RPM))
                 .build();
 
         Action toIntakeStart1 = drive.actionBuilder(shootingPose)
@@ -130,34 +131,34 @@ public class BlueCl extends LinearOpMode {
                 )
                 .build();
 
-        Action toIntake1_1 = drive.actionBuilder(intake1PoseStart)
-                .strafeToLinearHeading(
-                        intake1Pose1.position,
-                        intake1Pose1.heading
-                )
-                .stopAndAdd(botActions.actionIntakeOneCycle())
-                .build();
-        Action toIntake1_2 = drive.actionBuilder(intake1Pose1)
-                .strafeToLinearHeading(
-                        intake1Pose2.position,
-                        intake1Pose2.heading
-                )
-                .stopAndAdd(botActions.actionIntakeOneCycle())
-                .build();
-        Action toIntake1_3 = drive.actionBuilder(intake1Pose2)
-                .strafeToLinearHeading(
-                        intake1Pose3.position,
-                        intake1Pose3.heading
-                )
-                .stopAndAdd(botActions.actionIntakeOneCycle())
-                .build();
+        Action toIntake1_1 = new ParallelAction(
+                drive.actionBuilder(intake1PoseStart)
+                        .strafeToLinearHeading(intake1Pose1.position, intake1Pose1.heading)
+                        .build(),
+                botActions.actionIntakeOneCycle()
+        );
+
+
+        Action toIntake1_2 = new ParallelAction(
+                drive.actionBuilder(intake1Pose1)
+                        .strafeToLinearHeading(intake1Pose2.position, intake1Pose2.heading)
+                        .build(),
+                botActions.actionIntakeOneCycle()
+        );
+
+        Action toIntake1_3 = new ParallelAction(
+                drive.actionBuilder(intake1Pose2)
+                        .strafeToLinearHeading(intake1Pose3.position, intake1Pose3.heading)
+                        .build(),
+                botActions.actionIntakeOneCycle()
+        );
 
         Action backToShoot1 = drive.actionBuilder(intake1Pose3)
                 .strafeToLinearHeading(
                         shootingPose.position,
                         shootingPose.heading
                 )
-                .stopAndAdd(botActions.actionOuttake(hardware.aprilTag.getObeliskId(), SHOOT_RPM))
+                //.stopAndAdd(botActions.actionOuttakeSimple(hardware.aprilTag.getObeliskId(),1, SHOOT_RPM))
                 .build();
 
         Action toIntakeStart2 = drive.actionBuilder(shootingPose)
@@ -167,53 +168,55 @@ public class BlueCl extends LinearOpMode {
                 )
                 .build();
 
-        Action toIntake2_1 = drive.actionBuilder(intake2PoseStart)
-                .strafeToLinearHeading(
-                        intake2Pose1.position,
-                        intake2Pose1.heading
-                )
-                .stopAndAdd(botActions.actionIntakeOneCycle())
-                .build();
-        Action toIntake2_2 = drive.actionBuilder(intake2Pose1)
-                .strafeToLinearHeading(
-                        intake2Pose2.position,
-                        intake2Pose2.heading
-                )
-                .stopAndAdd(botActions.actionIntakeOneCycle())
-                .build();
-        Action toIntake2_3 = drive.actionBuilder(intake2Pose2)
-                .strafeToLinearHeading(
-                        intake2Pose3.position,
-                        intake2Pose3.heading
-                )
-                .stopAndAdd(botActions.actionIntakeOneCycle())
-                .build();
+        Action toIntake2_1 = new ParallelAction(
+                drive.actionBuilder(intake2PoseStart)
+                        .strafeToLinearHeading(intake2Pose1.position, intake1Pose1.heading)
+                        .build(),
+                botActions.actionIntakeOneCycle()
+        );
+
+        Action toIntake2_2 = new ParallelAction(
+                drive.actionBuilder(intake2Pose1)
+                        .strafeToLinearHeading(intake2Pose2.position, intake1Pose1.heading)
+                        .build(),
+                botActions.actionIntakeOneCycle()
+        );
+
+        Action toIntake2_3 = new ParallelAction(
+                drive.actionBuilder(intake2Pose2)
+                        .strafeToLinearHeading(intake2Pose3.position, intake1Pose1.heading)
+                        .build(),
+                botActions.actionIntakeOneCycle()
+        );
 
         Action backToShoot2 = drive.actionBuilder(intake2Pose3)
                 .strafeToLinearHeading(
                         shootingPose.position,
                         shootingPose.heading
                 )
-                .stopAndAdd(botActions.actionOuttake(hardware.aprilTag.getObeliskId(), SHOOT_RPM))
+                //.stopAndAdd(botActions.actionOuttakeSimple(hardware.aprilTag.getObeliskId(),2, SHOOT_RPM))
                 .build();
 
         waitForStart();
         if (isStopRequested()) return;
 
         Actions.runBlocking(
-                new SequentialAction(
-                        toObelisk,
-                        toShoot,
-                        toIntakeStart1,
-                        toIntake1_1,
-                        toIntake1_2,
-                        toIntake1_3,
-                        backToShoot1,
-                        toIntakeStart2,
-                        toIntake2_1,
-                        toIntake2_2,
-                        toIntake2_3,
-                        backToShoot2
+                new ParallelAction(
+                        botActions.actionPeriodic(),
+                        new SequentialAction(
+                                toObelisk,
+                                toShoot,
+                                toIntakeStart1,
+                                toIntake1_1,
+                                toIntake1_2,
+                                toIntake1_3,
+                                backToShoot1,
+                                toIntakeStart2,
+                                toIntake2_1,
+                                toIntake2_2,
+                                toIntake2_3,
+                                backToShoot2
+                        )
                 )
         );
     }
