@@ -17,21 +17,21 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 public class BlueCl extends LinearOpMode {
 
     // Obelisk
-    public static int OBELISK_X = -24;
-    public static int OBELISK_Y = -36;
-    public static double OBELISK_HEADING_DEG = -90;
+    public static int OBELISK_X = -20;
+    public static int OBELISK_Y = 40;
+    public static double OBELISK_HEADING_DEG = -120;
 
     // Shooting
-    public static int SHOOT_X = -24;
-    public static int SHOOT_Y = -24;
+    public static int SHOOT_X = -12;
+    public static int SHOOT_Y = 45;
     public static double SHOOT_HEADING_DEG = -45;
 
     // Intake
-    public static int INTAKE_X = -70;
+    public static int INTAKE_X = -15;
 
-    public static int INTAKE1_Y = -70;
-    public static int INTAKE2_Y = -80;
-    public static int INTAKE_FORWARD_DIST = 8;
+    public static int INTAKE1_Y = 50;
+    public static int INTAKE2_Y = 75;
+    public static int INTAKE_FORWARD_DIST = 24;
 
     @Override
     public void runOpMode() {
