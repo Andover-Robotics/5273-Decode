@@ -4,11 +4,12 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.auto.roadrunner.BotActions;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 
@@ -33,8 +34,13 @@ public class BlueCl extends LinearOpMode {
     public static int INTAKE2_Y = 75;
     public static int INTAKE_FORWARD_DIST = 24;
 
+    public static int SHOOT_RPM = 2500;
+
+
     @Override
     public void runOpMode() {
+        Hardware hardware = new Hardware(hardwareMap, telemetry);
+        BotActions botActions = new BotActions(hardware.intake, hardware.indexer, hardware.outtake, hardware.actuator, hardware.aprilTag, hardware.aprilAimer);
 
         // --- Start pose (constructor-only, canonical) ---
         Pose2d startPose = new Pose2d(
@@ -57,26 +63,45 @@ public class BlueCl extends LinearOpMode {
                 Math.toRadians(SHOOT_HEADING_DEG)
         );
 
-        Pose2d intake1Pose = new Pose2d(
+        Pose2d intake1PoseStart = new Pose2d(
                 INTAKE_X,
                 INTAKE1_Y,
                 Math.toRadians(0)
         );
-
-        Pose2d intake1ForwardPose = new Pose2d(
+        Pose2d intake1Pose1 = new Pose2d(
                 INTAKE_X + INTAKE_FORWARD_DIST,
                 INTAKE1_Y,
                 Math.toRadians(0)
         );
+        Pose2d intake1Pose2 = new Pose2d(
+                INTAKE_X + INTAKE_FORWARD_DIST + INTAKE_FORWARD_DIST,
+                INTAKE1_Y,
+                Math.toRadians(0)
+        );
+        Pose2d intake1Pose3 = new Pose2d(
+                INTAKE_X + INTAKE_FORWARD_DIST + INTAKE_FORWARD_DIST + INTAKE_FORWARD_DIST,
+                INTAKE1_Y,
+                Math.toRadians(0)
+        );
 
-        Pose2d intake2Pose = new Pose2d(
+
+        Pose2d intake2PoseStart = new Pose2d(
                 INTAKE_X,
                 INTAKE2_Y,
                 Math.toRadians(0)
         );
-
-        Pose2d intake2ForwardPose = new Pose2d(
+        Pose2d intake2Pose1 = new Pose2d(
                 INTAKE_X + INTAKE_FORWARD_DIST,
+                INTAKE2_Y,
+                Math.toRadians(0)
+        );
+        Pose2d intake2Pose2 = new Pose2d(
+                INTAKE_X + INTAKE_FORWARD_DIST + INTAKE_FORWARD_DIST,
+                INTAKE2_Y,
+                Math.toRadians(0)
+        );
+        Pose2d intake2Pose3 = new Pose2d(
+                INTAKE_X + INTAKE_FORWARD_DIST + INTAKE_FORWARD_DIST + INTAKE_FORWARD_DIST,
                 INTAKE2_Y,
                 Math.toRadians(0)
         );
@@ -87,6 +112,7 @@ public class BlueCl extends LinearOpMode {
                         obeliskPose.position,
                         obeliskPose.heading
                 )
+                .stopAndAdd(botActions.actionScanObelisk())
                 .build();
 
         Action toShoot = drive.actionBuilder(obeliskPose)
@@ -94,48 +120,81 @@ public class BlueCl extends LinearOpMode {
                         shootingPose.position,
                         shootingPose.heading
                 )
+                .stopAndAdd(botActions.actionOuttake(hardware.aprilTag.getObeliskId(), SHOOT_RPM))
                 .build();
 
-        Action toIntake1 = drive.actionBuilder(shootingPose)
+        Action toIntakeStart1 = drive.actionBuilder(shootingPose)
                 .strafeToLinearHeading(
-                        intake1Pose.position,
-                        intake1Pose.heading
+                        intake1PoseStart.position,
+                        intake1PoseStart.heading
                 )
                 .build();
 
-        Action intakeForward1 = drive.actionBuilder(intake1Pose)
+        Action toIntake1_1 = drive.actionBuilder(intake1PoseStart)
                 .strafeToLinearHeading(
-                        intake1ForwardPose.position,
-                        intake1ForwardPose.heading
+                        intake1Pose1.position,
+                        intake1Pose1.heading
                 )
+                .stopAndAdd(botActions.actionIntakeOneCycle())
+                .build();
+        Action toIntake1_2 = drive.actionBuilder(intake1Pose1)
+                .strafeToLinearHeading(
+                        intake1Pose2.position,
+                        intake1Pose2.heading
+                )
+                .stopAndAdd(botActions.actionIntakeOneCycle())
+                .build();
+        Action toIntake1_3 = drive.actionBuilder(intake1Pose2)
+                .strafeToLinearHeading(
+                        intake1Pose3.position,
+                        intake1Pose3.heading
+                )
+                .stopAndAdd(botActions.actionIntakeOneCycle())
                 .build();
 
-        Action backToShoot1 = drive.actionBuilder(intake1ForwardPose)
-                .strafeToLinearHeading(
-                        shootingPose.position,
-                        shootingPose.heading
-                )
-                .build();
-
-        Action toIntake2 = drive.actionBuilder(shootingPose)
-                .strafeToLinearHeading(
-                        intake2Pose.position,
-                        intake2Pose.heading
-                )
-                .build();
-
-        Action intakeForward2 = drive.actionBuilder(intake2Pose)
-                .strafeToLinearHeading(
-                        intake2ForwardPose.position,
-                        intake2ForwardPose.heading
-                )
-                .build();
-
-        Action backToShoot2 = drive.actionBuilder(intake2ForwardPose)
+        Action backToShoot1 = drive.actionBuilder(intake1Pose3)
                 .strafeToLinearHeading(
                         shootingPose.position,
                         shootingPose.heading
                 )
+                .stopAndAdd(botActions.actionOuttake(hardware.aprilTag.getObeliskId(), SHOOT_RPM))
+                .build();
+
+        Action toIntakeStart2 = drive.actionBuilder(shootingPose)
+                .strafeToLinearHeading(
+                        intake2PoseStart.position,
+                        intake2PoseStart.heading
+                )
+                .build();
+
+        Action toIntake2_1 = drive.actionBuilder(intake2PoseStart)
+                .strafeToLinearHeading(
+                        intake2Pose1.position,
+                        intake2Pose1.heading
+                )
+                .stopAndAdd(botActions.actionIntakeOneCycle())
+                .build();
+        Action toIntake2_2 = drive.actionBuilder(intake2Pose1)
+                .strafeToLinearHeading(
+                        intake2Pose2.position,
+                        intake2Pose2.heading
+                )
+                .stopAndAdd(botActions.actionIntakeOneCycle())
+                .build();
+        Action toIntake2_3 = drive.actionBuilder(intake2Pose2)
+                .strafeToLinearHeading(
+                        intake2Pose3.position,
+                        intake2Pose3.heading
+                )
+                .stopAndAdd(botActions.actionIntakeOneCycle())
+                .build();
+
+        Action backToShoot2 = drive.actionBuilder(intake2Pose3)
+                .strafeToLinearHeading(
+                        shootingPose.position,
+                        shootingPose.heading
+                )
+                .stopAndAdd(botActions.actionOuttake(hardware.aprilTag.getObeliskId(), SHOOT_RPM))
                 .build();
 
         waitForStart();
@@ -145,11 +204,15 @@ public class BlueCl extends LinearOpMode {
                 new SequentialAction(
                         toObelisk,
                         toShoot,
-                        toIntake1,
-                        intakeForward1,
+                        toIntakeStart1,
+                        toIntake1_1,
+                        toIntake1_2,
+                        toIntake1_3,
                         backToShoot1,
-                        toIntake2,
-                        intakeForward2,
+                        toIntakeStart2,
+                        toIntake2_1,
+                        toIntake2_2,
+                        toIntake2_3,
                         backToShoot2
                 )
         );
