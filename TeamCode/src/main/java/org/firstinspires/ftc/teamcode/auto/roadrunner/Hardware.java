@@ -37,6 +37,6 @@ public class Hardware {
         aprilTag = new AprilTag(hardwareMap, telemetry);
         aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
 
-        actions = new BotActions(intake, indexer, outtake, actuator, aprilTag, aprilAimer);
+        actions = new BotActions(telemetry, intake, indexer, outtake, actuator, aprilTag, aprilAimer);
     }
 }
