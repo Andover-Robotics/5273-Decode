@@ -44,17 +44,16 @@ public class Paths {
             );
 
             for (int col = 1; col <= 3; col++) {
-                builder.stopAndAdd(new ParallelAction(
+                builder/*.stopAndAdd(new ParallelAction(
                         //actions.actionIntakeOneCycle(),
-                        //builder.fresh()
-                        mecanumDrive.actionBuilder(new Pose2d(artifactPositions[row][0], intakeHeading))
-                                .strafeToSplineHeading(
+                //        mecanumDrive.actionBuilder(new Pose2d(artifactPositions[row][0], intakeHeading))
+                                */.strafeToSplineHeading(
                                        artifactPositions[row][col],
                                        intakeHeading
                                )
-                               .build()
-                        )
-                );
+                        /*)
+                )*/;
+                //builder.afterTime(.5, actions.actionIntakeOneCycle());
             }
 
             //builder.stopAndAdd(actions.actionShootWithLock(actions.aprilTag.getObeliskId(), 2.0, mecanumDrive));
