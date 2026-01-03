@@ -22,16 +22,16 @@ public class BlueCloseSimple extends LinearOpMode {
     //public static double OBELISK_Y = 38;
     //public static double OBELISK_HEADING_DEG = -120;
 
-    public static double SHOOT_X = 0;
+    public static double SHOOT_X = -12;
     public static double SHOOT_Y = 42;
     public static double SHOOT_HEADING_DEG = -45;
 
-    public static double INTAKE_X = 2;
+    public static double INTAKE_X = -10;
     public static double INTAKE1_Y = 51;
     public static double INTAKE2_Y = 75;
     public static double INTAKE_FORWARD_DIST = 8;
 
-    public static double PARK_X = -10;
+    public static double PARK_X = -22;
     public static double PARK_Y = 80;
 
     public static int SHOOT_RPM = 3580;
