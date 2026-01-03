@@ -31,7 +31,7 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
     public static double INTAKE2_Y = 75;
     public static double INTAKE_FORWARD_DIST = 8;
 
-    public static double PARK_X = -22;
+    public static double PARK_X = -6;
     public static double PARK_Y = 80;
 
     public static int SHOOT_RPM = 3580;
@@ -58,12 +58,12 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
         Pose2d intake1PoseStart = new Pose2d(INTAKE_X, INTAKE1_Y, Math.toRadians(0));
         Pose2d intake1Pose1 = new Pose2d(INTAKE_X + INTAKE_FORWARD_DIST, INTAKE1_Y, Math.toRadians(0));
         Pose2d intake1Pose2 = new Pose2d(INTAKE_X + 2 * INTAKE_FORWARD_DIST, INTAKE1_Y, Math.toRadians(0));
-        Pose2d intake1Pose3 = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4, INTAKE1_Y, Math.toRadians(0));
+        Pose2d intake1Pose3 = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 3, INTAKE1_Y, Math.toRadians(0));
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(0));
         Pose2d intake2Pose1 = new Pose2d(INTAKE_X + INTAKE_FORWARD_DIST, INTAKE2_Y, Math.toRadians(0));
         Pose2d intake2Pose2 = new Pose2d(INTAKE_X + 2 * INTAKE_FORWARD_DIST, INTAKE2_Y, Math.toRadians(0));
-        Pose2d intake2Pose3 = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4.5, INTAKE2_Y, Math.toRadians(0));
+        Pose2d intake2Pose3 = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 3.5, INTAKE2_Y, Math.toRadians(0));
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
 
         Action toObelisk = drive.actionBuilder(startPose)
@@ -76,8 +76,11 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
                         drive.actionBuilder(obeliskPose)
                                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(3)))
                                 .build(),
-                        botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 0)
+                        botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 0),
                 ),
+                botActions.actionIndexerNext(), // patch fixes
+                botActions.actionIndexerNext(),
+
                 botActions.actionOuttake(SHOOT_RPM)
         );
 
@@ -144,10 +147,20 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
         Action backToShoot2 = new SequentialAction(
                 new ParallelAction(
                         drive.actionBuilder(intake2Pose3)
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                // dodge gate, keeps momentum like this
+                                .strafeTo(intake1Pose2.position)
+                                .strafeToLinearHeading(
+                                        shootingPose.position,
+                                        shootingPose.heading
+                                )
                                 .build(),
-                        botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 2)
+                        botActions.actionOuttakeOffsetForMotif(
+                                hardware.aprilTag.getObeliskId(),
+                                2
+                        )
                 ),
+                botActions.actionIndexerNext(),
+
                 botActions.actionOuttake(SHOOT_RPM)
         );
 

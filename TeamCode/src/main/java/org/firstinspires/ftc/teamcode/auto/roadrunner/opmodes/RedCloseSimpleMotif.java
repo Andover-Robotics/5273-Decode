@@ -30,7 +30,7 @@ public class RedCloseSimpleMotif extends LinearOpMode {
     public static double INTAKE2_Y = 75;
     public static double INTAKE_FORWARD_DIST = 8;
 
-    public static double PARK_X = 22;
+    public static double PARK_X = 6;
     public static double PARK_Y = 80;
 
     public static int SHOOT_RPM = 3580;
@@ -86,6 +86,9 @@ public class RedCloseSimpleMotif extends LinearOpMode {
                                 .build(),
                         botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 0)
                 ),
+                botActions.actionIndexerNext(), // patch fixes
+                botActions.actionIndexerNext(),
+
                 botActions.actionOuttake(SHOOT_RPM)
         );
 
@@ -159,10 +162,20 @@ public class RedCloseSimpleMotif extends LinearOpMode {
         Action backToShoot2 = new SequentialAction(
                 new ParallelAction(
                         drive.actionBuilder(intake2Pose3)
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                // dodge gate, keeps momentum like this
+                                .strafeTo(intake1Pose2.position)
+                                .strafeToLinearHeading(
+                                        shootingPose.position,
+                                        shootingPose.heading
+                                )
                                 .build(),
-                        botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 2)
+                        botActions.actionOuttakeOffsetForMotif(
+                                hardware.aprilTag.getObeliskId(),
+                                2
+                        )
                 ),
+                botActions.actionIndexerNext(), // patch fixes
+
                 botActions.actionOuttake(SHOOT_RPM)
         );
 

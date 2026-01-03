@@ -98,7 +98,7 @@ public class BotActions {
                 // 1st
                 // This movestate is needed to make sure its outtake in the same order its intaken(unless changed elsewhere)
                 new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(1.8),
+                new SleepAction(1.6),
                 new InstantAction(actuator::upIndexed),
                 new SleepAction(0.2),
                 new InstantAction(actuator::down),
@@ -106,7 +106,7 @@ public class BotActions {
 
                 // 2nd
                 new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(0.8),
+                new SleepAction(0.9),
                 new InstantAction(actuator::upIndexed),
                 new SleepAction(0.2),
                 new InstantAction(actuator::down),
@@ -134,60 +134,58 @@ public class BotActions {
         int offset = 0;
 
         switch (row) {
-
-            // row 0 & 1: PPG
+            // Row 0 & 1 intake: P P G
             case 0:
             case 1:
                 switch (tagID) {
-                    case 21: // GPP -> rotate 2 times
-                        offset = 2;
-                        break;
-                    case 22: // PGP -> rotate 1 times
-                        offset = 1;
-                        break;
-                    case 23: // PPG -> no rotate
+                    case 21: // G P P
                         offset = 0;
                         break;
+                    case 22: // P G P
+                        offset = 1;
+                        break;
+                    case 23: // P P G
+                        offset = 2;
+                        break;
                     default:
-                        return new InstantAction(() -> {
-                        });
+                        return new InstantAction(() -> {});
                 }
                 break;
 
-            // row 2: PGP
+
+            // Row 2 intake: P G P
             case 2:
                 switch (tagID) {
-                    case 21: // GPP -> rotate 1 times
+                    case 21: // G P P
                         offset = 1;
                         break;
-                    case 22: // PGP -> no rotate
-                        offset = 0;
-                        break;
-                    case 23: // PPG -> rotate 2 times
+                    case 22: // P G P
                         offset = 2;
                         break;
+                    case 23: // P P G
+                        offset = 0;
+                        break;
                     default:
-                        return new InstantAction(() -> {
-                        });
+                        return new InstantAction(() -> {});
                 }
                 break;
 
-            // row 3: GPP
+            // Row 3 intake: G P P
             case 3:
                 switch (tagID) {
-                    case 21: // GPP -> no rotate
-                        offset = 1;
-                        break;
-                    case 22: // P G P -> rotate 2 times
-                        offset = 0;
-                        break;
-                    case 23: // P P G -> rotate 1 times
+                    case 21: // G P P
                         offset = 2;
                         break;
+                    case 22: // P G P
+                        offset = 0;
+                        break;
+                    case 23: // P P G
+                        offset = 1;
+                        break;
                     default:
-                        return new InstantAction(() -> {
-                        });
+                        return new InstantAction(() -> {});
                 }
+                break;
         }
 
                 return new SequentialAction(
@@ -359,6 +357,12 @@ public class BotActions {
         );
     }
 
+    // for now to fix issues
+    public Action actionIndexerNext() {
+        return new InstantAction(() -> {
+                indexer.moveTo(indexer.getState().next());
+        });
+    }
 
     // doesn't seem to work with parallel actions
     public Action actionPeriodic() {
