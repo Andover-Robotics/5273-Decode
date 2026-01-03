@@ -80,7 +80,7 @@ public class BotActions {
         );
     }
 
-    public Action actionOuttakeNoMotif(int rpm) {
+    public Action actionOuttake(int rpm) {
         return new SequentialAction(
                 new InstantAction(() -> indexer.setIntaking(false)),
                 new InstantAction(actuator::down),
@@ -95,16 +95,16 @@ public class BotActions {
                     }
                 },
 
-                // 1st 3
-                // Intaking false so this shouldn't be needed for first
-                //new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
+                // 1st
+                // This movestate is needed to make sure its outtake in the same order its intaken(unless changed elsewhere)
+                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
                 new SleepAction(1.8),
                 new InstantAction(actuator::upIndexed),
                 new SleepAction(0.2),
                 new InstantAction(actuator::down),
                 new SleepAction(0.6),
 
-                // 2nd 3
+                // 2nd
                 new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
                 new SleepAction(0.8),
                 new InstantAction(actuator::upIndexed),
@@ -112,7 +112,7 @@ public class BotActions {
                 new InstantAction(actuator::down),
                 new SleepAction(0.6),
 
-                // 3rd 3
+                // 3rd
                 new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
                 new SleepAction(0.8),
                 new InstantAction(actuator::upIndexed),
@@ -128,71 +128,42 @@ public class BotActions {
         );
     }
 
-    // No color sensor just logic
-    public Action actionOuttakeSimple(int tagID, int row, int rpm) {
-        telemetry.addData("Outtake Target RPM", rpm);
-        telemetry.update();
+    // Separate to run while moving
+    public Action actionOuttakeOffsetForMotif(int tagID, int row) {
 
-        int offset;
+        int offset = 0;
 
         switch (row) {
-            case 0: // P P G
+
+            // row 0 & 1: PPG
+            case 0:
+            case 1:
                 switch (tagID) {
-                    case 21:
-                        offset = 2;
-                        break; // GPP
-                    case 22:
-                        offset = 0;
-                        break; // PGP
-                    case 23:
-                        offset = 0;
-                        break; // PPG
-                    default:
-                        return new InstantAction(() -> {
-                        });
-                }
-                break;
-            case 1: // P P G
-                switch (tagID) {
-                    case 21:
+                    case 21: // GPP -> rotate 2 times
                         offset = 2;
                         break;
-                    case 22:
-                        offset = 0;
-                        break;
-                    case 23:
-                        offset = 0;
-                        break;
-                    default:
-                        return new InstantAction(() -> {
-                        });
-                }
-                break;
-            case 2: // P G P
-                switch (tagID) {
-                    case 21:
+                    case 22: // PGP -> rotate 1 times
                         offset = 1;
                         break;
-                    case 22:
+                    case 23: // PPG -> no rotate
                         offset = 0;
-                        break;
-                    case 23:
-                        offset = 2;
                         break;
                     default:
                         return new InstantAction(() -> {
                         });
                 }
                 break;
-            case 3: // G P P
+
+            // row 2: PGP
+            case 2:
                 switch (tagID) {
-                    case 21:
-                        offset = 0;
-                        break;
-                    case 22:
+                    case 21: // GPP -> rotate 1 times
                         offset = 1;
                         break;
-                    case 23:
+                    case 22: // PGP -> no rotate
+                        offset = 0;
+                        break;
+                    case 23: // PPG -> rotate 2 times
                         offset = 2;
                         break;
                     default:
@@ -200,54 +171,43 @@ public class BotActions {
                         });
                 }
                 break;
-            default:
-                return new InstantAction(() -> {
-                });
+
+            // row 3: GPP
+            case 3:
+                switch (tagID) {
+                    case 21: // GPP -> no rotate
+                        offset = 1;
+                        break;
+                    case 22: // P G P -> rotate 2 times
+                        offset = 0;
+                        break;
+                    case 23: // P P G -> rotate 1 times
+                        offset = 2;
+                        break;
+                    default:
+                        return new InstantAction(() -> {
+                        });
+                }
         }
 
-        return new SequentialAction(
-                new InstantAction(() -> indexer.setIntaking(false)),
-                new InstantAction(actuator::down),
+                return new SequentialAction(
+                        offset >= 1
+                                ? new InstantAction(() ->
+                                indexer.moveTo(indexer.getState().next(), true))
+                                : new InstantAction(() -> {
+                        }),
 
-                new Action() {
-                    private long startTime = -1;
-
-                    @Override
-                    public boolean run(@NonNull TelemetryPacket telemetry) {
-                        if (startTime < 0) startTime = System.currentTimeMillis();
-                        outtake.set(rpm); // continuously command RPM
-                        return System.currentTimeMillis() - startTime >= SHOOTER_SPINUP * 1000;
-                    }
-                },
-
-                new InstantAction(() -> {
-                    for (int i = 0; i < offset; i++) {
-                        indexer.moveTo(indexer.getState().next(), true);
-                    }
-                }),
-
-                // shoots remaining
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(0.25),
-                new InstantAction(actuator::upIndexed),
-
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(0.25),
-                new InstantAction(actuator::upIndexed),
-
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(0.25),
-                new InstantAction(actuator::upIndexed),
-
-                new InstantAction(actuator::down),
-
-                new InstantAction(outtake::stop),
-
-                new InstantAction(() -> indexer.setIntaking(true))
-        );
+                        // rotate second time if true
+                        offset >= 2
+                                ? new InstantAction(() ->
+                                indexer.moveTo(indexer.getState().next(), true))
+                                : new InstantAction(() -> {
+                        })
+                );
     }
 
-    public Action actionOuttake(int tagID, int rpm) {
+
+    public Action actionOuttakeWithColor(int tagID, int rpm) {
         switch (tagID) {
             case 21:
                 return new SequentialAction(
@@ -304,7 +264,7 @@ public class BotActions {
                     shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
                 }
 
-                actionOuttake(tagID, shooterRPM).run(telemetryPacket);
+                actionOuttakeWithColor(tagID, shooterRPM).run(telemetryPacket);
 
                 if (now - startTime >= shootDuration * 1000) {
                     continuousAprilTagLock = false;
