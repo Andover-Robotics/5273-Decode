@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -32,7 +33,7 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
     public static double INTAKE_FORWARD_DIST = 8;
 
     public static double PARK_X = -6;
-    public static double PARK_Y = 80;
+    public static double PARK_Y = 68;
 
     public static int SHOOT_RPM = 3580;
 
@@ -76,10 +77,9 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
                         drive.actionBuilder(obeliskPose)
                                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(3)))
                                 .build(),
-                        botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 0),
+                        /*botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 0)*/
+                        botActions.indexerRotateForMotif(hardware.aprilTag.getObeliskId(), 0)
                 ),
-                botActions.actionIndexerNext(), // patch fixes
-                botActions.actionIndexerNext(),
 
                 botActions.actionOuttake(SHOOT_RPM)
         );
@@ -114,7 +114,8 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
                         drive.actionBuilder(intake1Pose3)
                                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                                 .build(),
-                        botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 1)
+                        /*botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 1)*/
+                        botActions.indexerRotateForMotif(hardware.aprilTag.getObeliskId(), 1)
                 ),
                 botActions.actionOuttake(SHOOT_RPM)
         );
@@ -148,18 +149,18 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
                 new ParallelAction(
                         drive.actionBuilder(intake2Pose3)
                                 // dodge gate, keeps momentum like this
-                                .strafeTo(intake1Pose2.position)
+                                .strafeTo(new Vector2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST, INTAKE2_Y))
                                 .strafeToLinearHeading(
                                         shootingPose.position,
                                         shootingPose.heading
                                 )
                                 .build(),
-                        botActions.actionOuttakeOffsetForMotif(
+                        /*botActions.actionOuttakeOffsetForMotif(
                                 hardware.aprilTag.getObeliskId(),
                                 2
-                        )
+                        )*/
+                        botActions.indexerRotateForMotif(hardware.aprilTag.getObeliskId(), 2)
                 ),
-                botActions.actionIndexerNext(),
 
                 botActions.actionOuttake(SHOOT_RPM)
         );
@@ -207,7 +208,7 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
         periodicThread.interrupt();
         try {
             periodicThread.join();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignored) {
         }
     }
 }

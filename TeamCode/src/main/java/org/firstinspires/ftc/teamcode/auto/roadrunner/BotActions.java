@@ -127,6 +127,39 @@ public class BotActions {
                 })
         );
     }
+    public  Action indexerRotateForMotif(int tagId, int row) {
+        int rotations = 0;
+
+        if (row == 0 || row == 1) { // P P G
+            switch (tagId) {
+                case 21: rotations = 2; break;
+                case 22: rotations = 1; break;
+                case 23: rotations = 0; break;
+            }
+        } else if (row == 2) { // P G P
+            switch (tagId) {
+                case 21: rotations = 1; break;
+                case 22: rotations = 0; break;
+                case 23: rotations = 2; break;
+            }
+        }
+
+        switch (rotations) {
+            case 2:
+                return new SequentialAction(
+                        actionIndexerNext(),
+                        actionIndexerNext()
+                );
+            case 1:
+                return actionIndexerNext();
+            default:
+                return new Action() {
+                    @Override public boolean run(@NonNull com.acmerobotics.dashboard.telemetry.TelemetryPacket p) {
+                        return true;
+                    }
+                };
+        }
+    }
 
     // Separate to run while moving
     public Action actionOuttakeOffsetForMotif(int tagID, int row) {
