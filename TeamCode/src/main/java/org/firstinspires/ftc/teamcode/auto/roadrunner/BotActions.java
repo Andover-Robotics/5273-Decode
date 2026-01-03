@@ -30,10 +30,11 @@ public class BotActions {
     private final Actuator actuator;
     public final AprilTag aprilTag;
     private final AprilTagAimer aprilAimer;
-    private int obeliskId;
-    public static double NON_INDEX_SPIN_TIME = 6;//seconds of full-power indexer blast
-    public static double SHOOTER_SPINUP = 3.0;
-    public static double FULL_BLAST_POWER =0.6;
+
+    public static double NON_INDEX_SPIN_TIME = 3;//seconds of full-power indexer blast
+    public static double SHOOTER_SPINUP = 2.0;
+    public static double FULL_BLAST_POWER =0.25;
+
     public static boolean continuousAprilTagLock;
     private double lastTurnCorrection;
 
@@ -80,6 +81,22 @@ public class BotActions {
         );
     }
 
+    public Action actionQuickOuttake(int rpm) {
+        return new SequentialAction(
+                new InstantAction(actuator::upQuick),// lower up position for quick dump
+                new InstantAction(() -> outtake.set(rpm)),
+                new SleepAction(SHOOTER_SPINUP),                      // spin up shooter
+                new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),// full blast
+                new SleepAction(NON_INDEX_SPIN_TIME),
+                new InstantAction(indexer::stopIndexerPower),
+                new InstantAction(outtake::stop),
+                new InstantAction(actuator::down),
+                new InstantAction(() -> indexer.setIntaking(true)),
+                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.zero))
+        );
+    }
+
+    // very slow ver
     public Action actionOuttake(int rpm) {
         return new SequentialAction(
                 new InstantAction(() -> indexer.setIntaking(false)),
@@ -386,6 +403,31 @@ public class BotActions {
                     }
                 }),
                 new SleepAction(0.167),
+                new InstantAction(intake::stop)
+        );
+    }
+
+    public Action actionIntakeThreeFast() {
+        return new SequentialAction(
+                new InstantAction(() -> {
+                    indexer.setIntaking(true);
+                    intake.run();
+                }),
+
+                // slot 1
+                new SleepAction(0.45),
+                new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
+
+                // slot 2
+                new SleepAction(0.45),
+                new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
+
+                // slot 3
+                new SleepAction(0.45),
+                new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
+
+                // stop intakeintake
+                new SleepAction(0.15),
                 new InstantAction(intake::stop)
         );
     }

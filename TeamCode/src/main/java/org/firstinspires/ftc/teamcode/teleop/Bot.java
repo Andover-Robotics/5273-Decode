@@ -58,7 +58,7 @@ public class Bot {
     public static double TRIGGER_DEADZONE = 0.05;
     public static double shooterRPM = 2900;
     public static double NON_INDEX_SPIN_TIME = 3;//seconds of full-power indexer blast
-    public static double SHOOTER_SPINUP = 1.5;
+    public static double SHOOTER_SPINUP = 2.0;
     public static double FULL_BLAST_POWER =0.25;
     public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 1.12;
     private static final long AIM_UPDATE_INTERVAL_MS = 50;
@@ -148,8 +148,14 @@ public class Bot {
 
     private void handleIntakeState() {
         double leftTrigger = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        //double rightTrigger = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+
         if (leftTrigger > TRIGGER_DEADZONE) intake.run();
         else intake.stop();
+
+        //if (rightTrigger > TRIGGER_DEADZONE) intake.runBackwards();
+        //else intake.stop();
+
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) indexer.moveTo(indexer.getState().next());
 
         if (g2.wasJustPressed(GamepadKeys.Button.A)) state = FSM.QuickOuttake;
@@ -303,7 +309,9 @@ public class Bot {
                 }
             }
 
-            shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+            if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
+                shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+            }
             turnCorrection = 0.9 * lastTurnCorrection;
         }
     }
