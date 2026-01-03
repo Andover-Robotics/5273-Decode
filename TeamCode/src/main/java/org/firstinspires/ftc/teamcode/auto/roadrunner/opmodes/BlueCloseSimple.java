@@ -70,7 +70,7 @@ public class BlueCloseSimple extends LinearOpMode {
         */
 
         Action toShoot = drive.actionBuilder(startPose)
-                .strafeToLinearHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(3)))
+                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                 .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
                 .build();
 
