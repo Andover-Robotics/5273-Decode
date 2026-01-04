@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.teleop;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -39,6 +38,13 @@ public class Bot {
     private final GamepadEx g2;
     private final Telemetry telemetry;
 
+    // haptics & lights
+    private boolean rumbledAlready = false;
+    private int fullWarningRumbles = 3;
+    private int gamepadLightColorDuration = 500;
+
+
+    // camera vision
     private boolean fieldCentric = false;
     private boolean continuousAprilTagLock = false;
     private long lastAimUpdate = 0;
@@ -97,15 +103,19 @@ public class Bot {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
             goalTagID = 20;
             aprilTag.setGoalTagID(goalTagID); // blue
+            g1.gamepad.setLedColor(0,0,1, gamepadLightColorDuration);
             colorGoalSelected = "Blue";
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
             goalTagID = 24;
             aprilTag.setGoalTagID(goalTagID); // red
+            g1.gamepad.setLedColor(1,0,0, gamepadLightColorDuration);
             colorGoalSelected = "Red";
         }
 
+        outtake.periodic();
+        indexer.update();
 
         switch (state) {
             case Intake:
@@ -117,9 +127,6 @@ public class Bot {
             case Endgame:
                 handleEndgameState();
         }
-
-        outtake.periodic();
-        indexer.update();
 
         telemetry.addData("Field Centric", fieldCentric);
         telemetry.addData("Indexer State", "%s -> %s", indexer.getState(), indexer.getState().next());
@@ -169,28 +176,39 @@ public class Bot {
             indexer.moveTo(indexer.getState());
         }
         if (g2.wasJustPressed(GamepadKeys.Button.Y)) state = FSM.Endgame;
+
+        if(indexer.isLoaded() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){ // works with my other code in the outtake functions to ensure warning rumbles don't happen more than once
+            g1.gamepad.rumbleBlips(fullWarningRumbles);
+            g2.gamepad.rumbleBlips(fullWarningRumbles);
+            rumbledAlready = true;
+        }
     }
 
     private void handleQuickOuttakeState() {
         if (g2.wasJustPressed(GamepadKeys.Button.X)) {
             Actions.runBlocking(fireWithPeriodic(actionNonIndexedDump()));
+            rumbledAlready = false;
         }
         if (g2.wasJustPressed(GamepadKeys.Button.A)) {
             state = FSM.Intake;
             indexer.setIntaking(true);
+            rumbledAlready = false;
         }
     }
 
     private void handleSortOuttakeState() {
         if (g2.wasJustPressed(GamepadKeys.Button.X)) {
             Actions.runBlocking(fireWithPeriodic(actionFireGreen()));
+            rumbledAlready = false;
         }
         if (g2.wasJustPressed(GamepadKeys.Button.Y)) {
             Actions.runBlocking(fireWithPeriodic(actionFirePurple()));
+            rumbledAlready = false;
         }
         if (g2.wasJustPressed(GamepadKeys.Button.A)) {
             indexer.setIntaking(true);
             state = FSM.Intake;
+            rumbledAlready = false;
         }
     }
 
@@ -292,9 +310,11 @@ public class Bot {
         // Toggle continuous lock with gamepad1 A
         if (g1.wasJustPressed(GamepadKeys.Button.A)) {
             continuousAprilTagLock = true;
+            g1.gamepad.rumbleBlips(2);
         }
         if (g1.wasJustPressed(GamepadKeys.Button.B)) {
             continuousAprilTagLock = false;
+            g1.gamepad.rumbleBlips(1);
         }
 
         if (continuousAprilTagLock) {

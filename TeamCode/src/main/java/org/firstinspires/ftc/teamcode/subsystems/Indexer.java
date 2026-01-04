@@ -63,7 +63,7 @@ public class Indexer {
     // Internal state
     private IndexerState state = IndexerState.zero;
     private boolean intaking = true;
-    private boolean loaded = false;
+    private boolean loaded = false; // true when all 3 slots are full (indiscriminate of color)
 
     // Per-slot state
     private final SlotState[] slots = {
