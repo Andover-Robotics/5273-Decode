@@ -58,28 +58,29 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+@Config
 public final class MecanumDrive {
     public static class Params {
         // IMU orientation
         // fill in these values based on
         //   see https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html?highlight=imu#physical-hub-mounting
         public RevHubOrientationOnRobot.LogoFacingDirection logoFacingDirection =
-                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
         public RevHubOrientationOnRobot.UsbFacingDirection usbFacingDirection =
                 RevHubOrientationOnRobot.UsbFacingDirection.UP;
 
         // drive model parameters
-        public double inPerTick = 0.00195844;
-        public double lateralInPerTick = 0.0013507208556414678;//0.0013459514834332914;
-        public double trackWidthTicks = 5928.012581733038;
+        public double inPerTick = 0.00198216055;
+        public double lateralInPerTick = 0.0014844503556411136;
+        public double trackWidthTicks = 6944.951969827173;
 
         // feedforward parameters (in tick units)
-        public double kS = 1.5515281643230021;
-        public double kV = 0.00022;
-        public double kA = 0.00008;
+        public double kS = 2.1;
+        public double kV = 0.00024;
+        public double kA = 0.00007;
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 60;
+        public double maxWheelVel = 50;
         public double minProfileAccel = -60;
         public double maxProfileAccel = 60;
 
@@ -88,13 +89,13 @@ public final class MecanumDrive {
         public double maxAngAccel = Math.PI;
 
         // path controller gains
-        public double axialGain = 7.0;
-        public double lateralGain = 4.0;
-        public double headingGain = 6.0; // shared with turn
+        public double axialGain = 6;
+        public double lateralGain = 3.5;
+        public double headingGain = 4; // shared with turn
 
-        public double axialVelGain = 0;
-        public double lateralVelGain = 0;
-        public double headingVelGain = .2; // shared with turn
+        public double axialVelGain = 2;
+        public double lateralVelGain = 1;
+        public double headingVelGain = 1; // shared with turn
     }
 
     public static Params PARAMS = new Params();
@@ -144,7 +145,6 @@ public final class MecanumDrive {
             imu = lazyImu.get();
 
             // TODO: reverse encoders if needed
-            //   leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
             this.pose = pose;
         }

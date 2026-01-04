@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import com.acmerobotics.dashboard.config.Config;
 
 @Config
-@Autonomous(name = "Blue-Far", group = "Autonomous")
-public class BlueFar extends LinearOpMode {
+@Autonomous(name = "Red-Close", group = "Autonomous")
+public class RedClose extends LinearOpMode {
 
     // START POSE
     public static double startX = 0;

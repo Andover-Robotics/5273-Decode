@@ -22,7 +22,13 @@ public class ConcreteLazyImu implements LazyImu {
     @NonNull
     @Override
     public IMU get() {
-        return null;
+        if (imu == null){
+            imu = hardwareMap.get(IMU.class, name);
+
+            IMU.Parameters parameters = new IMU.Parameters(orientation);
+            imu.initialize(parameters);
+        }
+        return imu;
     }
 
 }
