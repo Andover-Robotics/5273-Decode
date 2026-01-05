@@ -16,8 +16,6 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 public class Bot extends BotPeriodics {
     // haptics & lights
     private boolean rumbledAlready = false;
-    private int fullWarningRumbles = 3;
-    private int gamepadLightColorDuration = 500;
     public enum FSM {
         Intake,
         QuickOuttake,
@@ -27,11 +25,9 @@ public class Bot extends BotPeriodics {
 
     public FSM state;
 
-    public static double TRIGGER_DEADZONE = 0.05;
-    public static double shooterRPM = 2900;
-    public static double NON_INDEX_SPIN_TIME = 3;//seconds of full-power indexer blast
+    public static double NON_INDEX_SPIN_TIME = 3; //seconds of full-power indexer blast
     public static double SHOOTER_SPINUP = 2.0;
-    public static double FULL_BLAST_POWER =0.25;
+    public static double FULL_BLAST_POWER = 0.25;
     public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 1.12;
 
     public Bot(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
@@ -71,7 +67,7 @@ public class Bot extends BotPeriodics {
         double leftTrigger = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         //double rightTrigger = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
-        if (leftTrigger > TRIGGER_DEADZONE) intake.run();
+        if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
         else intake.stop();
 
         //if (rightTrigger > TRIGGER_DEADZONE) intake.runBackwards();
@@ -88,8 +84,8 @@ public class Bot extends BotPeriodics {
         if (g2.wasJustPressed(GamepadKeys.Button.Y)) state = FSM.Endgame;
 
         if(indexer.isLoaded() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){ // works with my other code in the outtake functions to ensure warning rumbles don't happen more than once
-            g1.gamepad.rumbleBlips(fullWarningRumbles);
-            g2.gamepad.rumbleBlips(fullWarningRumbles);
+            g1.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
+            g2.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
             rumbledAlready = true;
         }
     }
@@ -98,13 +94,13 @@ public class Bot extends BotPeriodics {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
             goalTagID = 20;
             aprilTag.setGoalTagID(goalTagID);
-            g1.gamepad.setLedColor(0, 0, 1, gamepadLightColorDuration);
+            g1.gamepad.setLedColor(0, 0, 1, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Blue";
         }
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
             goalTagID = 24;
             aprilTag.setGoalTagID(goalTagID);
-            g1.gamepad.setLedColor(1, 0, 0, gamepadLightColorDuration);
+            g1.gamepad.setLedColor(1, 0, 0, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Red";
         }
     }
