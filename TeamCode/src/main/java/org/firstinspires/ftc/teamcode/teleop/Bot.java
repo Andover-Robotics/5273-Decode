@@ -43,6 +43,8 @@ public class Bot {
     private int fullWarningRumbles = 3;
     private int gamepadLightColorDuration = 500;
 
+    private ActionHost actionHost;
+
 
     // camera vision
     private boolean fieldCentric = false;
@@ -91,32 +93,12 @@ public class Bot {
         indexer.moveTo(Indexer.IndexerState.zero);
         indexer.setIntaking(true);
         state = FSM.Intake;
+        actionHost = new ActionHost();
     }
 
-    public void teleopTick() {
-        g1.readButtons();
-        g2.readButtons();
-
-        handleAprilTagLock();
-        handleMovement();
-
-        if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
-            goalTagID = 20;
-            aprilTag.setGoalTagID(goalTagID); // blue
-            g1.gamepad.setLedColor(0,0,1, gamepadLightColorDuration);
-            colorGoalSelected = "Blue";
-        }
-
-        if (g1.wasJustPressed(GamepadKeys.Button.START)) {
-            goalTagID = 24;
-            aprilTag.setGoalTagID(goalTagID); // red
-            g1.gamepad.setLedColor(1,0,0, gamepadLightColorDuration);
-            colorGoalSelected = "Red";
-        }
-
-        outtake.periodic();
-        indexer.update();
-
+    public void teleopTick()
+    {
+        handlePeriodics();
         switch (state) {
             case Intake:
                 handleIntakeState();
@@ -131,36 +113,22 @@ public class Bot {
                 handleEndgameState();
                 break;
         }
-
-        telemetry.addData("Field Centric", fieldCentric);
-        telemetry.addData("Indexer State", "%s -> %s", indexer.getState(), indexer.getState().next());
-        telemetry.addData("Indexer Voltages", "Target: %.3f , Actual: %.3f", indexer.getTargetVoltage(), indexer.getVoltage());
-        telemetry.addData("Outtake RPM", "Target: %.1f, Actual: %.1f", outtake.getTargetRPM(), outtake.getRPM());
-        telemetry.addData("Actuator up?", actuator.isActivated());
-        telemetry.addData("Indexer Loaded?", indexer.isLoaded());
-        telemetry.addData("April Lock", continuousAprilTagLock);
-        telemetry.addData("Bot Range", aprilTag.getRange());
-        telemetry.addData("Alliance selected:", colorGoalSelected);
-        for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
-            telemetry.addData(
-                    "Slot " + s.index,
-                    "%s  (err=%.1f°)",
-                    indexer.getColorAt(s),
-                    indexer.debugSlotErrorDeg(s)
-            );
-        }
-        telemetry.update();
     }
 
-    private void handleMovement() {
-        double lx = g1.getLeftX();
-        double ly = g1.getLeftY();
-        double rx = g1.getRightX();
+    private void handlePeriodics()
+    {
+        g1.readButtons();
+        g2.readButtons();
+        handleAprilTagLock();
+        handleMovement();
+        handleAllianceSelection();
+        handleTelemetry();
+        indexer.update();
+        outtake.periodic();
+        actionHost.update();
 
-        if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
-        else movement.teleopTick(lx, ly, rx, turnCorrection);
     }
-
+    // MAINLINE HANDLERS
     private void handleIntakeState() {
         double leftTrigger = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         //double rightTrigger = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
@@ -189,9 +157,12 @@ public class Bot {
     }
 
     private void handleQuickOuttakeState() {
-        if (g2.wasJustPressed(GamepadKeys.Button.X)) {
-            Actions.runBlocking(fireWithPeriodic(actionNonIndexedDump()));
+        if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.X)) {
+            actionHost.start(actionNonIndexedDump());
             rumbledAlready = false;
+        }
+        if (g2.wasJustPressed(GamepadKeys.Button.BACK)) {
+            actionHost.abort();
         }
         if (g2.wasJustPressed(GamepadKeys.Button.A)) {
             state = FSM.Intake;
@@ -201,20 +172,25 @@ public class Bot {
     }
 
     private void handleSortOuttakeState() {
-        if (g2.wasJustPressed(GamepadKeys.Button.X)) {
-            Actions.runBlocking(fireWithPeriodic(actionFireGreen()));
-            rumbledAlready = false;
+        if (!actionHost.isRunning()) {
+            if (g2.wasJustPressed(GamepadKeys.Button.X)) {
+                actionHost.start(actionFireGreen());
+            }
+            if (g2.wasJustPressed(GamepadKeys.Button.Y)) {
+                actionHost.start(actionFirePurple());
+            }
         }
-        if (g2.wasJustPressed(GamepadKeys.Button.Y)) {
-            Actions.runBlocking(fireWithPeriodic(actionFirePurple()));
-            rumbledAlready = false;
+
+        if (g2.wasJustPressed(GamepadKeys.Button.BACK)) {
+            actionHost.abort();
         }
+
         if (g2.wasJustPressed(GamepadKeys.Button.A)) {
             indexer.setIntaking(true);
             state = FSM.Intake;
-            rumbledAlready = false;
         }
     }
+
 
     private void handleEndgameState() {
         if (g2.wasJustPressed(GamepadKeys.Button.A)) {
@@ -310,6 +286,67 @@ public class Bot {
         };
     }
 
+    private double getTargetRpm() {
+        double range = aprilTag.getRange();
+        if (Double.isNaN(range) || range <= 0) {
+            return shooterRPM;
+        }
+        return outtake.getRegressionRPM(range);
+    }
+
+    // Periodic Handlers
+
+    private void handleTelemetry()
+    {
+        telemetry.addData("Field Centric", fieldCentric);
+        telemetry.addData("Indexer State", "%s -> %s",
+                indexer.getState(), indexer.getState().next());
+        telemetry.addData("Indexer Voltages",
+                "Target: %.3f , Actual: %.3f",
+                indexer.getTargetVoltage(), indexer.getVoltage());
+        telemetry.addData("Outtake RPM",
+                "Target: %.1f, Actual: %.1f",
+                outtake.getTargetRPM(), outtake.getRPM());
+        telemetry.addData("Actuator up?", actuator.isActivated());
+        telemetry.addData("Indexer Loaded?", indexer.isLoaded());
+        telemetry.addData("April Lock", continuousAprilTagLock);
+        telemetry.addData("Bot Range", aprilTag.getRange());
+        telemetry.addData("Alliance selected", colorGoalSelected);
+        for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
+            telemetry.addData(
+                    "Slot " + s.index,
+                    "%s (err=%.1f°)",
+                    indexer.getColorAt(s),
+                    indexer.debugSlotErrorDeg(s)
+            );
+        }
+        telemetry.update();
+    }
+
+    private void handleAllianceSelection() {
+        if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
+            goalTagID = 20;
+            aprilTag.setGoalTagID(goalTagID);
+            g1.gamepad.setLedColor(0, 0, 1, gamepadLightColorDuration);
+            colorGoalSelected = "Blue";
+        }
+        if (g1.wasJustPressed(GamepadKeys.Button.START)) {
+            goalTagID = 24;
+            aprilTag.setGoalTagID(goalTagID);
+            g1.gamepad.setLedColor(1, 0, 0, gamepadLightColorDuration);
+            colorGoalSelected = "Red";
+        }
+    }
+
+    private void handleMovement() {
+        double lx = g1.getLeftX();
+        double ly = g1.getLeftY();
+        double rx = g1.getRightX();
+
+        if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
+        else movement.teleopTick(lx, ly, rx, turnCorrection);
+    }
+
     private void handleAprilTagLock() {
         // Toggle continuous lock with gamepad1 A
         if (g1.wasJustPressed(GamepadKeys.Button.A)) {
@@ -344,11 +381,29 @@ public class Bot {
         }
     }
 
-    private double getTargetRpm() {
-        double range = aprilTag.getRange();
-        if (Double.isNaN(range) || range <= 0) {
-            return shooterRPM;
+    public class ActionHost {
+        private Action current;
+
+        public void start(Action action) {
+            current = action;
         }
-        return outtake.getRegressionRPM(range);
+
+        public void abort() {
+            current = null;
+        }
+
+        public boolean isRunning() {
+            return current != null;
+        }
+
+        public void update() {
+            if (current == null) return;
+
+            boolean stillRunning = current.run(null);
+            if (!stillRunning) {
+                current = null;
+            }
+        }
     }
 }
+
