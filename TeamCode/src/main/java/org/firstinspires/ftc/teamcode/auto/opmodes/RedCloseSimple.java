@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto.roadrunner.opmodes;
+package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
@@ -9,8 +9,8 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.auto.roadrunner.BotActions;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
+import org.firstinspires.ftc.teamcode.auto.helpers.BotActions;
+import org.firstinspires.ftc.teamcode.auto.helpers.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 @Config
@@ -77,7 +77,7 @@ public class RedCloseSimple extends LinearOpMode {
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(180));
 
         /*
-        Action toObelisk = drive.actionBuilder(startPose)
+        org.firstinspires.ftc.teamcode.auto.helpers.Action toObelisk = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(obeliskPose.position, obeliskPose.heading)
                 .stopAndAdd(botActions.actionScanObelisk())
                 .build();

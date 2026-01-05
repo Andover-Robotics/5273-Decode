@@ -1,13 +1,12 @@
-package org.firstinspires.ftc.teamcode.auto.roadrunner.opmodes;
+package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.*;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Paths;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.auto.helpers.Paths;
+import org.firstinspires.ftc.teamcode.auto.helpers.Hardware;
 
 import com.acmerobotics.dashboard.config.Config;
 

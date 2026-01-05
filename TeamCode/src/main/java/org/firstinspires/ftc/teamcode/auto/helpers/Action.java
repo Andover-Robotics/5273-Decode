@@ -1,3 +1,5 @@
+package org.firstinspires.ftc.teamcode.auto.helpers;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class Action {
             return this;
         }
 
-        // Build the Action
+        // Build the org.firstinspires.ftc.teamcode.auto.helpers.Action
         public Action build() {
             return new Action(steps);
         }
