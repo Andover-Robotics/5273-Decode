@@ -43,7 +43,6 @@ public class Bot extends BotPeriodics {
     public static double SHOOTER_SPINUP = 2.0;
     public static double FULL_BLAST_POWER =0.25;
     public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 1.12;
-    private static final long AIM_UPDATE_INTERVAL_MS = 50;
 
     public Bot(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
         super(hardwareMap, tele, gamepad1, gamepad2);
@@ -161,7 +160,7 @@ public class Bot extends BotPeriodics {
                 new InstantAction(outtake::stop),
                 new InstantAction(actuator::down),
                 new InstantAction(() -> indexer.setIntaking(true)),
-                new InstantAction(() -> indexer.initializeColors()),
+                new InstantAction(indexer::initializeColors),
                 new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.zero))
         );
     }
