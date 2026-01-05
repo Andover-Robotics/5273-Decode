@@ -5,8 +5,6 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -32,11 +30,10 @@ public class RedCloseSimple extends LinearOpMode {
     public static double INTAKE2_Y = 75;
     public static double INTAKE_FORWARD_DIST = 8;
 
-    public static double PARK_X = 6;
-    public static double PARK_Y = 68;
+    public static double PARK_X = 22;
+    public static double PARK_Y = 80;
 
-    public static int SHOOT_RPM = 4010;
-    public static int timeToStartOuttakeBeforeToOuttake = 1;
+    public static int SHOOT_RPM = 3580;
 
     @Override
     public void runOpMode() {
@@ -86,18 +83,13 @@ public class RedCloseSimple extends LinearOpMode {
                 .build();
         */
 
-        Action toShoot = new SequentialAction(
-                new ParallelAction(
-                        drive.actionBuilder(startPose)
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                                .build(),
-
-                        new SequentialAction(
-                                new SleepAction(0), // no need
-                                botActions.actionQuickOuttake(SHOOT_RPM)
-                        )
+        Action toShoot = drive.actionBuilder(startPose)
+                .strafeToLinearHeading(
+                        shootingPose.position,
+                        shootingPose.heading
                 )
-        );
+                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
+                .build();
 
         Action toIntakeStart1 = drive.actionBuilder(shootingPose)
                 .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
@@ -124,18 +116,13 @@ public class RedCloseSimple extends LinearOpMode {
                 botActions.actionIntakeOneCycle(false)
         );
 
-        Action backToShoot1 = new SequentialAction(
-                new ParallelAction(
-                        drive.actionBuilder(intake1Pose3)
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                                .build(),
-
-                        new SequentialAction(
-                                new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
-                                botActions.actionQuickOuttake(SHOOT_RPM)
-                        )
+        Action backToShoot1 = drive.actionBuilder(intake1Pose3)
+                .strafeToLinearHeading(
+                        shootingPose.position,
+                        shootingPose.heading
                 )
-        );
+                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
+                .build();
 
         Action toIntakeStart2 = drive.actionBuilder(shootingPose)
                 .strafeToLinearHeading(intake2PoseStart.position, intake2PoseStart.heading)
@@ -162,19 +149,11 @@ public class RedCloseSimple extends LinearOpMode {
                 botActions.actionIntakeOneCycle(false)
         );
 
-        Action backToShoot2 = new SequentialAction(
-                new ParallelAction(
-                        drive.actionBuilder(intake2Pose3)
-                                .strafeTo(new Vector2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST, INTAKE2_Y))
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                                .build(),
+        Action backToShoot2 = drive.actionBuilder(intake2Pose3)
+                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
+                .build();
 
-                        new SequentialAction(
-                                new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
-                                botActions.actionQuickOuttake(SHOOT_RPM)
-                        )
-                )
-        );
         Action toPark = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(
                         parkPose.position,
