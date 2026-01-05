@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * An OpMode that finds servo values. Copied from last year's code.
  */
-@TeleOp(name = "Old Servo Value Finder", group = "Teleop")
+@TeleOp(name = "Old Servo Value Finder", group = "testing")
 public class OldServoValueFinder extends LinearOpMode {
     private static String[] SERVO_LIST;
     private static int num = 0;

@@ -5,22 +5,12 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.ftc.Actions;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
-import org.firstinspires.ftc.teamcode.subsystems.Actuator;
-import org.firstinspires.ftc.teamcode.subsystems.AprilTag;
-import org.firstinspires.ftc.teamcode.subsystems.AprilTagAimer;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
-import org.firstinspires.ftc.teamcode.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.subsystems.Movement;
-import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
 @Config
 public class Bot extends BotPeriodics {
@@ -143,11 +133,9 @@ public class Bot extends BotPeriodics {
                 actionHost.start(actionFirePurple());
             }
         }
-
         if (g2.wasJustPressed(GamepadKeys.Button.BACK)) {
             actionHost.abort();
         }
-
         if (g2.wasJustPressed(GamepadKeys.Button.A)) {
             indexer.setIntaking(true);
             state = FSM.Intake;

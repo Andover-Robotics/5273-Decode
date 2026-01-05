@@ -1,9 +1,8 @@
-package org.firstinspires.ftc.teamcode.auto.roadrunner.opmodes;
+package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
-import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -11,13 +10,13 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.auto.roadrunner.BotActions;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
+import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
+import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 @Config
-@Autonomous(name = "Simple Blue Auto With Motif", group = "Autonomous")
-public class BlueCloseSimpleMotif extends LinearOpMode {
+@Autonomous(name = "Faster Simple Blue Auto With Motif", group = "Autonomous")
+public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
     public static double OBELISK_X = -12;
     public static double OBELISK_Y = 38;
@@ -57,13 +56,9 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
         Pose2d shootingPose = new Pose2d(SHOOT_X, SHOOT_Y, Math.toRadians(SHOOT_HEADING_DEG));
 
         Pose2d intake1PoseStart = new Pose2d(INTAKE_X, INTAKE1_Y, Math.toRadians(0));
-        Pose2d intake1Pose1 = new Pose2d(INTAKE_X + INTAKE_FORWARD_DIST, INTAKE1_Y, Math.toRadians(0));
-        Pose2d intake1Pose2 = new Pose2d(INTAKE_X + 2 * INTAKE_FORWARD_DIST, INTAKE1_Y, Math.toRadians(0));
         Pose2d intake1Pose3 = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 3, INTAKE1_Y, Math.toRadians(0));
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(0));
-        Pose2d intake2Pose1 = new Pose2d(INTAKE_X + INTAKE_FORWARD_DIST, INTAKE2_Y, Math.toRadians(0));
-        Pose2d intake2Pose2 = new Pose2d(INTAKE_X + 2 * INTAKE_FORWARD_DIST, INTAKE2_Y, Math.toRadians(0));
         Pose2d intake2Pose3 = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 3.5, INTAKE2_Y, Math.toRadians(0));
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
 
@@ -88,25 +83,11 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
                 .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
                 .build();
 
-        Action toIntake1_1 = new ParallelAction(
-                drive.actionBuilder(intake1PoseStart)
-                        .strafeToLinearHeading(intake1Pose1.position, intake1Pose1.heading)
-                        .build(),
-                botActions.actionIntakeOneCycle(true)
-        );
-
-        Action toIntake1_2 = new ParallelAction(
-                drive.actionBuilder(intake1Pose1)
-                        .strafeToLinearHeading(intake1Pose2.position, intake1Pose2.heading)
-                        .build(),
-                botActions.actionIntakeOneCycle(true)
-        );
-
         Action toIntake1_3 = new ParallelAction(
-                drive.actionBuilder(intake1Pose2)
+                drive.actionBuilder(intake1PoseStart)
                         .strafeToLinearHeading(intake1Pose3.position, intake1Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeThreeFast()
         );
 
         Action backToShoot1 = new SequentialAction(
@@ -124,25 +105,11 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
                 .strafeToLinearHeading(intake2PoseStart.position, intake2PoseStart.heading)
                 .build();
 
-        Action toIntake2_1 = new ParallelAction(
-                drive.actionBuilder(intake2PoseStart)
-                        .strafeToLinearHeading(intake2Pose1.position, intake2Pose1.heading)
-                        .build(),
-                botActions.actionIntakeOneCycle(true)
-        );
-
-        Action toIntake2_2 = new ParallelAction(
-                drive.actionBuilder(intake2Pose1)
-                        .strafeToLinearHeading(intake2Pose2.position, intake2Pose2.heading)
-                        .build(),
-                botActions.actionIntakeOneCycle(true)
-        );
-
         Action toIntake2_3 = new ParallelAction(
-                drive.actionBuilder(intake2Pose2)
-                        .strafeToLinearHeading(intake2Pose3.position, intake2Pose3.heading)
+                drive.actionBuilder(intake1PoseStart)
+                        .strafeToLinearHeading(intake1Pose3.position, intake1Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeThreeFast()
         );
 
         Action backToShoot2 = new SequentialAction(
@@ -192,13 +159,9 @@ public class BlueCloseSimpleMotif extends LinearOpMode {
                         toObelisk,
                         toShoot,
                         toIntakeStart1,
-                        toIntake1_1,
-                        toIntake1_2,
                         toIntake1_3,
                         backToShoot1,
                         toIntakeStart2,
-                        toIntake2_1,
-                        toIntake2_2,
                         toIntake2_3,
                         backToShoot2,
                         toPark

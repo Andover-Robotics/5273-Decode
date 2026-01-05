@@ -1,19 +1,18 @@
-package org.firstinspires.ftc.teamcode.auto.roadrunner.opmodes;
+package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.*;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Paths;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.auto.utils.Paths;
+import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 
 import com.acmerobotics.dashboard.config.Config;
 
 @Config
-@Autonomous(name = "Red-Close", group = "Autonomous")
-public class RedClose extends LinearOpMode {
+@Autonomous(name = "Red-Far", group = "Autonomous")
+public class RedFar extends LinearOpMode {
 
     // START POSE
     public static double startX = 0;
@@ -37,7 +36,6 @@ public class RedClose extends LinearOpMode {
     public static double outtakeHeadingDeg = 135;
     public static double obeliskScanHeadingDeg = 90;
 
-    // ARTIFACTS
     public static double[][] artifactX = {
             {-10, -5, 0, 5},  // Row 0
             {-10, -5, 0, 5},  // Row 1
@@ -52,7 +50,7 @@ public class RedClose extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Initialize hardware and drive
-        Hardware hardware = new Hardware(hardwareMap, telemetry);
+        Hardware hardware = new Hardware(hardwareMap, telemetry);;
 
         // Convert dashboard fields to Pose2d/Vector2d
         Pose2d startPose = new Pose2d(startX, startY, Math.toRadians(startHeadingDeg));

@@ -1,19 +1,18 @@
-package org.firstinspires.ftc.teamcode.auto.roadrunner.opmodes;
+package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.*;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Paths;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.auto.utils.Paths;
+import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 
 import com.acmerobotics.dashboard.config.Config;
 
 @Config
-@Autonomous(name = "Blue-Far", group = "Autonomous")
-public class BlueFar extends LinearOpMode {
+@Autonomous(name = "Red-Close", group = "Autonomous")
+public class RedClose extends LinearOpMode {
 
     // START POSE
     public static double startX = 0;

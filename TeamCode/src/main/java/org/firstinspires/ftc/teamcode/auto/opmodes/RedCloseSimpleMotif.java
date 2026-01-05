@@ -1,25 +1,26 @@
-package org.firstinspires.ftc.teamcode.auto.roadrunner.opmodes;
+package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.auto.roadrunner.BotActions;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
+import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
+import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 @Config
-@Autonomous(name = "Simple Red Auto", group = "Autonomous")
-public class RedCloseSimple extends LinearOpMode {
+@Autonomous(name = "Simple Red Auto With Motif", group = "Autonomous")
+public class RedCloseSimpleMotif extends LinearOpMode {
 
-    //public static double OBELISK_X = 0;
-    //public static double OBELISK_Y = 38;
-    //public static double OBELISK_HEADING_DEG = 300;
+    public static double OBELISK_X = 12;
+    public static double OBELISK_Y = 38;
+    public static double OBELISK_HEADING_DEG = 300;
 
     public static double SHOOT_X = 12;
     public static double SHOOT_Y = 42;
@@ -30,8 +31,8 @@ public class RedCloseSimple extends LinearOpMode {
     public static double INTAKE2_Y = 75;
     public static double INTAKE_FORWARD_DIST = 8;
 
-    public static double PARK_X = 22;
-    public static double PARK_Y = 80;
+    public static double PARK_X = 6;
+    public static double PARK_Y = 68;
 
     public static int SHOOT_RPM = 3580;
 
@@ -51,13 +52,11 @@ public class RedCloseSimple extends LinearOpMode {
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(180));
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
 
-        /*
         Pose2d obeliskPose = new Pose2d(
                 OBELISK_X,
                 OBELISK_Y,
                 Math.toRadians(OBELISK_HEADING_DEG)
         );
-        */
 
         Pose2d shootingPose = new Pose2d(
                 SHOOT_X,
@@ -76,20 +75,22 @@ public class RedCloseSimple extends LinearOpMode {
         Pose2d intake2Pose3 = new Pose2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST - 4.5, INTAKE2_Y, Math.toRadians(180));
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(180));
 
-        /*
         Action toObelisk = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(obeliskPose.position, obeliskPose.heading)
                 .stopAndAdd(botActions.actionScanObelisk())
                 .build();
-        */
 
-        Action toShoot = drive.actionBuilder(startPose)
-                .strafeToLinearHeading(
-                        shootingPose.position,
-                        shootingPose.heading
-                )
-                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
-                .build();
+        Action toShoot = new SequentialAction(
+                new ParallelAction(
+                        drive.actionBuilder(obeliskPose)
+                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(3)))
+                                .build(),
+                        /*botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 0)*/
+                        botActions.indexerRotateForMotif(hardware.aprilTag.getObeliskId(), 0)
+                        ),
+
+                botActions.actionOuttake(SHOOT_RPM)
+        );
 
         Action toIntakeStart1 = drive.actionBuilder(shootingPose)
                 .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
@@ -116,13 +117,16 @@ public class RedCloseSimple extends LinearOpMode {
                 botActions.actionIntakeOneCycle(false)
         );
 
-        Action backToShoot1 = drive.actionBuilder(intake1Pose3)
-                .strafeToLinearHeading(
-                        shootingPose.position,
-                        shootingPose.heading
-                )
-                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
-                .build();
+        Action backToShoot1 = new SequentialAction(
+                new ParallelAction(
+                        drive.actionBuilder(intake1Pose3)
+                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                .build(),
+                        /*botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 1)*/
+                        botActions.indexerRotateForMotif(hardware.aprilTag.getObeliskId(), 1)
+                ),
+                botActions.actionOuttake(SHOOT_RPM)
+        );
 
         Action toIntakeStart2 = drive.actionBuilder(shootingPose)
                 .strafeToLinearHeading(intake2PoseStart.position, intake2PoseStart.heading)
@@ -149,10 +153,25 @@ public class RedCloseSimple extends LinearOpMode {
                 botActions.actionIntakeOneCycle(false)
         );
 
-        Action backToShoot2 = drive.actionBuilder(intake2Pose3)
-                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
-                .build();
+        Action backToShoot2 = new SequentialAction(
+                new ParallelAction(
+                        drive.actionBuilder(intake2Pose3)
+                                // dodge gate, keeps momentum like this
+                                .strafeTo(new Vector2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST, INTAKE2_Y))
+                                .strafeToLinearHeading(
+                                        shootingPose.position,
+                                        shootingPose.heading
+                                )
+                                .build(),
+                        /*botActions.actionOuttakeOffsetForMotif(
+                                hardware.aprilTag.getObeliskId(),
+                                2
+                        )*/
+                        botActions.indexerRotateForMotif(hardware.aprilTag.getObeliskId(), 2)
+                ),
+
+                botActions.actionOuttake(SHOOT_RPM)
+        );
 
         Action toPark = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(
@@ -178,6 +197,7 @@ public class RedCloseSimple extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
+                        toObelisk,
                         toShoot,
                         toIntakeStart1,
                         toIntake1_1,
@@ -196,6 +216,7 @@ public class RedCloseSimple extends LinearOpMode {
         periodicThread.interrupt();
         try {
             periodicThread.join();
-        } catch (InterruptedException ignored) {}
+        } catch (InterruptedException ignored) {
+        }
     }
 }

@@ -7,13 +7,13 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.subsystems.AprilTag;
-import org.firstinspires.ftc.teamcode.subsystems.AprilTagAimer;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
 import org.firstinspires.ftc.teamcode.subsystems.Movement;
 
 import org.openftc.easyopencv.*;
 
-@TeleOp(name = "AprilTagTester", group = "AA_main")
+@TeleOp(name = "AprilTagTester", group = "testing")
 public class AprilTagTester extends LinearOpMode {
     OpenCvCamera camera;
     private long lastAimUpdateTime = 0;

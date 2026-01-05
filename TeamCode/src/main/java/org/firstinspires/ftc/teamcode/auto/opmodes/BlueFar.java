@@ -1,41 +1,40 @@
-package org.firstinspires.ftc.teamcode.auto.roadrunner.opmodes;
+package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.*;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Paths;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.Hardware;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.auto.utils.Paths;
+import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 
 import com.acmerobotics.dashboard.config.Config;
 
 @Config
-@Autonomous(name = "Blue-Close", group = "Autonomous")
-public class BlueClose extends LinearOpMode {
+@Autonomous(name = "Blue-Far", group = "Autonomous")
+public class BlueFar extends LinearOpMode {
 
     // START POSE
     public static double startX = 0;
     public static double startY = 0;
-    public static double startHeadingDeg = 0;
+    public static double startHeadingDeg = 180;
 
     // SHOOT POSITION
     public static double shootX = -10;
-    public static double shootY = 24;
+    public static double shootY = 10;
 
     // PARK POSITION
     public static double parkX = 0;
     public static double parkY = 100;
 
     // OBELISK SCAN POSITION
-    public static double obeliskScanX = -20;
+    public static double obeliskScanX = 0;
     public static double obeliskScanY = 50;
 
     // HEADINGS
-    public static double intakeHeadingDeg = 0;
-    public static double outtakeHeadingDeg = -45;
-    public static double obeliskScanHeadingDeg = -90;
+    public static double intakeHeadingDeg = 180;
+    public static double outtakeHeadingDeg = 135;
+    public static double obeliskScanHeadingDeg = 90;
 
     // ARTIFACTS
     public static double[][] artifactX = {

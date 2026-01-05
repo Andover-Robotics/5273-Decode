@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teleop;
+package org.firstinspires.ftc.teamcode.testing;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 /**
  * Represents the Teleop OpMode
  */
-@TeleOp(name = "Proto", group = "AA_main")
+@TeleOp(name = "Proto", group = "testing")
 public class Prototyping extends LinearOpMode {
     //private Intake intake;
     //private Indexer indexer;

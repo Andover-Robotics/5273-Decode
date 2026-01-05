@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.CRServoPositionControl;
+import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.ColorSensorSystem;
 
 @Config
 public class Indexer {

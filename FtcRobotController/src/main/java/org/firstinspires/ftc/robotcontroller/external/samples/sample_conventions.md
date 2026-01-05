@@ -37,7 +37,7 @@ Utility:    This sample type is provided as a useful tool, or aide, to perform s
 After the prefix, other conventions will apply:
 
 * Sensor class names should constructed as:       Sensor - Company - Type
-* Robot class names should be constructed as:     Robot - Mode - Action - OpModetype
+* Robot class names should be constructed as:     Robot - Mode - org.firstinspires.ftc.teamcode.auto.utils.Action - OpModetype
 * Concept class names should be constructed as:   Concept - Topic - OpModetype
 
 ### Sample OpMode Content/Style
