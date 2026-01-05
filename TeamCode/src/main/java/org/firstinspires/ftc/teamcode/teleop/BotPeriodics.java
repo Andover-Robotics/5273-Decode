@@ -1,0 +1,199 @@
+package org.firstinspires.ftc.teamcode.teleop;
+
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantAction;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.ftc.Actions;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
+import org.firstinspires.ftc.teamcode.subsystems.Actuator;
+import org.firstinspires.ftc.teamcode.subsystems.AprilTag;
+import org.firstinspires.ftc.teamcode.subsystems.AprilTagAimer;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Movement;
+import org.firstinspires.ftc.teamcode.subsystems.Outtake;
+
+@Config
+public class BotPeriodics {
+    protected final Intake intake;
+    protected final Indexer indexer;
+    protected final Actuator actuator;
+    protected final Outtake outtake;
+    protected final Movement movement;
+    protected final AprilTag aprilTag;
+    protected final AprilTagAimer aprilAimer;
+    protected final IMU imu;
+    protected final TwoDeadWheelLocalizer deadWheelLocalizer;
+
+    protected final GamepadEx g1;
+    protected final GamepadEx g2;
+    protected final Telemetry telemetry;
+
+    protected ActionHost actionHost;
+
+    // camera vision
+    protected boolean fieldCentric = false;
+    protected boolean continuousAprilTagLock = false;
+    protected long lastAimUpdate = 0;
+    protected double lastTurnCorrection = 0.0;
+    protected double turnCorrection = 0.0;
+    protected int goalTagID;
+    protected String colorGoalSelected;
+
+    public static double TRIGGER_DEADZONE = 0.05;
+    public static double shooterRPM = 2900;
+    public static double NON_INDEX_SPIN_TIME = 3;//seconds of full-power indexer blast
+    public static double SHOOTER_SPINUP = 2.0;
+    public static double FULL_BLAST_POWER =0.25;
+    public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 1.12;
+    protected static final long AIM_UPDATE_INTERVAL_MS = 50;
+
+    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
+        intake = new Intake(hardwareMap);
+        indexer = new Indexer(hardwareMap);
+        actuator = new Actuator(hardwareMap);
+        outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
+        movement = new Movement(hardwareMap);
+        imu = movement.getImu();
+        deadWheelLocalizer = movement.getTwoDeadWheelLocalizer();
+        aprilTag = new AprilTag(hardwareMap, tele);
+        aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
+        g1 = new GamepadEx(gamepad1);
+        g2 = new GamepadEx(gamepad2);
+        telemetry = tele;
+    }
+    
+    protected void handlePeriodics()
+    {
+        g1.readButtons();
+        g2.readButtons();
+        handleAprilTagLock();
+        handleMovement();
+        handleAllianceSelection();
+        handleTelemetry();
+        indexer.update();
+        outtake.periodic();
+        actionHost.update();
+
+    }
+
+    // Periodic Handlers
+
+    protected void handleTelemetry()
+    {
+        telemetry.addData("Field Centric", fieldCentric);
+        telemetry.addData("Indexer State", "%s -> %s",
+                indexer.getState(), indexer.getState().next());
+        telemetry.addData("Indexer Voltages",
+                "Target: %.3f , Actual: %.3f",
+                indexer.getTargetVoltage(), indexer.getVoltage());
+        telemetry.addData("Outtake RPM",
+                "Target: %.1f, Actual: %.1f",
+                outtake.getTargetRPM(), outtake.getRPM());
+        telemetry.addData("Actuator up?", actuator.isActivated());
+        telemetry.addData("Indexer Loaded?", indexer.isLoaded());
+        telemetry.addData("April Lock", continuousAprilTagLock);
+        telemetry.addData("Bot Range", aprilTag.getRange());
+        telemetry.addData("Alliance selected", colorGoalSelected);
+        for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
+            telemetry.addData(
+                    "Slot " + s.index,
+                    "%s (err=%.1f°)",
+                    indexer.getColorAt(s),
+                    indexer.debugSlotErrorDeg(s)
+            );
+        }
+        telemetry.update();
+    }
+
+    protected void handleAllianceSelection() {
+        if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
+            goalTagID = 20;
+            aprilTag.setGoalTagID(goalTagID);
+            colorGoalSelected = "Blue";
+        }
+        if (g1.wasJustPressed(GamepadKeys.Button.START)) {
+            goalTagID = 24;
+            aprilTag.setGoalTagID(goalTagID);
+            colorGoalSelected = "Red";
+        }
+    }
+
+    protected void handleMovement() {
+        double lx = g1.getLeftX();
+        double ly = g1.getLeftY();
+        double rx = g1.getRightX();
+
+        if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
+        else movement.teleopTick(lx, ly, rx, turnCorrection);
+    }
+
+    protected void handleAprilTagLock() {
+        // Toggle continuous lock with gamepad1 A
+        if (g1.wasJustPressed(GamepadKeys.Button.A)) {
+            continuousAprilTagLock = true;
+            g1.gamepad.rumbleBlips(2);
+        }
+        if (g1.wasJustPressed(GamepadKeys.Button.B)) {
+            continuousAprilTagLock = false;
+            g1.gamepad.rumbleBlips(1);
+        }
+
+        if (continuousAprilTagLock) {
+            lastTurnCorrection = 0;
+            turnCorrection = 0;
+            long now = System.currentTimeMillis();
+            if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
+                lastAimUpdate = now;
+                aprilTag.scanGoalTag();
+                double bearing = aprilTag.getBearing();
+                if (!Double.isNaN(bearing)) {
+                    lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
+                } else {
+                    lastTurnCorrection = 0;
+                    //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
+                }
+            }
+
+            if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
+                shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+            }
+            turnCorrection = 0.9 * lastTurnCorrection;
+        }
+    }
+
+    public class ActionHost {
+        protected Action current;
+
+        public void start(Action action) {
+            current = action;
+        }
+
+        public void abort() {
+            current = null;
+        }
+
+        public boolean isRunning() {
+            return current != null;
+        }
+
+        public void update() {
+            if (current == null) return;
+
+            boolean stillRunning = current.run(null);
+            if (!stillRunning) {
+                current = null;
+            }
+        }
+    }
+}
+

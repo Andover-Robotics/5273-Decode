@@ -23,37 +23,11 @@ import org.firstinspires.ftc.teamcode.subsystems.Movement;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
 @Config
-public class Bot {
-    private final Intake intake;
-    private final Indexer indexer;
-    private final Actuator actuator;
-    private final Outtake outtake;
-    private final Movement movement;
-    private final AprilTag aprilTag;
-    private final AprilTagAimer aprilAimer;
-    private final IMU imu;
-    private final TwoDeadWheelLocalizer deadWheelLocalizer;
-
-    private final GamepadEx g1;
-    private final GamepadEx g2;
-    private final Telemetry telemetry;
-
+public class Bot extends BotPeriodics {
     // haptics & lights
     private boolean rumbledAlready = false;
     private int fullWarningRumbles = 3;
     private int gamepadLightColorDuration = 500;
-
-    private ActionHost actionHost;
-
-
-    // camera vision
-    private boolean fieldCentric = false;
-    private boolean continuousAprilTagLock = false;
-    private long lastAimUpdate = 0;
-    private double lastTurnCorrection = 0.0;
-    private double turnCorrection = 0.0;
-    private int goalTagID;
-    private String colorGoalSelected;
     public enum FSM {
         Intake,
         QuickOuttake,
@@ -72,18 +46,7 @@ public class Bot {
     private static final long AIM_UPDATE_INTERVAL_MS = 50;
 
     public Bot(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
-        intake = new Intake(hardwareMap);
-        indexer = new Indexer(hardwareMap);
-        actuator = new Actuator(hardwareMap);
-        outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
-        movement = new Movement(hardwareMap);
-        imu = movement.getImu();
-        deadWheelLocalizer = movement.getTwoDeadWheelLocalizer();
-        aprilTag = new AprilTag(hardwareMap, tele);
-        aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
-        g1 = new GamepadEx(gamepad1);
-        g2 = new GamepadEx(gamepad2);
-        telemetry = tele;
+        super(hardwareMap, tele, gamepad1, gamepad2);
         state = FSM.Intake;
     }
 
@@ -93,7 +56,7 @@ public class Bot {
         indexer.moveTo(Indexer.IndexerState.zero);
         indexer.setIntaking(true);
         state = FSM.Intake;
-        actionHost = new ActionHost();
+        actionHost = new BotPeriodics.ActionHost();
     }
 
     public void teleopTick()
@@ -113,20 +76,6 @@ public class Bot {
                 handleEndgameState();
                 break;
         }
-    }
-
-    private void handlePeriodics()
-    {
-        g1.readButtons();
-        g2.readButtons();
-        handleAprilTagLock();
-        handleMovement();
-        handleAllianceSelection();
-        handleTelemetry();
-        indexer.update();
-        outtake.periodic();
-        actionHost.update();
-
     }
     // MAINLINE HANDLERS
     private void handleIntakeState() {
@@ -272,138 +221,12 @@ public class Bot {
                 new InstantAction(actuator::down)
         );
     }
-
-
-
-    private Action fireWithPeriodic(Action fireAction) {
-        return packet -> {
-            indexer.update();
-            outtake.periodic();
-            handleMovement();
-            handleAprilTagLock();
-            g1.readButtons();
-            return fireAction.run(packet);
-        };
-    }
-
     private double getTargetRpm() {
         double range = aprilTag.getRange();
         if (Double.isNaN(range) || range <= 0) {
             return shooterRPM;
         }
         return outtake.getRegressionRPM(range);
-    }
-
-    // Periodic Handlers
-
-    private void handleTelemetry()
-    {
-        telemetry.addData("Field Centric", fieldCentric);
-        telemetry.addData("Indexer State", "%s -> %s",
-                indexer.getState(), indexer.getState().next());
-        telemetry.addData("Indexer Voltages",
-                "Target: %.3f , Actual: %.3f",
-                indexer.getTargetVoltage(), indexer.getVoltage());
-        telemetry.addData("Outtake RPM",
-                "Target: %.1f, Actual: %.1f",
-                outtake.getTargetRPM(), outtake.getRPM());
-        telemetry.addData("Actuator up?", actuator.isActivated());
-        telemetry.addData("Indexer Loaded?", indexer.isLoaded());
-        telemetry.addData("April Lock", continuousAprilTagLock);
-        telemetry.addData("Bot Range", aprilTag.getRange());
-        telemetry.addData("Alliance selected", colorGoalSelected);
-        for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
-            telemetry.addData(
-                    "Slot " + s.index,
-                    "%s (err=%.1f°)",
-                    indexer.getColorAt(s),
-                    indexer.debugSlotErrorDeg(s)
-            );
-        }
-        telemetry.update();
-    }
-
-    private void handleAllianceSelection() {
-        if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
-            goalTagID = 20;
-            aprilTag.setGoalTagID(goalTagID);
-            g1.gamepad.setLedColor(0, 0, 1, gamepadLightColorDuration);
-            colorGoalSelected = "Blue";
-        }
-        if (g1.wasJustPressed(GamepadKeys.Button.START)) {
-            goalTagID = 24;
-            aprilTag.setGoalTagID(goalTagID);
-            g1.gamepad.setLedColor(1, 0, 0, gamepadLightColorDuration);
-            colorGoalSelected = "Red";
-        }
-    }
-
-    private void handleMovement() {
-        double lx = g1.getLeftX();
-        double ly = g1.getLeftY();
-        double rx = g1.getRightX();
-
-        if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
-        else movement.teleopTick(lx, ly, rx, turnCorrection);
-    }
-
-    private void handleAprilTagLock() {
-        // Toggle continuous lock with gamepad1 A
-        if (g1.wasJustPressed(GamepadKeys.Button.A)) {
-            continuousAprilTagLock = true;
-            g1.gamepad.rumbleBlips(2);
-        }
-        if (g1.wasJustPressed(GamepadKeys.Button.B)) {
-            continuousAprilTagLock = false;
-            g1.gamepad.rumbleBlips(1);
-        }
-
-        if (continuousAprilTagLock) {
-            lastTurnCorrection = 0;
-            turnCorrection = 0;
-            long now = System.currentTimeMillis();
-            if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
-                lastAimUpdate = now;
-                aprilTag.scanGoalTag();
-                double bearing = aprilTag.getBearing();
-                if (!Double.isNaN(bearing)) {
-                    lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
-                } else {
-                    lastTurnCorrection = 0;
-                    //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
-                }
-            }
-
-            if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
-                shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
-            }
-            turnCorrection = 0.9 * lastTurnCorrection;
-        }
-    }
-
-    public class ActionHost {
-        private Action current;
-
-        public void start(Action action) {
-            current = action;
-        }
-
-        public void abort() {
-            current = null;
-        }
-
-        public boolean isRunning() {
-            return current != null;
-        }
-
-        public void update() {
-            if (current == null) return;
-
-            boolean stillRunning = current.run(null);
-            if (!stillRunning) {
-                current = null;
-            }
-        }
     }
 }
 
