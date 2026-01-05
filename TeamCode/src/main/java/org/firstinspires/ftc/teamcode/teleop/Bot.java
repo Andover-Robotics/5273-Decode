@@ -120,12 +120,16 @@ public class Bot {
         switch (state) {
             case Intake:
                 handleIntakeState();
+                break;
             case QuickOuttake:
                 handleQuickOuttakeState();
+                break;
             case SortOuttake:
                 handleSortOuttakeState();
+                break;
             case Endgame:
                 handleEndgameState();
+                break;
         }
 
         telemetry.addData("Field Centric", fieldCentric);
