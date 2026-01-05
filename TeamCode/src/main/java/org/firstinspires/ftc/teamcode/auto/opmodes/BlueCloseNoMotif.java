@@ -14,8 +14,8 @@ import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 @Config
-@Autonomous(name = "Simple Blue Auto", group = "Autonomous")
-public class BlueCloseSimple extends LinearOpMode {
+@Autonomous(name = "Blue No Motif Simple", group = "Autonomous")
+public class BlueCloseNoMotif extends LinearOpMode {
 
     //public static double OBELISK_X = 0;
     //public static double OBELISK_Y = 38;
