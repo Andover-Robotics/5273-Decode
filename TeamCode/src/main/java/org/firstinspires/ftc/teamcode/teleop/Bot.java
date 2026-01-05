@@ -104,6 +104,21 @@ public class Bot extends BotPeriodics {
         }
     }
 
+    protected void handleAllianceSelection() {
+        if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
+            goalTagID = 20;
+            aprilTag.setGoalTagID(goalTagID);
+            g1.gamepad.setLedColor(0, 0, 1, gamepadLightColorDuration);
+            colorGoalSelected = "Blue";
+        }
+        if (g1.wasJustPressed(GamepadKeys.Button.START)) {
+            goalTagID = 24;
+            aprilTag.setGoalTagID(goalTagID);
+            g1.gamepad.setLedColor(1, 0, 0, gamepadLightColorDuration);
+            colorGoalSelected = "Red";
+        }
+    }
+
     private void handleQuickOuttakeState() {
         if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.X)) {
             actionHost.start(actionNonIndexedDump());
