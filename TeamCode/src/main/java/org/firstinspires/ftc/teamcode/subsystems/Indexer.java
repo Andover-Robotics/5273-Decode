@@ -302,19 +302,23 @@ public class Indexer {
 
             // Auto-advance (guarded by toggle)
             if (ENABLE_AUTO_ADVANCE && s == state && intaking && isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
-                if (hasArtifact) {
-                    // Count non-empty hits once somethings been detected
-                    if (slot.wasEmpty) {
-                        slot.fillingHits = 1;
-                    } else {
-                        slot.fillingHits++;
-                    }
+                boolean isKnownColor = slot.color == ArtifactColor.GREEN || slot.color == ArtifactColor.PURPLE;
+                boolean becameNonEmpty = slot.wasEmpty && hasArtifact;
 
-                    boolean colorSet = slot.color != ArtifactColor.EMPTY;
-                    if (colorSet && slot.fillingHits >= NON_EMPTY_HITS_TO_ADVANCE) {
-                        moveTo(state.next());
-                        slot.fillingHits = 0; // reset for the next slot
-                    }
+                // Only start counting on an empty to detected transition
+                if (becameNonEmpty) {
+                    slot.fillingHits = 1;
+                } else if (hasArtifact && isKnownColor) {
+                    // keep counting while a known color remains present
+                    slot.fillingHits++;
+                } else if (!hasArtifact) {
+                    // no artifact detected, reset counter
+                    slot.fillingHits = 0;
+                }
+
+                if (isKnownColor && slot.fillingHits >= NON_EMPTY_HITS_TO_ADVANCE) {
+                    moveTo(state.next());
+                    slot.fillingHits = 0; // reset for the next slot
                 }
             }
 
