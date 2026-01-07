@@ -24,7 +24,7 @@ public class Indexer {
     // Dashboard control
     public static boolean dashAdvance = false;
     public static int dashTargetSlot = -1; // -1 = disabled; 0/1/2 = slot
-    public static boolean ENABLE_AUTO_ADVANCE = false;
+    public static boolean ENABLE_AUTO_ADVANCE = true;
 
     // Config
     public static double offsetAngle = 17.0;

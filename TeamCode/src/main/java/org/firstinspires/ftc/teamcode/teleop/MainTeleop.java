@@ -14,6 +14,7 @@ public class MainTeleop extends LinearOpMode {
         Bot bot = new Bot(hardwareMap, telemetry, gamepad1, gamepad2);
         bot.teleopInit();
         waitForStart();
+        bot.teleopStart();
         while (opModeIsActive() && !isStopRequested()) {
             bot.teleopTick();
         }

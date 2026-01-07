@@ -36,12 +36,14 @@ public class Bot extends BotPeriodics {
     }
 
     public void teleopInit() {
-        actuator.down();
         indexer.initializeColors(Indexer.ArtifactColor.EMPTY);
-        indexer.moveTo(Indexer.IndexerState.zero);
         indexer.setIntaking(true);
         state = FSM.Intake;
-        actionHost = new BotPeriodics.ActionHost();
+    }
+
+    public void teleopStart(){
+        actuator.down();
+        indexer.moveTo(Indexer.IndexerState.zero);
     }
 
     public void teleopTick()
@@ -62,6 +64,7 @@ public class Bot extends BotPeriodics {
                 break;
         }
     }
+
     // MAINLINE HANDLERS
     private void handleIntakeState() {
         double leftTrigger = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
@@ -75,7 +78,8 @@ public class Bot extends BotPeriodics {
 
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) indexer.moveTo(indexer.getState().next());
 
-        if (g2.wasJustPressed(GamepadKeys.Button.A)) state = FSM.QuickOuttake;
+        if (g2.wasJustPressed(GamepadKeys.Button.A))
+            state = FSM.QuickOuttake;
         if (g2.wasJustPressed(GamepadKeys.Button.B)){
             state = FSM.SortOuttake;
             indexer.setIntaking(false);

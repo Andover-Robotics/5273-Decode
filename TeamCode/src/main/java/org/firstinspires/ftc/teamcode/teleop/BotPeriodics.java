@@ -60,6 +60,7 @@ public class BotPeriodics {
         aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
+        actionHost = new ActionHost();
         telemetry = tele;
     }
     
@@ -67,14 +68,16 @@ public class BotPeriodics {
     {
         g1.readButtons();
         g2.readButtons();
+        // driver one (constant
         handleAprilTagLock();
         handleMovement();
         handleAllianceSelection();
+
         handleTelemetry();
+
         indexer.update();
         outtake.periodic();
         actionHost.update();
-
     }
 
     // Periodic Handlers
@@ -159,31 +162,6 @@ public class BotPeriodics {
                 shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
             }
             turnCorrection = 0.9 * lastTurnCorrection;
-        }
-    }
-
-    public class ActionHost {
-        protected Action current;
-
-        public void start(Action action) {
-            current = action;
-        }
-
-        public void abort() {
-            current = null;
-        }
-
-        public boolean isRunning() {
-            return current != null;
-        }
-
-        public void update() {
-            if (current == null) return;
-
-            boolean stillRunning = current.run(null);
-            if (!stillRunning) {
-                current = null;
-            }
         }
     }
 }
