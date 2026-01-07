@@ -1,4 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleop;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 
 public class ActionHost {
@@ -18,8 +20,9 @@ public class ActionHost {
 
     public void update() {
         if (current == null) return;
-
-        boolean stillRunning = current.run(null);
+        TelemetryPacket packet = new TelemetryPacket();
+        boolean stillRunning = current.run(packet);
+        FtcDashboard.getInstance().sendTelemetryPacket(packet);
         if (!stillRunning) {
             current = null;
         }
