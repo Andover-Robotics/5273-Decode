@@ -299,7 +299,7 @@ public class BotActions {
                 lastTurnCorrection = !Double.isNaN(bearing)
                         ? aprilAimer.calculateTurnPowerFromBearing(bearing)
                         : 0;
-                double turnCorrection = 0.9 * lastTurnCorrection;
+                double turnCorrection = lastTurnCorrection;
 
                 mecanumDrive.setDrivePowers(
                         new PoseVelocity2d(new Vector2d(0, 0), turnCorrection)

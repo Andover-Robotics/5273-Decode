@@ -24,7 +24,7 @@ public class AprilTagAimer {
     private final IMU imu;
     private final TwoDeadWheelLocalizer deadWheelLocalizer;
     public static Pose2d TAG_POSE = new Pose2d(0, 132, Math.toRadians(0));
-    public static double cameraHeight = 11.815; // inches
+    public static double cameraHeight = 11.815; // inches, from ground to center of lens
     public static double goalAprilTagHeight = 29.5; // inches
 
     /* When and why to tune these
@@ -42,22 +42,22 @@ public class AprilTagAimer {
         Pose2d robotPose = deadWheelLocalizer.getPose();
         Pose2d tagPose = TAG_POSE;
 
+        // Vector from robot -> tag in field coordinates
         double dx = tagPose.position.x - robotPose.position.x;
         double dy = tagPose.position.y - robotPose.position.y;
 
         double horizontalDistance = Math.hypot(dx, dy);
 
-        // height difference
         double dz = goalAprilTagHeight - cameraHeight;
 
-        // In 3d to get point-to-point distance
-        double range = Math.sqrt(horizontalDistance * horizontalDistance + dz * dz);
+        // point-to-point distance
+        double range = Math.hypot(horizontalDistance, dz);
 
         double desiredHeading = Math.atan2(dy, dx);
-        double currentHeading = robotPose.heading.toDouble();
 
-        double bearingError = Math.toDegrees(desiredHeading - currentHeading);
-        bearingError = angleWrapDegrees(bearingError);
+        double currentHeading = imu
+                .getRobotYawPitchRollAngles()
+                .getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
 
         double bearing = Math.toDegrees(desiredHeading - currentHeading);
         bearing = angleWrapDegrees(bearing);
@@ -67,7 +67,10 @@ public class AprilTagAimer {
     }
 
     private double angleWrapDegrees(double angle) {
-        return (angle + 180) % 360 - 180;
+        angle %= 360.0;
+        if (angle > 180.0) angle -= 360.0;
+        if (angle < -180.0) angle += 360.0;
+        return angle;
     }
 
     public double calculateTurnPowerFromBearing(double bearing) {
