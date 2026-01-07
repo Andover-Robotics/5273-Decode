@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 
 /**
@@ -26,19 +27,13 @@ public class Movement {
      * Initializes a Movement instance.
      * @param map {@link com.qualcomm.robotcore.hardware.HardwareMap}
      */
-    public Movement(@NonNull HardwareMap map){
+    public Movement(@NonNull HardwareMap map, ConcreteLazyImu concreteImu){
         leftFront = map.get(DcMotor.class, "leftFront");
         leftBack = map.get(DcMotor.class, "leftBack");
         rightFront = map.get(DcMotor.class, "rightFront");
         rightBack = map.get(DcMotor.class, "rightBack");
 
-        imu = map.get(IMU.class, "imu");
-
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                RevHubOrientationOnRobot.UsbFacingDirection.UP));
-
-        imu.initialize(parameters);
+        this.imu = concreteImu.get();
 
         deadWheelLocalizer =
                 new TwoDeadWheelLocalizer(
