@@ -104,6 +104,7 @@ public class Indexer {
             slot.obs.reset();
             slot.wasEmpty = true;
             slot.fillingHits = 0;
+            slot.autoAdvanceArmed = true;
         }
     }
 
@@ -115,6 +116,7 @@ public class Indexer {
             slot.obs.reset();
             slot.wasEmpty = true;
             slot.fillingHits = 0;
+            slot.autoAdvanceArmed = true;
         }
     }
 
@@ -248,6 +250,7 @@ public class Indexer {
         boolean isEmpty = (color == ArtifactColor.EMPTY || color == ArtifactColor.UNKNOWN);
         slot.wasEmpty = isEmpty;
         slot.fillingHits = 0;
+        slot.autoAdvanceArmed = true; // rearm when explicitly marked empty
     }
 
     private double angleError(double a, double b) {
@@ -273,6 +276,7 @@ public class Indexer {
             if (slot.wasEmpty && hasArtifact) {
                 slot.obs.reset();
                 slot.fillingHits = 0;
+                slot.autoAdvanceArmed = true; // arm on empty->detected transition
             }
 
             slot.obs.record(instantColor);
@@ -303,22 +307,19 @@ public class Indexer {
             // Auto-advance (guarded by toggle)
             if (ENABLE_AUTO_ADVANCE && s == state && intaking && isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
                 boolean isKnownColor = slot.color == ArtifactColor.GREEN || slot.color == ArtifactColor.PURPLE;
-                boolean becameNonEmpty = slot.wasEmpty && hasArtifact;
 
-                // Only start counting on an empty to detected transition
-                if (becameNonEmpty) {
-                    slot.fillingHits = 1;
-                } else if (hasArtifact && isKnownColor) {
-                    // keep counting while a known color remains present
-                    slot.fillingHits++;
-                } else if (!hasArtifact) {
-                    // no artifact detected, reset counter
+                // manage counter and arming
+                if (!hasArtifact) {
                     slot.fillingHits = 0;
+                    slot.autoAdvanceArmed = true;  // rearm when slot goes empty
+                } else if (hasArtifact && isKnownColor && slot.autoAdvanceArmed) {
+                    slot.fillingHits++;
                 }
 
-                if (isKnownColor && slot.fillingHits >= NON_EMPTY_HITS_TO_ADVANCE) {
+                if (isKnownColor && slot.autoAdvanceArmed && slot.fillingHits >= NON_EMPTY_HITS_TO_ADVANCE) {
                     moveTo(state.next());
-                    slot.fillingHits = 0; // reset for the next slot
+                    slot.fillingHits = 0;
+                    slot.autoAdvanceArmed = false; // require a new empty to detected transition
                 }
             }
 
@@ -326,6 +327,7 @@ public class Indexer {
             slot.wasEmpty = !hasArtifact;
             if (slot.wasEmpty) {
                 slot.fillingHits = 0;
+                slot.autoAdvanceArmed = true; // rearm on empty detection
             }
 
             // telemetry for current slot
@@ -470,6 +472,7 @@ public class Indexer {
         SlotObservation obs = new SlotObservation();
         boolean wasEmpty = true;
         int fillingHits = 0; // counts non empty observations after an empty to filled transition
+        boolean autoAdvanceArmed = true; // armed after empty, disarmed after advance
     }
 
     private static class SlotObservation {
