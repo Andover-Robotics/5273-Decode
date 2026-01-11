@@ -85,6 +85,8 @@ public class Bot extends BotPeriodics {
             indexer.setIntaking(false);
             indexer.moveTo(indexer.getState());
         }
+        if(g2.wasJustPressed(GamepadKeys.Button.Y))
+            indexer.prepareQuickspin(new Indexer.ArtifactColor[]{Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE,Indexer.ArtifactColor.PURPLE});
         if (g2.wasJustPressed(GamepadKeys.Button.Y)) state = FSM.Endgame;
 
         if(indexer.isLoaded() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){ // works with my other code in the outtake functions to ensure warning rumbles don't happen more than once
