@@ -104,7 +104,7 @@ public class Indexer {
             slot.obs.reset();
             slot.wasEmpty = true;
             slot.fillingHits = 0;
-            slot.autoAdvanceArmed = true;
+            slot.autoAdvanceArmed = false;
         }
     }
 
@@ -116,7 +116,7 @@ public class Indexer {
             slot.obs.reset();
             slot.wasEmpty = true;
             slot.fillingHits = 0;
-            slot.autoAdvanceArmed = true;
+            slot.autoAdvanceArmed = false;
         }
     }
 
@@ -194,7 +194,8 @@ public class Indexer {
     public void update() {
         handleDashboardCommands();
         refreshLoadedAndServo();
-        updateSlotClassification(debugClosestSlot());
+        if(intaking)
+            updateSlotClassification(debugClosestSlot());
     }
 
     private void handleDashboardCommands() {
@@ -250,7 +251,7 @@ public class Indexer {
         boolean isEmpty = (color == ArtifactColor.EMPTY || color == ArtifactColor.UNKNOWN);
         slot.wasEmpty = isEmpty;
         slot.fillingHits = 0;
-        slot.autoAdvanceArmed = true; // rearm when explicitly marked empty
+        slot.autoAdvanceArmed = isEmpty; // rearm only if explicitly emptied
     }
 
     private double angleError(double a, double b) {
@@ -272,11 +273,10 @@ public class Indexer {
                     ? colorSensor.classifyColorOnly()
                     : ArtifactColor.EMPTY;
 
-            // start a fresh count when an artifact newly appears
             if (slot.wasEmpty && hasArtifact) {
                 slot.obs.reset();
                 slot.fillingHits = 0;
-                slot.autoAdvanceArmed = true; // arm on empty->detected transition
+                slot.autoAdvanceArmed = true;
             }
 
             slot.obs.record(instantColor);
@@ -284,7 +284,6 @@ public class Indexer {
 
             int total = slot.obs.totalHits();
 
-            // Resolve only after enough evidence
             if (total >= MIN_HITS_FOR_DECISION) {
                 ArtifactColor candidate = slot.obs.resolveWithThreshold(
                         GREEN_THRESHOLD,
@@ -295,42 +294,43 @@ public class Indexer {
 
                 ArtifactColor currentColor = slot.color;
 
-                // Prevent UNKNOWN/EMPTY from overwriting a known color
-                boolean protectKnown = (candidate == ArtifactColor.UNKNOWN || candidate == ArtifactColor.EMPTY) &&
-                        (currentColor == ArtifactColor.GREEN || currentColor == ArtifactColor.PURPLE);
+                boolean protectKnown =
+                        (candidate == ArtifactColor.UNKNOWN || candidate == ArtifactColor.EMPTY) &&
+                                (currentColor == ArtifactColor.GREEN || currentColor == ArtifactColor.PURPLE);
 
                 if (!protectKnown && candidate != currentColor) {
                     slot.color = candidate;
                 }
             }
 
-            // Auto-advance (guarded by toggle)
-            if (ENABLE_AUTO_ADVANCE && s == state && intaking && isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
-                boolean isKnownColor = slot.color == ArtifactColor.GREEN || slot.color == ArtifactColor.PURPLE;
+            // Auto-advance
+            if (ENABLE_AUTO_ADVANCE && s == state && intaking &&
+                    isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
 
-                // manage counter and arming
-                if (!hasArtifact) {
-                    slot.fillingHits = 0;
-                    slot.autoAdvanceArmed = true;  // rearm when slot goes empty
-                } else if (hasArtifact && isKnownColor && slot.autoAdvanceArmed) {
+                boolean isKnownColor =
+                        slot.color == ArtifactColor.GREEN ||
+                                slot.color == ArtifactColor.PURPLE;
+
+                if (hasArtifact && isKnownColor && slot.autoAdvanceArmed) {
                     slot.fillingHits++;
                 }
 
-                if (isKnownColor && slot.autoAdvanceArmed && slot.fillingHits >= NON_EMPTY_HITS_TO_ADVANCE) {
+                if (isKnownColor &&
+                        slot.autoAdvanceArmed &&
+                        slot.fillingHits >= NON_EMPTY_HITS_TO_ADVANCE) {
+
                     moveTo(state.next());
                     slot.fillingHits = 0;
-                    slot.autoAdvanceArmed = false; // require a new empty to detected transition
+                    slot.autoAdvanceArmed = false; // must see empty again
                 }
             }
 
-            // Update empty memory / reset fill counter
+            // Update memory ONLY (no arming here)
             slot.wasEmpty = !hasArtifact;
             if (slot.wasEmpty) {
                 slot.fillingHits = 0;
-                slot.autoAdvanceArmed = true; // rearm on empty detection
             }
 
-            // telemetry for current slot
             if (telemetry != null && s == currentSlot) {
                 int totalHits = slot.obs.totalHits();
                 telemetry.addData("Loaded", loaded);
@@ -346,7 +346,6 @@ public class Indexer {
             }
         }
     }
-
     // debug
     public IndexerState debugClosestSlot() {
         double current = getMeasuredAngle();
@@ -472,7 +471,7 @@ public class Indexer {
         SlotObservation obs = new SlotObservation();
         boolean wasEmpty = true;
         int fillingHits = 0; // counts non empty observations after an empty to filled transition
-        boolean autoAdvanceArmed = true; // armed after empty, disarmed after advance
+        boolean autoAdvanceArmed = false; // must see empty before arming
     }
 
     private static class SlotObservation {
