@@ -105,4 +105,8 @@ public class Outtake {
     {
         return 0.00211836 * Math.pow(range, 3) - 0.614769 * Math.pow(range, 2) + 65.69185 * range + 1508.69255;
     }
+
+    public boolean inRange(double tolerance) {
+        return Math.abs(currentRPM - targetRPM) <= tolerance;
+    }
 }
