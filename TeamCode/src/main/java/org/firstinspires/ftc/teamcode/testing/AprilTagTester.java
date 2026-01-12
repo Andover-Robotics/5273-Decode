@@ -48,7 +48,7 @@ public class AprilTagTester extends LinearOpMode {
             gamePadOne.readButtons();
             gamePadTwo.readButtons();
 
-            double turnCorrection;
+            double turnCorrection = 0;
             if (continuousAprilTagLock) {
                 long currentTime = System.currentTimeMillis();
 

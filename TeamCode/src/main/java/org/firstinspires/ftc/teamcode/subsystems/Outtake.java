@@ -40,6 +40,11 @@ public class Outtake {
 
     private final double TPR = 28.0;   // encoder ticks per rotation
 
+    public static double spinupInRangeMinTime = 300; // ms
+    public static double spinupMaxTime = 4000; // ms
+    private long inRangeStartTime = -1;
+    private long spinupStartTime = -1;
+
     public Outtake(HardwareMap hardwareMap, Mode mode) {
         shooter = new MotorEx(hardwareMap, "outtake");
         shooter.setInverted(true);
@@ -63,6 +68,10 @@ public class Outtake {
         if (mode == Mode.POWER) {
             motorPower = clamp(x, 0.0, 1.0);
         } else { // RPM MODE
+            if (x != targetRPM) {
+                spinupStartTime = -1;
+                inRangeStartTime = -1;
+            }
             targetRPM = x;
         }
     }
@@ -106,7 +115,36 @@ public class Outtake {
         return 0.00211836 * Math.pow(range, 3) - 0.614769 * Math.pow(range, 2) + 65.69185 * range + 1508.69255;
     }
 
+    // Within the range and has been in range for spinupInRangeMinTime
     public boolean inRange(double tolerance) {
-        return Math.abs(currentRPM - targetRPM) <= tolerance;
+        long currentTime = System.currentTimeMillis();
+        if (spinupStartTime == -1)
+        {
+            spinupStartTime = currentTime;
+        }
+
+        boolean withinTolerance = Math.abs(currentRPM - targetRPM) <= tolerance;
+
+        if (withinTolerance)
+        {
+            if (inRangeStartTime == -1)
+                inRangeStartTime = currentTime;
+        }
+        else
+        {
+                inRangeStartTime = -1;
+        }
+
+        boolean inRangeLongEnough = inRangeStartTime >= 0 && (currentTime - inRangeStartTime) >= spinupInRangeMinTime;
+        boolean spunPastMaxTime = (currentTime - spinupStartTime) >= spinupMaxTime;
+
+        if (inRangeLongEnough || spunPastMaxTime)
+        {
+            spinupStartTime = -1;
+            inRangeStartTime = -1;
+            return true;
+        }
+
+        return false;
     }
 }
