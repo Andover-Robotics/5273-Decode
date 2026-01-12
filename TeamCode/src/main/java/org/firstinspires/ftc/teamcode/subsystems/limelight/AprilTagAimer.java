@@ -51,7 +51,7 @@ public class AprilTagAimer {
         double dz = goalAprilTagHeight - cameraHeight;
 
         // In 3d to get point-to-point distance
-        double range = Math.sqrt(horizontalDistance * horizontalDistance + dz * dz);
+        double range = Math.hypot(horizontalDistance, dz);
 
         double desiredHeading = Math.atan2(dy, dx);
         double currentHeading = robotPose.heading.toDouble();
