@@ -164,7 +164,14 @@ public class BotPeriodics {
             if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
                 shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
             }
-            turnCorrection = 0.9 * lastTurnCorrection;
+            else {
+                // localized handles
+            }
+
+            // turnCorrection = 0.9 * lastTurnCorrection; - we don't want this
+        }
+        else {
+            turnCorrection = 0;
         }
     }
 }

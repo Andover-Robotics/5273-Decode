@@ -66,8 +66,7 @@ public class AprilTagTester extends LinearOpMode {
                     }
                 }
 
-                // Use the last computed correction between updates, but slowly decay it
-                turnCorrection = 0.9 * lastTurnCorrection;
+                // turnCorrection = 0.9 * lastTurnCorrection; - don't want this
             } else {
                 turnCorrection = 0;
             }

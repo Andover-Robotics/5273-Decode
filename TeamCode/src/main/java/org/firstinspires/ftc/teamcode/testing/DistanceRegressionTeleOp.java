@@ -97,7 +97,13 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
             if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
                 shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
             }
-            turnCorrection = 0.9 * lastTurnCorrection;  // smooth decay
+            else {
+                // localized handles
+            }
+            // turnCorrection = 0.9 * lastTurnCorrection; - don't want this
+        }
+        else {
+            turnCorrection = 0; // repeated just for clarity across opmodes
         }
 
         //drivetrain control
