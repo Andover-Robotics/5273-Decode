@@ -79,6 +79,9 @@ public class Bot extends BotPeriodics {
         if (g2.gamepad.right_bumper) {
             applyPreSpinRPM();
         }
+        else {
+            outtake.stop();
+        }
 
         if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
         else intake.stop();
@@ -125,6 +128,9 @@ public class Bot extends BotPeriodics {
         // Allow press-and-hold pre-spin while in QuickOuttake (before running actions)
         if (g2.gamepad.right_bumper) {
             applyPreSpinRPM();
+        }
+        else {
+            outtake.stop();
         }
 
         if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.X)) {
