@@ -180,19 +180,11 @@ public class Bot extends BotPeriodics {
     }
 
     private void applyPreSpinRPM() {
-        double range = aprilTag.getRange();
-        double rpm;
-        if (Double.isNaN(range) || range <= 0) {
-            rpm = INTAKE_MIN_RPM;
-        } else {
-            double reg = outtake.getRegressionRPM(range);
-            rpm = Math.max(reg, INTAKE_MIN_RPM);
-        }
-        outtake.set(rpm); // RPM mode: set shooter target RPM
+        outtake.set(getTargetRPM()); // RPM mode: set shooter target RPM
     }
 
     private Action actionNonIndexedDump() {
-        final double rpm = getTargetRpm() * QUICKSPIN_OUTTAKE_RPM_SCALE;
+        final double rpm = getTargetRPM() * QUICKSPIN_OUTTAKE_RPM_SCALE;
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),
                 new InstantAction(() -> outtake.set(rpm)),
@@ -221,7 +213,7 @@ public class Bot extends BotPeriodics {
             return new InstantAction(() -> {});
         }
 
-        final double rpm = getTargetRpm();
+        final double rpm = getTargetRPM();
 
         return new SequentialAction(
                 new InstantAction(() -> indexer.setIntaking(false)),
@@ -252,10 +244,11 @@ public class Bot extends BotPeriodics {
                 indexer.findBestSlotForColor(Indexer.ArtifactColor.PURPLE);
 
         if (slot == null) {
-            return new InstantAction(() -> {});
+            return new InstantAction(() -> {
+            });
         }
 
-        final double rpm = getTargetRpm();
+        final double rpm = getTargetRPM();
 
         return new SequentialAction(
                 new InstantAction(actuator::down),
@@ -279,9 +272,5 @@ public class Bot extends BotPeriodics {
                 new InstantAction(outtake::stop),
                 new InstantAction(actuator::down)
         );
-    }
-    private double getTargetRpm() {
-        double range = aprilTag.getRange();
-        return outtake.getRegressionRPM(range);
     }
 }
