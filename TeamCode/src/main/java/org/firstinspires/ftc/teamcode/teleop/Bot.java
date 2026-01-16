@@ -76,12 +76,15 @@ public class Bot extends BotPeriodics {
         //double rightTrigger = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
         // Press-and-hold right bumper to spin up shooter while in Intake
-        if (g2.gamepad.right_bumper) {
-            applyPreSpinRPM();
+        if (!actionHost.isRunning()) {
+            if (g2.gamepad.right_bumper) {
+                state = FSM.QuickOuttake;
+                applyPreSpinRPM();
+            } else {
+                outtake.stop();
+            }
         }
-        else {
-            outtake.stop();
-        }
+
 
         if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
         else intake.stop();
@@ -126,16 +129,18 @@ public class Bot extends BotPeriodics {
 
     private void handleQuickOuttakeState() {
         // Allow press-and-hold pre-spin while in QuickOuttake (before running actions)
-        if (g2.gamepad.right_bumper) {
-            applyPreSpinRPM();
-        }
-        else {
-            outtake.stop();
+        if (!actionHost.isRunning()) {
+            if (g2.gamepad.right_bumper) {
+                applyPreSpinRPM();
+            } else {
+                outtake.stop();
+            }
         }
 
         if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.X)) {
             actionHost.start(actionNonIndexedDump());
             rumbledAlready = false;
+            state = FSM.Intake;
         }
         if (g2.wasJustPressed(GamepadKeys.Button.BACK)) {
             actionHost.abort();
