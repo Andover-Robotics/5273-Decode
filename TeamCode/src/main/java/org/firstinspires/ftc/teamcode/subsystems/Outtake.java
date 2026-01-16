@@ -35,7 +35,7 @@ public class Outtake {
     // Mode + state
     public Mode mode;
     private double motorPower = 0.0;
-    private double targetRPM = 0.0;
+    public static double targetRPM = 2800.0; // without seeing any tags
     private double currentRPM = 0.0;
 
     private final double TPR = 28.0;   // encoder ticks per rotation
