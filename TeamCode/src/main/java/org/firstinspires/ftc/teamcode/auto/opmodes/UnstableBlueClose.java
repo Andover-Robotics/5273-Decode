@@ -12,7 +12,7 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 @Autonomous(name = "Unstable-Blue-Close", group = "Autonomous")
-public class BlueClose extends LinearOpMode {
+public class UnstableBlueClose extends LinearOpMode {
 
     // START POSE
     public static double startX = 0;

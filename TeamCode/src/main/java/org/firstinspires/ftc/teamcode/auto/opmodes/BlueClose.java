@@ -5,6 +5,8 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -14,8 +16,8 @@ import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 @Config
-@Autonomous(name = "Blue No Motif Simple", group = "Autonomous")
-public class BlueCloseNoMotif extends LinearOpMode {
+@Autonomous(name = "Blue Close Auto", group = "Autonomous")
+public class BlueClose extends LinearOpMode {
 
     //public static double OBELISK_X = 0;
     //public static double OBELISK_Y = 38;
@@ -30,10 +32,11 @@ public class BlueCloseNoMotif extends LinearOpMode {
     public static double INTAKE2_Y = 75;
     public static double INTAKE_FORWARD_DIST = 8;
 
-    public static double PARK_X = -22;
-    public static double PARK_Y = 80;
+    public static double PARK_X = -6;
+    public static double PARK_Y = 68;
 
-    public static int SHOOT_RPM = 3580;
+    public static int SHOOT_RPM = 4010;
+    public static int timeToStartOuttakeBeforeToOuttake = 1;
 
     @Override
     public void runOpMode() {
@@ -66,16 +69,25 @@ public class BlueCloseNoMotif extends LinearOpMode {
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
 
         /*
-        org.firstinspires.ftc.teamcode.auto.utils.Action toObelisk = drive.actionBuilder(startPose)
+        Action toObelisk = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(obeliskPose.position, obeliskPose.heading)
                 .stopAndAdd(botActions.actionScanObelisk())
                 .build();
         */
 
-        Action toShoot = drive.actionBuilder(startPose)
-                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
-                .build();
+        Action toShoot = new SequentialAction(
+                new ParallelAction(
+                        drive.actionBuilder(startPose)
+                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                .build(),
+
+                        new SequentialAction(
+                                new SleepAction(0), // no need
+                                botActions.actionQuickOuttake(SHOOT_RPM)
+                        )
+                )
+        );
+
 
         Action toIntakeStart1 = drive.actionBuilder(shootingPose)
                 .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
@@ -102,10 +114,18 @@ public class BlueCloseNoMotif extends LinearOpMode {
                 botActions.actionIntakeOneCycle(false)
         );
 
-        Action backToShoot1 = drive.actionBuilder(intake1Pose3)
-                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
-                .build();
+        Action backToShoot1 = new SequentialAction(
+                new ParallelAction(
+                        drive.actionBuilder(intake1Pose3)
+                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                .build(),
+
+                        new SequentialAction(
+                                new SleepAction(timeToStartOuttakeBeforeToOuttake),
+                                botActions.actionQuickOuttake(SHOOT_RPM)
+                        )
+                )
+        );
 
         Action toIntakeStart2 = drive.actionBuilder(shootingPose)
                 .strafeToLinearHeading(intake2PoseStart.position, intake2PoseStart.heading)
@@ -132,10 +152,20 @@ public class BlueCloseNoMotif extends LinearOpMode {
                 botActions.actionIntakeOneCycle(false)
         );
 
-        Action backToShoot2 = drive.actionBuilder(intake2Pose3)
-                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
-                .build();
+        Action backToShoot2 = new SequentialAction(
+                new ParallelAction(
+                        drive.actionBuilder(intake2Pose3)
+                                .strafeTo(new Vector2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST, INTAKE2_Y))
+                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                .build(),
+
+                        new SequentialAction(
+                                new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
+                                botActions.actionQuickOuttake(SHOOT_RPM)
+                        )
+                )
+        );
+
 
         Action toPark = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(
