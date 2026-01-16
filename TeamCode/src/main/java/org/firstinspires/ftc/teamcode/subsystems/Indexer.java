@@ -26,6 +26,8 @@ public class Indexer {
     public static int dashTargetSlot = -1; // -1 = disabled; 0/1/2 = slot
     public static boolean ENABLE_AUTO_ADVANCE = true;
 
+    public static boolean ALWAYS_SEEK_EMPTY_WHILE_INTAKING = true;
+
     // Full+Unknown rescan toggle
     public static boolean ENABLE_FULL_UNKNOWN_SCAN = true;
 
@@ -76,7 +78,7 @@ public class Indexer {
     // Internal state
     private IndexerState state = IndexerState.zero;
     private boolean intaking = true;
-    private boolean loaded = false;   // anything present
+    private boolean loaded = false;   // "anything present" (sensor OR stored memory)
     private boolean noEmpty = false;  // FULL: true when there are NO stored EMPTY slots
 
     public boolean isFull() { return noEmpty; }
@@ -125,6 +127,7 @@ public class Indexer {
             slot.wasEmpty = true;
             slot.fillingHits = 0;
             slot.autoAdvanceArmed = false;
+            slot.fillCycleActive = false;
         }
         recomputeNoEmpty();
     }
@@ -138,6 +141,7 @@ public class Indexer {
             slot.wasEmpty = true;
             slot.fillingHits = 0;
             slot.autoAdvanceArmed = false;
+            slot.fillCycleActive = false;
         }
         recomputeNoEmpty();
     }
@@ -216,7 +220,8 @@ public class Indexer {
     // 2) Update loaded state and servo control
     // 3) Classify the slot under the sensor and optionally auto-advance
     // 4) Recompute FULL flag
-    // 5) If full+unknown, optionally move to unknown slots for rescan
+    // 5) If intaking and any EMPTY exists, always seek an EMPTY slot (skip UNKNOWN too)
+    // 6) If full and still have UNKNOWN slots, optionally move to unknown slots for rescan
     public void update() {
         handleDashboardCommands();
         refreshLoadedAndServo();
@@ -227,6 +232,18 @@ public class Indexer {
 
         // Update full flag every loop based on stored memory
         recomputeNoEmpty();
+
+        // This skips UNKNOWN too when an EMPTY exists.
+        if (ALWAYS_SEEK_EMPTY_WHILE_INTAKING && intaking && !noEmpty &&
+                isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
+
+            if (slot(state).color != ArtifactColor.EMPTY) {
+                IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.EMPTY);
+                if (target != null) {
+                    moveTo(target);
+                }
+            }
+        }
 
         // If full and still have UNKNOWN slots, go look at them (intaking only)
         if (ENABLE_FULL_UNKNOWN_SCAN && intaking && noEmpty && anyUnknownStored()) {
@@ -298,6 +315,7 @@ public class Indexer {
         slot.wasEmpty = isEmpty;
         slot.fillingHits = 0;
         slot.autoAdvanceArmed = false;
+        slot.fillCycleActive = false;
 
         recomputeNoEmpty();
     }
@@ -350,39 +368,46 @@ public class Indexer {
                 }
             }
 
-            // Auto-advance: fill event on current slot -> after forced hits -> move to an EMPTY slot
+            // Auto-advance: latch empty->nonempty fill cycle and count raw presence hits
             if (ENABLE_AUTO_ADVANCE && intaking && s == state &&
                     isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
 
-                // Only auto-advance when this slot is supposedly empty in memory
-                boolean storedEmpty = (slot.color == ArtifactColor.EMPTY);
+                boolean sensorNonEmpty = hasArtifact;
 
-                // If we were empty and now see an artifact, arm and count hits (raw presence)
-                if (storedEmpty && hasArtifact) {
-                    slot.autoAdvanceArmed = true;
-                    slot.fillingHits++;
-                } else if (!hasArtifact) {
-                    // Seeing empty resets the counter/arming
-                    slot.fillingHits = 0;
-                    slot.autoAdvanceArmed = false;
+                // Start fill cycle only on a physical empty->nonempty transition (rising edge)
+                if (!slot.fillCycleActive) {
+                    if (slot.wasEmpty && sensorNonEmpty) {
+                        slot.fillCycleActive = true;
+                        slot.fillingHits = 0;
+                    }
                 }
 
-                if (slot.autoAdvanceArmed &&
-                        slot.fillingHits >= requiredNonEmptyHitsToAdvance()) {
-
-                    // Try to go to another EMPTY slot (cyclic search to stay efficient)
-                    IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.EMPTY);
-
-                    if (target != null) {
-                        moveTo(target);
+                if (slot.fillCycleActive) {
+                    if (sensorNonEmpty) {
+                        slot.fillingHits++;
                     } else {
-                        // No EMPTY slots exist => full
-                        noEmpty = true;
+                        // If it went empty again, abort the cycle
+                        slot.fillCycleActive = false;
+                        slot.fillingHits = 0;
                     }
 
-                    // Reset counters for this slot
-                    slot.fillingHits = 0;
-                    slot.autoAdvanceArmed = false;
+                    if (slot.fillCycleActive &&
+                            slot.fillingHits >= requiredNonEmptyHitsToAdvance()) {
+
+                        // Try to go to another EMPTY slot (cyclic search to stay efficient)
+                        IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.EMPTY);
+
+                        if (target != null) {
+                            moveTo(target);
+                        } else {
+                            // No EMPTY slots exist => full
+                            noEmpty = true;
+                        }
+
+                        // End cycle regardless
+                        slot.fillCycleActive = false;
+                        slot.fillingHits = 0;
+                    }
                 }
             }
 
@@ -390,16 +415,16 @@ public class Indexer {
             slot.wasEmpty = !hasArtifact;
 
             if (telemetry != null && s == currentSlot) {
-                int totalHits = slot.obs.totalHits();
+                int totalHitsTelemetry = slot.obs.totalHits();
                 telemetry.addData("Loaded", loaded);
                 telemetry.addData("Full(noEmpty)", noEmpty);
                 telemetry.addData("Slot " + s + " hit %",
                         String.format(
                                 "G: %.0f%%, P: %.0f%%, E: %.0f%%, U: %.0f%%",
-                                totalHits > 0 ? slot.obs.greenHits * 100.0 / totalHits : 0,
-                                totalHits > 0 ? slot.obs.purpleHits * 100.0 / totalHits : 0,
-                                totalHits > 0 ? slot.obs.emptyHits * 100.0 / totalHits : 0,
-                                totalHits > 0 ? slot.obs.unknownHits * 100.0 / totalHits : 0
+                                totalHitsTelemetry > 0 ? slot.obs.greenHits * 100.0 / totalHitsTelemetry : 0,
+                                totalHitsTelemetry > 0 ? slot.obs.purpleHits * 100.0 / totalHitsTelemetry : 0,
+                                totalHitsTelemetry > 0 ? slot.obs.emptyHits * 100.0 / totalHitsTelemetry : 0,
+                                totalHitsTelemetry > 0 ? slot.obs.unknownHits * 100.0 / totalHitsTelemetry : 0
                         ));
                 colorSensor.addTelemetry(telemetry);
             }
@@ -563,8 +588,10 @@ public class Indexer {
         ArtifactColor color = ArtifactColor.UNKNOWN;
         SlotObservation obs = new SlotObservation();
         boolean wasEmpty = true;
-        int fillingHits = 0; // counts non empty (sensor) observations after empty to nonempty while stored empty
-        boolean autoAdvanceArmed = false; // armed during fill process
+
+        int fillingHits = 0;          // counts sensorNonEmpty hits during a fill cycle
+        boolean autoAdvanceArmed = false; // kept for compatibility; no longer required
+        boolean fillCycleActive = false;  // latched after stored EMPTY + sensor nonempty
     }
 
     private static class SlotObservation {
