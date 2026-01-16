@@ -11,8 +11,8 @@ import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import com.acmerobotics.dashboard.config.Config;
 
 @Config
-@Autonomous(name = "Blue-Far", group = "Autonomous")
-public class BlueFar extends LinearOpMode {
+@Autonomous(name = "Unstable-Red-Close", group = "Autonomous")
+public class UnstableRedClose extends LinearOpMode {
 
     // START POSE
     public static double startX = 0;

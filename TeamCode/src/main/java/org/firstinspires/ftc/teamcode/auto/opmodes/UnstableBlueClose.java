@@ -11,31 +11,32 @@ import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import com.acmerobotics.dashboard.config.Config;
 
 @Config
-@Autonomous(name = "Red-Far", group = "Autonomous")
-public class RedFar extends LinearOpMode {
+@Autonomous(name = "Unstable-Blue-Close", group = "Autonomous")
+public class UnstableBlueClose extends LinearOpMode {
 
     // START POSE
     public static double startX = 0;
     public static double startY = 0;
-    public static double startHeadingDeg = 180;
+    public static double startHeadingDeg = 0;
 
     // SHOOT POSITION
     public static double shootX = -10;
-    public static double shootY = 10;
+    public static double shootY = 24;
 
     // PARK POSITION
     public static double parkX = 0;
     public static double parkY = 100;
 
     // OBELISK SCAN POSITION
-    public static double obeliskScanX = 0;
+    public static double obeliskScanX = -20;
     public static double obeliskScanY = 50;
 
     // HEADINGS
-    public static double intakeHeadingDeg = 180;
-    public static double outtakeHeadingDeg = 135;
-    public static double obeliskScanHeadingDeg = 90;
+    public static double intakeHeadingDeg = 0;
+    public static double outtakeHeadingDeg = -45;
+    public static double obeliskScanHeadingDeg = -90;
 
+    // ARTIFACTS
     public static double[][] artifactX = {
             {-10, -5, 0, 5},  // Row 0
             {-10, -5, 0, 5},  // Row 1
@@ -50,7 +51,7 @@ public class RedFar extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Initialize hardware and drive
-        Hardware hardware = new Hardware(hardwareMap, telemetry);;
+        Hardware hardware = new Hardware(hardwareMap, telemetry);
 
         // Convert dashboard fields to Pose2d/Vector2d
         Pose2d startPose = new Pose2d(startX, startY, Math.toRadians(startHeadingDeg));

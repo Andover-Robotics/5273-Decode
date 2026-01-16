@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -34,7 +35,8 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
     public static double PARK_X = -6;
     public static double PARK_Y = 68;
 
-    public static int SHOOT_RPM = 3580;
+    public static int SHOOT_RPM = 4010;
+    public static int timeToStartOuttakeBeforeToOuttake = 1;
 
     @Override
     public void runOpMode() {
@@ -69,14 +71,15 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
         Action toShoot = new SequentialAction(
                 new ParallelAction(
-                        drive.actionBuilder(obeliskPose)
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(3)))
+                        drive.actionBuilder(startPose)
+                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                                 .build(),
-                        /*botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 0)*/
-                        botActions.indexerRotateForMotif(hardware.aprilTag.getObeliskId(), 0)
-                ),
 
-                botActions.actionOuttake(SHOOT_RPM)
+                        new SequentialAction(
+                                new SleepAction(0), // no need
+                                botActions.actionQuickOuttake(SHOOT_RPM)
+                        )
+                )
         );
 
         Action toIntakeStart1 = drive.actionBuilder(shootingPose)
@@ -95,10 +98,12 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                         drive.actionBuilder(intake1Pose3)
                                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                                 .build(),
-                        /*botActions.actionOuttakeOffsetForMotif(hardware.aprilTag.getObeliskId(), 1)*/
-                        botActions.indexerRotateForMotif(hardware.aprilTag.getObeliskId(), 1)
-                ),
-                botActions.actionOuttake(SHOOT_RPM)
+
+                        new SequentialAction(
+                                new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
+                                botActions.actionQuickOuttake(SHOOT_RPM)
+                        )
+                )
         );
 
         Action toIntakeStart2 = drive.actionBuilder(shootingPose)
@@ -115,21 +120,15 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
         Action backToShoot2 = new SequentialAction(
                 new ParallelAction(
                         drive.actionBuilder(intake2Pose3)
-                                // dodge gate, keeps momentum like this
-                                .strafeTo(new Vector2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST, INTAKE2_Y))
-                                .strafeToLinearHeading(
-                                        shootingPose.position,
-                                        shootingPose.heading
-                                )
+                                .strafeTo(new Vector2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST, INTAKE2_Y))
+                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                                 .build(),
-                        /*botActions.actionOuttakeOffsetForMotif(
-                                hardware.aprilTag.getObeliskId(),
-                                2
-                        )*/
-                        botActions.indexerRotateForMotif(hardware.aprilTag.getObeliskId(), 2)
-                ),
 
-                botActions.actionOuttake(SHOOT_RPM)
+                        new SequentialAction(
+                                new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
+                                botActions.actionQuickOuttake(SHOOT_RPM)
+                        )
+                )
         );
 
         Action toPark = drive.actionBuilder(startPose)
