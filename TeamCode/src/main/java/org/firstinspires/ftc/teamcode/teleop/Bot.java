@@ -277,9 +277,6 @@ public class Bot extends BotPeriodics {
     }
     private double getTargetRpm() {
         double range = aprilTag.getRange();
-        if (Double.isNaN(range) || range <= 0) {
-            return shooterRPM;
-        }
         return outtake.getRegressionRPM(range);
     }
 }

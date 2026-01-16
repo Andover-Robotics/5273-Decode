@@ -44,6 +44,7 @@ public class Outtake {
     public static double spinupMaxTime = 4000; // ms
     private long inRangeStartTime = -1;
     private long spinupStartTime = -1;
+    public static double INTAKE_MIN_RPM = 3500.0;
 
     public Outtake(HardwareMap hardwareMap, Mode mode) {
         shooter = new MotorEx(hardwareMap, "outtake");
@@ -112,6 +113,9 @@ public class Outtake {
 
     public double getRegressionRPM(double range)
     {
+        if (Double.isNaN(range) || range <= 0) {
+            return INTAKE_MIN_RPM;
+        }
         return 0.00211836 * Math.pow(range, 3) - 0.614769 * Math.pow(range, 2) + 65.69185 * range + 1508.69255;
     }
 
