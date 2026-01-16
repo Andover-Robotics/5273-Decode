@@ -38,6 +38,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
     public static int SHOOT_RPM = 4010;
     public static int timeToStartOuttakeBeforeToOuttake = 1;
 
+    // has quick outtake and quick intake
     @Override
     public void runOpMode() {
         Hardware hardware = new Hardware(hardwareMap, telemetry);
