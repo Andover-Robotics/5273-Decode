@@ -16,6 +16,9 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 @Config
 public class RotationalTester extends OpMode {
     public static double TARGET_DEG = 90.0;
+    public static double TARGET_RATE_DEG = 180;
+    double goalRad;   // where we eventually want to go
+
 
     public static double HEADING_GAIN;        // kP
     public static double HEADING_VEL_GAIN ;    // kD
@@ -28,7 +31,7 @@ public class RotationalTester extends OpMode {
 
     // === Dashboard ===
     FtcDashboard dashboard;
-    double lastHeading = 0.0;
+    double lastHeading;
     double lastVel = 0.0;
     long lastTime;
     double targetRad;
@@ -45,7 +48,9 @@ public class RotationalTester extends OpMode {
         kS = MecanumDrive.PARAMS.kS;
         kV = MecanumDrive.PARAMS.kV;
         kA = MecanumDrive.PARAMS.kA;
-        lastTime = 0;
+        lastTime = System.nanoTime();
+        lastHeading = targetRad;
+        goalRad =targetRad;
         // Dashboard telemetry
         dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
@@ -63,8 +68,12 @@ public class RotationalTester extends OpMode {
         lastTime = now;
         if (dt <= 0) return;
 
+        double maxStep = Math.toRadians(TARGET_RATE_DEG) * dt;
+        double diff = wrapHeading(targetRad - goalRad);
+        diff = clamp(diff, -maxStep, maxStep);
+        goalRad = wrapHeading(goalRad + diff);
         // --- Error ---
-        double error = wrapHeading(targetRad - heading);
+        double error = wrapHeading(goalRad - heading);
 
         // --- Velocity & accel ---
         double vel = (heading - lastHeading) / dt;
@@ -99,6 +108,7 @@ public class RotationalTester extends OpMode {
         // --- Telemetry ---
         telemetry.addData("Heading (deg)", Math.toDegrees(heading));
         telemetry.addData("Target (deg)", Math.toDegrees(targetRad));
+        telemetry.addData("Goal (deg)", Math.toDegrees(goalRad));
         telemetry.addData("Error (deg)", Math.toDegrees(error));
         telemetry.addData("Angular vel (deg/s)", Math.toDegrees(vel));
         telemetry.addData("Turn power", turnPower);
@@ -108,6 +118,9 @@ public class RotationalTester extends OpMode {
         while (radians > Math.PI) radians -= 2.0 * Math.PI;
         while (radians < -Math.PI) radians += 2.0 * Math.PI;
         return radians;
+    }
+    private double clamp(double v, double min, double max) {
+        return Math.max(min, Math.min(max, v));
     }
 
 }
