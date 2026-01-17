@@ -46,11 +46,32 @@ public class Bot {
     private double turnCorrection = 0.0;
 
     public enum FSM {
+        MotifSelection,
         Intake,
         QuickOuttake,
         SortOuttake,
         Endgame
     }
+
+    public Indexer.ArtifactColor[] motif;
+
+    private Indexer.ArtifactColor[] PGP = {
+            Indexer.ArtifactColor.PURPLE,
+            Indexer.ArtifactColor.GREEN,
+            Indexer.ArtifactColor.PURPLE
+    };
+
+    private Indexer.ArtifactColor[] PPG = {
+            Indexer.ArtifactColor.PURPLE,
+            Indexer.ArtifactColor.PURPLE,
+            Indexer.ArtifactColor.GREEN
+    };
+
+    private Indexer.ArtifactColor[] GPP = {
+            Indexer.ArtifactColor.GREEN,
+            Indexer.ArtifactColor.PURPLE,
+            Indexer.ArtifactColor.PURPLE
+    };
 
     public FSM state;
 
@@ -74,7 +95,7 @@ public class Bot {
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
         telemetry = tele;
-        state = FSM.Intake;
+        state = FSM.MotifSelection;
     }
 
     public void teleopInit() {
@@ -82,7 +103,7 @@ public class Bot {
         indexer.initializeColors(Indexer.ArtifactColor.EMPTY);
         indexer.moveTo(Indexer.IndexerState.zero);
         indexer.setIntaking(true);
-        state = FSM.Intake;
+        state = FSM.MotifSelection;
     }
 
     public void teleopTick() {
@@ -97,6 +118,20 @@ public class Bot {
         }
 
         switch (state) {
+            case MotifSelection:
+                if (g2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+                    motif = PGP;
+                    state = FSM.Intake;
+                }
+                else if (g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+                    motif = PPG;
+                    state = FSM.Intake;
+                }
+                else if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+                    motif = GPP;
+                    state = FSM.Intake;
+                }
+                break;
             case Intake:
                 handleIntakeState();
             case QuickOuttake:
@@ -157,6 +192,8 @@ public class Bot {
         if (g2.wasJustPressed(GamepadKeys.Button.X)) {
             Actions.runBlocking(fireWithPeriodic(actionNonIndexedDump()));
         }
+        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
+            indexer.prepareQuickspin(motif);
         if (g2.wasJustPressed(GamepadKeys.Button.A)) {
             state = FSM.Intake;
             indexer.setIntaking(true);
