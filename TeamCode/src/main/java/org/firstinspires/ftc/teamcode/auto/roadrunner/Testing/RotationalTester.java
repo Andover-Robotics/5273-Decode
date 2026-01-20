@@ -8,20 +8,21 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 
 
-@Config
+
 public class RotationalTester extends OpMode {
     public static double TARGET_DEG = 90.0;
     public static double TARGET_RATE_DEG = 180;
-    double goalRad;   // where we eventually want to go
+    double goalRad; // where we eventually want to go
 
 
-    public static double HEADING_GAIN;        // kP
-    public static double HEADING_VEL_GAIN ;    // kD
+    public static double HEADING_GAIN; // kP
+    public static double HEADING_VEL_GAIN ; // kD
 
     public static double kS;
     public static double kV;
@@ -40,7 +41,7 @@ public class RotationalTester extends OpMode {
     public static double SETTLE_VEL_DEG = 5.0;
     @Override
     public void init() {
-        // Hardware setup
+// Hardware setup
         drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
         targetRad = drive.localizer.getPose().heading.toDouble();
         HEADING_GAIN = MecanumDrive.PARAMS.headingGain;
@@ -48,10 +49,11 @@ public class RotationalTester extends OpMode {
         kS = MecanumDrive.PARAMS.kS;
         kV = MecanumDrive.PARAMS.kV;
         kA = MecanumDrive.PARAMS.kA;
+        lastTime = 0;
         lastTime = System.nanoTime();
         lastHeading = targetRad;
         goalRad =targetRad;
-        // Dashboard telemetry
+// Dashboard telemetry
         dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
     }
@@ -72,23 +74,24 @@ public class RotationalTester extends OpMode {
         double diff = wrapHeading(targetRad - goalRad);
         diff = clamp(diff, -maxStep, maxStep);
         goalRad = wrapHeading(goalRad + diff);
-        // --- Error ---
+// --- Error ---
+
         double error = wrapHeading(goalRad - heading);
 
-        // --- Velocity & accel ---
+// --- Velocity & accel ---
         double vel = (heading - lastHeading) / dt;
         double accel = (vel - lastVel) / dt;
 
         lastHeading = heading;
         lastVel = vel;
 
-        // --- Feedforward ---
+// --- Feedforward ---
         double ff =
                 Math.signum(vel) * kS +
                         kV * vel +
                         kA * accel;
 
-        // --- Feedback ---
+// --- Feedback ---
         double fb =
                 HEADING_GAIN * error -
                         HEADING_VEL_GAIN * vel;
@@ -97,7 +100,7 @@ public class RotationalTester extends OpMode {
         turnPower = Math.max(-1.0, Math.min(1.0, turnPower));
         drive.setDrivePowers(new PoseVelocity2d( new Vector2d(0,0), turnPower));
 
-        // --- Advance target when settled ---
+// --- Advance target when settled ---
         boolean settled =
                 Math.abs(Math.toDegrees(error)) < SETTLE_ERROR_DEG &&
                         Math.abs(Math.toDegrees(vel)) < SETTLE_VEL_DEG;
@@ -105,7 +108,7 @@ public class RotationalTester extends OpMode {
         if (settled) {
             targetRad += Math.toRadians(TARGET_DEG);
         }
-        // --- Telemetry ---
+// --- Telemetry ---
         telemetry.addData("Heading (deg)", Math.toDegrees(heading));
         telemetry.addData("Target (deg)", Math.toDegrees(targetRad));
         telemetry.addData("Goal (deg)", Math.toDegrees(goalRad));
