@@ -47,7 +47,7 @@ public class BotPeriodics {
     protected int goalTagID;
     protected String colorGoalSelected;
 
-    public static double shooterRPM = 2900;
+    public static double targetRPM = 0;
     protected static final long AIM_UPDATE_INTERVAL_MS = 50;
 
     public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
@@ -162,7 +162,7 @@ public class BotPeriodics {
             }
 
             if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
-                shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+                targetRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
             }
             else {
                 // localized handles
@@ -173,6 +173,10 @@ public class BotPeriodics {
         else {
             turnCorrection = 0;
         }
+    }
+
+    protected double getTargetRPM() {
+        return targetRPM;
     }
 }
 

@@ -30,7 +30,7 @@ public class Outtake {
     public static double p = 0.000267;
     public static double i = 0.0;
     public static double d = 0.0;
-    public static double f = 0.0002;   // 1 / maxrpm and then tuned
+    public static double f = 0.00020069;   // 1 / maxrpm and then tuned
 
     // Mode + state
     public Mode mode;
