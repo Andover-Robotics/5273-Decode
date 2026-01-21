@@ -85,10 +85,10 @@ public final class MecanumDrive {
         //axial 5 0.75 heading 2 0 // lateral 3.5 0
         public double kS = 1.85;
         public double kV = 0.00027;
-        public double kA = 0.000075;
+        public double kA = 0.00007;
 
 
-        // path profile parameters (in inches)
+        // path profile parameters in inches)
         public double maxWheelVel = 40;
         public double minProfileAccel = -60;
         public double maxProfileAccel = 60;
@@ -107,7 +107,7 @@ public final class MecanumDrive {
         // xerro 1.7 // y error .5 / heaing error .7
         public double axialVelGain = 1;
         public double lateralVelGain = .75;
-        public double headingVelGain = .5; // shared with turn
+        public double headingVelGain = .125; // shared with turn
     }
 
 
