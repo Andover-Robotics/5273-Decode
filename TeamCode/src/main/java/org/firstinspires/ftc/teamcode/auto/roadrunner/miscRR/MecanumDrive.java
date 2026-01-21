@@ -104,7 +104,7 @@ public final class MecanumDrive {
         public double lateralGain = 3.5;
         public double headingGain = 3; // shared with turn
 
-
+        // xerro 1.7 // y error .5 / heaing error .7
         public double axialVelGain = 1;
         public double lateralVelGain = .75;
         public double headingVelGain = .5; // shared with turn
