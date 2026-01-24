@@ -95,6 +95,7 @@ public class BotActions {
                 new InstantAction(outtake::stop),
                 new InstantAction(actuator::down),
                 new InstantAction(() -> indexer.setIntaking(true)),
+                new InstantAction(indexer::initializeColors),
                 new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.zero))
         );
     }
@@ -150,7 +151,7 @@ public class BotActions {
     public  Action indexerRotateForMotif(int tagId, int row) {
         int rotations = 0;
 
-        if (row == 0 || row == 1) { // P P G
+        if (row == 0 || row == 1) { // G P P
             switch (tagId) {
                 case 21: rotations = 2; break;
                 case 22: rotations = 1; break;

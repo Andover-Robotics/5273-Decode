@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -74,12 +75,13 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 new ParallelAction(
                         drive.actionBuilder(startPose)
                                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                                .build(),
+                                .build()/*,
 
                         new SequentialAction(
                                 new SleepAction(0), // no need
                                 botActions.actionQuickOuttake(SHOOT_RPM)
                         )
+                        */
                 )
         );
 
@@ -98,12 +100,13 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 new ParallelAction(
                         drive.actionBuilder(intake1Pose3)
                                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                                .build(),
+                                .build()/*,
 
                         new SequentialAction(
                                 new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
                                 botActions.actionQuickOuttake(SHOOT_RPM)
                         )
+                        */
                 )
         );
 
@@ -123,12 +126,13 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                         drive.actionBuilder(intake2Pose3)
                                 .strafeTo(new Vector2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST, INTAKE2_Y))
                                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                                .build(),
+                                .build()/*,
 
                         new SequentialAction(
                                 new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
                                 botActions.actionQuickOuttake(SHOOT_RPM)
                         )
+                        */
                 )
         );
 
