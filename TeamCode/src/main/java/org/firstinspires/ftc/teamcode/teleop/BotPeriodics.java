@@ -47,7 +47,7 @@ public class BotPeriodics {
     protected int goalTagID;
     protected String colorGoalSelected;
 
-    public static double targetRPM = 0;
+    public static double targetRPM = 3800;
     protected static final long AIM_UPDATE_INTERVAL_MS = 50;
 
     public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
@@ -130,6 +130,11 @@ public class BotPeriodics {
         double lx = g1.getLeftX();
         double ly = g1.getLeftY();
         double rx = g1.getRightX();
+
+
+        double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
+        else intake.stop();
 
         if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
         else movement.teleopTick(lx, ly, rx, turnCorrection);
