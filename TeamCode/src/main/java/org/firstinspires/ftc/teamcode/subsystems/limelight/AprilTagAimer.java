@@ -10,9 +10,9 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocaliz
 
 @Config
 public class AprilTagAimer {
-    public static double kP = 0.06;
+    public static double kP = 0.008;
     public static double kI = 0.0;
-    public static double kD = 0.0;
+    public static double kD = 0.0001;
     public static double kF = 0.12;
     public static double filter = 0.867;  // smoothing factor (1 = no filtering, 0 = very heavy smoothing)
     public static double maxIntegral = 1.0;
@@ -51,7 +51,7 @@ public class AprilTagAimer {
         double dz = goalAprilTagHeight - cameraHeight;
 
         // In 3d to get point-to-point distance
-        double range = Math.hypot(horizontalDistance, dz);
+        double range = Math.sqrt(horizontalDistance * horizontalDistance + dz * dz);
 
         double desiredHeading = Math.atan2(dy, dx);
         double currentHeading = robotPose.heading.toDouble();
