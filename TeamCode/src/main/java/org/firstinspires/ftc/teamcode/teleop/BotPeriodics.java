@@ -93,14 +93,15 @@ public class BotPeriodics {
         telemetry.addData("Indexer Voltages",
                 "Target: %.3f , Actual: %.3f",
                 indexer.getTargetVoltage(), indexer.getVoltage());
-        telemetry.addData("Outtake RPM",
-                "Target: %.1f, Actual: %.1f",
-                outtake.getTargetRPM(), outtake.getRPM());
+        telemetry.addData("Outtake RPM", outtake.getRPM());
+        telemetry.addData("Target RMP", outtake.getTargetRPM());
         telemetry.addData("Actuator up?", actuator.isActivated());
         telemetry.addData("Indexer Loaded?", indexer.isLoaded());
         telemetry.addData("April Lock", continuousAprilTagLock);
         telemetry.addData("Bot Range", aprilTag.getRange());
         telemetry.addData("Alliance selected", colorGoalSelected);
+        telemetry.addData("Turn Correction:", turnCorrection);
+        telemetry.addData("Last Turn Correction", lastTurnCorrection);
         for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
             telemetry.addData(
                     "Slot " + s.index,
@@ -146,31 +147,24 @@ public class BotPeriodics {
         }
 
         if (continuousAprilTagLock) {
-            lastTurnCorrection = 0;
-            turnCorrection = 0;
             long now = System.currentTimeMillis();
             if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
                 lastAimUpdate = now;
                 aprilTag.scanGoalTag();
                 double bearing = aprilTag.getBearing();
+
                 if (!Double.isNaN(bearing)) {
                     lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
+                    turnCorrection = lastTurnCorrection;
                 } else {
-                    lastTurnCorrection = 0;
-                    //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
+                    turnCorrection = 0;
                 }
             }
 
-            if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
-                targetRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+            if (!Double.isNaN(aprilTag.getRange())) {
+                targetRPM = outtake.getRegressionRPM(aprilTag.getRange());
             }
-            else {
-                // localized handles
-            }
-
-            // turnCorrection = 0.9 * lastTurnCorrection; - we don't want this
-        }
-        else {
+        } else {
             turnCorrection = 0;
         }
     }
