@@ -12,11 +12,9 @@ public class MainTeleop extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         Bot bot = new Bot(hardwareMap, telemetry, gamepad1, gamepad2);
-
         bot.teleopInit();
-
         waitForStart();
-
+        bot.teleopStart();
         while (opModeIsActive() && !isStopRequested()) {
             bot.teleopTick();
         }
