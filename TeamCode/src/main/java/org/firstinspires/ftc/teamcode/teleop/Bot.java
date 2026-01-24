@@ -130,6 +130,8 @@ public class Bot extends BotPeriodics {
         if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
             indexer.prepareQuickspin(new Indexer.ArtifactColor[]{Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE,Indexer.ArtifactColor.PURPLE});
         if (g2.wasJustPressed(GamepadKeys.Button.Y)) state = FSM.Endgame;
+        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
+            indexer.prepareQuickspin(motif);
 
         if(indexer.isLoaded() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){
             g1.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
@@ -169,7 +171,7 @@ public class Bot extends BotPeriodics {
             state = FSM.Intake;
         }
         if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
-            indexer.prepareQuickspin(new Indexer.ArtifactColor[]{Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE,Indexer.ArtifactColor.PURPLE});
+            indexer.prepareQuickspin(motif);
         if (g2.wasJustPressed(GamepadKeys.Button.BACK)) {
             actionHost.abort();
         }
