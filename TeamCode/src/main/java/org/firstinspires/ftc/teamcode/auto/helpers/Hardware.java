@@ -8,6 +8,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.subsystems.*;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
 
 public class Hardware {
     public final Intake intake;
