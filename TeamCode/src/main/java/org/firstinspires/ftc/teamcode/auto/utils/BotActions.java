@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
+import org.firstinspires.ftc.teamcode.teleop.Bot;
 
 
 public class BotActions {
@@ -59,18 +60,19 @@ public class BotActions {
         indexer.initializeColors(one, two, three);
     }
 
-    public Action actionNonIndexedDump(
-            double rpm,
-            double spinupTime,
-            double blastTime,
-            double blastPower
-    ) {
+    public Action actionNonIndexedDump(int shootRPM) {
+        final double rpm = shootRPM * Bot.QUICKSPIN_OUTTAKE_RPM_SCALE;
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),
                 new InstantAction(() -> outtake.set(rpm)),
-                new SleepAction(spinupTime),
-                new InstantAction(() -> indexer.setIndexerPower(blastPower)),
-                new SleepAction(blastTime),
+                new Action() {
+                    @Override
+                    public boolean run(TelemetryPacket packet) {
+                        return !outtake.inRange(100.0);
+                    }
+                },
+                new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),
+                new SleepAction(NON_INDEX_SPIN_TIME),
                 new InstantAction(indexer::stopIndexerPower),
                 new InstantAction(outtake::stop),
                 new InstantAction(actuator::down),
@@ -79,6 +81,8 @@ public class BotActions {
                 new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.zero))
         );
     }
+
+
 
     public Action actionQuickOuttake(int rpm) {
         return new SequentialAction(
