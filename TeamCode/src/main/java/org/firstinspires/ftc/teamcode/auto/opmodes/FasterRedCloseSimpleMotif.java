@@ -16,12 +16,12 @@ import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 @Config
-@Autonomous(name = "Red Close Auto", group = "Autonomous")
-public class RedClose extends LinearOpMode {
+@Autonomous(name = "Faster Simple Red Auto With Motif", group = "Autonomous")
+public class FasterRedCloseSimpleMotif extends LinearOpMode {
 
-    //public static double OBELISK_X = 0;
-    //public static double OBELISK_Y = 38;
-    //public static double OBELISK_HEADING_DEG = 300;
+    public static double OBELISK_X = 12;
+    public static double OBELISK_Y = 38;
+    public static double OBELISK_HEADING_DEG = 300;
 
     public static double SHOOT_X = 12;
     public static double SHOOT_Y = 42;
@@ -38,7 +38,7 @@ public class RedClose extends LinearOpMode {
     public static int SHOOT_RPM = 4010;
     public static int timeToStartOuttakeBeforeToOuttake = 1;
 
-    // has quick outtake, no quick intake
+    // has quick outtake and quick intake
     @Override
     public void runOpMode() {
         Hardware hardware = new Hardware(hardwareMap, telemetry);
@@ -55,13 +55,11 @@ public class RedClose extends LinearOpMode {
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(180));
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
 
-        /*
         Pose2d obeliskPose = new Pose2d(
                 OBELISK_X,
                 OBELISK_Y,
                 Math.toRadians(OBELISK_HEADING_DEG)
         );
-        */
 
         Pose2d shootingPose = new Pose2d(
                 SHOOT_X,
@@ -70,22 +68,16 @@ public class RedClose extends LinearOpMode {
         );
 
         Pose2d intake1PoseStart = new Pose2d(INTAKE_X, INTAKE1_Y, Math.toRadians(180));
-        Pose2d intake1Pose1 = new Pose2d(INTAKE_X - INTAKE_FORWARD_DIST, INTAKE1_Y, Math.toRadians(180));
-        Pose2d intake1Pose2 = new Pose2d(INTAKE_X - 2 * INTAKE_FORWARD_DIST, INTAKE1_Y, Math.toRadians(180));
         Pose2d intake1Pose3 = new Pose2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST - 4, INTAKE1_Y, Math.toRadians(180));
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(180));
-        Pose2d intake2Pose1 = new Pose2d(INTAKE_X - INTAKE_FORWARD_DIST, INTAKE2_Y, Math.toRadians(180));
-        Pose2d intake2Pose2 = new Pose2d(INTAKE_X - 2 * INTAKE_FORWARD_DIST, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2Pose3 = new Pose2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST - 4.5, INTAKE2_Y, Math.toRadians(180));
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(180));
 
-        /*
         Action toObelisk = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(obeliskPose.position, obeliskPose.heading)
                 .stopAndAdd(botActions.actionScanObelisk())
                 .build();
-        */
 
         Action toShoot = new SequentialAction(
                 new ParallelAction(
@@ -104,22 +96,8 @@ public class RedClose extends LinearOpMode {
                 .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
                 .build();
 
-        Action toIntake1_1 = new ParallelAction(
-                drive.actionBuilder(intake1PoseStart)
-                        .strafeToLinearHeading(intake1Pose1.position, intake1Pose1.heading)
-                        .build(),
-                botActions.actionIntakeOneCycle(true)
-        );
-
-        Action toIntake1_2 = new ParallelAction(
-                drive.actionBuilder(intake1Pose1)
-                        .strafeToLinearHeading(intake1Pose2.position, intake1Pose2.heading)
-                        .build(),
-                botActions.actionIntakeOneCycle(true)
-        );
-
         Action toIntake1_3 = new ParallelAction(
-                drive.actionBuilder(intake1Pose2)
+                drive.actionBuilder(intake1PoseStart)
                         .strafeToLinearHeading(intake1Pose3.position, intake1Pose3.heading)
                         .build(),
                 botActions.actionIntakeOneCycle(false)
@@ -142,22 +120,8 @@ public class RedClose extends LinearOpMode {
                 .strafeToLinearHeading(intake2PoseStart.position, intake2PoseStart.heading)
                 .build();
 
-        Action toIntake2_1 = new ParallelAction(
-                drive.actionBuilder(intake2PoseStart)
-                        .strafeToLinearHeading(intake2Pose1.position, intake2Pose1.heading)
-                        .build(),
-                botActions.actionIntakeOneCycle(true)
-        );
-
-        Action toIntake2_2 = new ParallelAction(
-                drive.actionBuilder(intake2Pose1)
-                        .strafeToLinearHeading(intake2Pose2.position, intake2Pose2.heading)
-                        .build(),
-                botActions.actionIntakeOneCycle(true)
-        );
-
         Action toIntake2_3 = new ParallelAction(
-                drive.actionBuilder(intake2Pose2)
+                drive.actionBuilder(intake2PoseStart)
                         .strafeToLinearHeading(intake2Pose3.position, intake2Pose3.heading)
                         .build(),
                 botActions.actionIntakeOneCycle(false)
@@ -201,15 +165,12 @@ public class RedClose extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
+                        toObelisk,
                         toShoot,
                         toIntakeStart1,
-                        toIntake1_1,
-                        toIntake1_2,
                         toIntake1_3,
                         backToShoot1,
                         toIntakeStart2,
-                        toIntake2_1,
-                        toIntake2_2,
                         toIntake2_3,
                         backToShoot2,
                         toPark
@@ -219,6 +180,7 @@ public class RedClose extends LinearOpMode {
         periodicThread.interrupt();
         try {
             periodicThread.join();
-        } catch (InterruptedException ignored) {}
+        } catch (InterruptedException ignored) {
+        }
     }
 }

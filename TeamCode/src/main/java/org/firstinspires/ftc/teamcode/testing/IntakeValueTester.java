@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
-@TeleOp(name = "Intake Value Tester", group = "Teleop")
+@TeleOp(name = "Intake Value Tester", group = "testing")
 public class IntakeValueTester extends LinearOpMode {
     Intake intake;
     Outtake outtake;

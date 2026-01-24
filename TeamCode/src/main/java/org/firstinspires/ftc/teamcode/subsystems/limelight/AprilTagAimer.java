@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.subsystems.limelight;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -10,13 +10,13 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocaliz
 
 @Config
 public class AprilTagAimer {
-    public static double kP = 0.01;
+    public static double kP = 0.06;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.00767;
+    public static double kF = 0.12;
     public static double filter = 0.867;  // smoothing factor (1 = no filtering, 0 = very heavy smoothing)
     public static double maxIntegral = 1.0;
-    public static double deadband = 0.67;
+    public static double deadband = 1;
     private double integral = 0;
     private double lastDerivative = 0.0;
     private double lastError = 0;

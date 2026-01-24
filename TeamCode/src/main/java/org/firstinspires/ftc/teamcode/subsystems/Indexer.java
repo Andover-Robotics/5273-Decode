@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -7,6 +6,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.CRServoPositionControl;
+import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.ColorSensorSystem;
 
 @Config
 public class Indexer {
@@ -63,7 +64,7 @@ public class Indexer {
     // Internal state
     private IndexerState state = IndexerState.zero;
     private boolean intaking = true;
-    private boolean loaded = false;
+    private boolean loaded = false; // true when all 3 slots are full (indiscriminate of color)
 
     // Per-slot state
     private final SlotState[] slots = {
@@ -102,7 +103,7 @@ public class Indexer {
             slot.color = initialColor;
             slot.obs.reset();
             slot.wasEmpty = true;
-            slot.advanceConsumed = false;
+            slot.fillingHits = 0;
         }
     }
 
@@ -113,7 +114,7 @@ public class Indexer {
             slot.color = colors[i];
             slot.obs.reset();
             slot.wasEmpty = true;
-            slot.advanceConsumed = false;
+            slot.fillingHits = 0;
         }
     }
 
@@ -246,9 +247,7 @@ public class Indexer {
         // Update empty tracking
         boolean isEmpty = (color == ArtifactColor.EMPTY || color == ArtifactColor.UNKNOWN);
         slot.wasEmpty = isEmpty;
-
-        // Reset auto-advance gating
-        slot.advanceConsumed = false;
+        slot.fillingHits = 0;
     }
 
     private double angleError(double a, double b) {
@@ -273,6 +272,7 @@ public class Indexer {
             // start a fresh count when an artifact newly appears
             if (slot.wasEmpty && hasArtifact) {
                 slot.obs.reset();
+                slot.fillingHits = 0;
             }
 
             slot.obs.record(instantColor);
@@ -302,17 +302,26 @@ public class Indexer {
 
             // Auto-advance (guarded by toggle)
             if (ENABLE_AUTO_ADVANCE && s == state && intaking && isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
-                boolean slotAlreadyFull = (slot.color == ArtifactColor.GREEN || slot.color == ArtifactColor.PURPLE);
-                if (!slotAlreadyFull && slot.wasEmpty && hasArtifact && !slot.advanceConsumed) {
-                    moveTo(state.next());
-                    slot.advanceConsumed = true;
+                if (hasArtifact) {
+                    // Count non-empty hits once somethings been detected
+                    if (slot.wasEmpty) {
+                        slot.fillingHits = 1;
+                    } else {
+                        slot.fillingHits++;
+                    }
+
+                    boolean colorSet = slot.color != ArtifactColor.EMPTY;
+                    if (colorSet && slot.fillingHits >= NON_EMPTY_HITS_TO_ADVANCE) {
+                        moveTo(state.next());
+                        slot.fillingHits = 0; // reset for the next slot
+                    }
                 }
             }
 
-            // Update empty memory / advance gating
+            // Update empty memory / reset fill counter
             slot.wasEmpty = !hasArtifact;
             if (slot.wasEmpty) {
-                slot.advanceConsumed = false; // allow next fill to advance
+                slot.fillingHits = 0;
             }
 
             // telemetry for current slot
@@ -456,7 +465,7 @@ public class Indexer {
         ArtifactColor color = ArtifactColor.UNKNOWN;
         SlotObservation obs = new SlotObservation();
         boolean wasEmpty = true;
-        boolean advanceConsumed = false;
+        int fillingHits = 0; // counts non empty observations after an empty to filled transition
     }
 
     private static class SlotObservation {
@@ -540,5 +549,4 @@ public class Indexer {
                 && slots[x].color == desired[1]
                 && slots[(x + 1) % 3].color == desired[2];
     }
-
 }

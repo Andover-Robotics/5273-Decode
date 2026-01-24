@@ -1,6 +1,4 @@
-package org.firstinspires.ftc.teamcode.teleop;
-
-import android.telephony.IccOpenLogicalChannelResponse;
+package org.firstinspires.ftc.teamcode.testing;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -12,6 +10,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.*;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
+
 @Config
 @TeleOp(name = "DistanceRegressionTeleOp", group = "AA_main")
 public class DistanceRegressionTeleOp extends LinearOpMode {
@@ -175,13 +176,13 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         }
 
         // Alliance selection
-        if (g2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
             goalTagID = 20;
             aprilTag.setGoalTagID(goalTagID); // blue
             colorGoalSelected = "Blue";
         }
 
-        if (g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.START)) {
             goalTagID = 24;
             aprilTag.setGoalTagID(goalTagID); // red
             colorGoalSelected = "Red";

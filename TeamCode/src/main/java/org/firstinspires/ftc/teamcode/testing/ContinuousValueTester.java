@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 
 
-import org.firstinspires.ftc.teamcode.subsystems.CRServoPositionControl;
+import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.CRServoPositionControl;
 
 @TeleOp(name = "ContinuousServoTester")
 

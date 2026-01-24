@@ -7,8 +7,8 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.ColorSensorSystem;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer.IndexerState;
 
@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer.IndexerState;
 public class ColorTester extends OpMode {
 
     private Indexer indexer;
+    private ColorSensorSystem colorSensor;
     GamepadEx gp2;
 
     @Override
@@ -27,6 +28,7 @@ public class ColorTester extends OpMode {
         );
 
         indexer = new Indexer(hardwareMap);
+        colorSensor = new ColorSensorSystem(hardwareMap);
         indexer.setTelemetry(telemetry);   // <-- THIS
 
         telemetry.addLine("Indexer Debug Initialized");
@@ -48,6 +50,8 @@ public class ColorTester extends OpMode {
         double angle = indexer.getMeasuredAngle();
         IndexerState closest = indexer.debugClosestSlot();
 
+        telemetry.addData("alpha", colorSensor.getAlpha());
+        telemetry.addData("alpha", colorSensor.getRGB());
         telemetry.addLine("===== INDEXER STATE =====");
         telemetry.addData("Measured Angle (deg)", "%.2f", angle);
         telemetry.addData("Intaking Mode", indexer.isIntaking());
