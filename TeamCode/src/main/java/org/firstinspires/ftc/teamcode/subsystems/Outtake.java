@@ -27,10 +27,10 @@ public class Outtake {
     private final PIDController controller;
 
     // Dashboard-tunable gains
-    public static double p = 0.000267;
+    public static double p = 0.000567;
     public static double i = 0.0;
     public static double d = 0.0;
-    public static double f = 0.00020069;   // 1 / maxrpm and then tuned
+    public static double f = 0.00021;   // 1 / maxrpm and then tuned
 
     // Mode + state
     public Mode mode;
@@ -68,14 +68,15 @@ public class Outtake {
     public void set(double x) {
         if (mode == Mode.POWER) {
             motorPower = clamp(x, 0.0, 1.0);
-        } else { // RPM MODE
-            if (x != targetRPM) {
+        } else {
+            if (Math.abs(x - targetRPM) > 25) {
                 spinupStartTime = -1;
                 inRangeStartTime = -1;
             }
             targetRPM = x;
         }
     }
+
 
     public double getRPM() { return currentRPM; }
     public double getTargetRPM() { return targetRPM; }
