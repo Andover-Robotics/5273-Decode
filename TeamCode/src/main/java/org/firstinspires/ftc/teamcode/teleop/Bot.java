@@ -118,6 +118,8 @@ public class Bot extends BotPeriodics {
 
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) indexer.moveTo(indexer.getState().next());
 
+        if(g2.wasJustPressed(GamepadKeys.Button.X))
+            indexer.initializeColors(Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN);
         if (g2.wasJustPressed(GamepadKeys.Button.A))
             state = FSM.QuickOuttake;
         if (g2.wasJustPressed(GamepadKeys.Button.B)){
