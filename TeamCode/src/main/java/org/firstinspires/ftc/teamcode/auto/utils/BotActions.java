@@ -181,6 +181,27 @@ public class BotActions {
         }
     }
 
+    public Action indexerRotateForMotifGood(int tagID, int row) {
+        Indexer.ArtifactColor[] motifOrder = new Indexer.ArtifactColor[3];
+        switch (tagID) {
+            case 21: // G P P
+                motifOrder[0] = Indexer.ArtifactColor.GREEN;
+                motifOrder[1] = Indexer.ArtifactColor.PURPLE;
+                motifOrder[2] = Indexer.ArtifactColor.PURPLE;
+                break;
+            case 22: // P G P
+                motifOrder[0] = Indexer.ArtifactColor.PURPLE;
+                motifOrder[1] = Indexer.ArtifactColor.GREEN;
+                motifOrder[2] = Indexer.ArtifactColor.PURPLE;
+                break;
+            case 23: // P P G
+                motifOrder[0] = Indexer.ArtifactColor.PURPLE;
+                motifOrder[1] = Indexer.ArtifactColor.PURPLE;
+                motifOrder[2] = Indexer.ArtifactColor.GREEN;
+                break;
+        }
+        return new InstantAction(() -> indexer.prepareQuickspin(motifOrder));
+    }
     // Separate to run while moving
     public Action actionOuttakeOffsetForMotif(int tagID, int row) {
 

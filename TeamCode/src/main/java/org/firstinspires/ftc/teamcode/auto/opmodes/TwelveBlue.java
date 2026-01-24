@@ -27,6 +27,11 @@ public class TwelveBlue extends LinearOpMode {
 
     public static double INTAKE_X = -10;
     public static double INTAKE1_Y = 51;
+
+    public static double INTAKE_OPEN_GATE_Y = 60;
+    public static double INTAKE_OPEN_GATE_X = 6;
+    public static double INTAKE_GATE_HEADING = -90;
+
     public static double INTAKE2_Y = 75;
     public static double INTAKE3_Y = 99;
     public static double INTAKE_FORWARD_DIST = 8;
@@ -55,10 +60,13 @@ public class TwelveBlue extends LinearOpMode {
         //Pose2d obeliskPose = new Pose2d(OBELISK_X, OBELISK_Y, Math.toRadians(OBELISK_HEADING_DEG));
         Pose2d shootingPose = new Pose2d(SHOOT_X, SHOOT_Y, Math.toRadians(SHOOT_HEADING_DEG));
 
+
         Pose2d intake1PoseStart = new Pose2d(INTAKE_X, INTAKE1_Y, Math.toRadians(0));
         Pose2d intake1Pose1 = new Pose2d(INTAKE_X + INTAKE_FORWARD_DIST, INTAKE1_Y, Math.toRadians(0));
         Pose2d intake1Pose2 = new Pose2d(INTAKE_X + 2 * INTAKE_FORWARD_DIST, INTAKE1_Y, Math.toRadians(0));
         Pose2d intake1Pose3 = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4, INTAKE1_Y, Math.toRadians(0));
+
+        Pose2d openGatePose = new Pose2d(INTAKE_OPEN_GATE_X, INTAKE_OPEN_GATE_Y, Math.toRadians(INTAKE_GATE_HEADING));
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(0));
         Pose2d intake2Pose1 = new Pose2d(INTAKE_X + INTAKE_FORWARD_DIST, INTAKE2_Y, Math.toRadians(0));
@@ -108,7 +116,11 @@ public class TwelveBlue extends LinearOpMode {
                 botActions.actionIntakeOneCycle(false)
         );
 
-        Action backToShoot1 = drive.actionBuilder(intake1Pose3)
+        Action openGate = drive.actionBuilder(intake1Pose3)
+                .strafeToLinearHeading(openGatePose.position, openGatePose.heading)
+                .build();
+
+        Action backToShoot1 = drive.actionBuilder(openGatePose)
                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                 .stopAndAdd(botActions.actionNonIndexedDump(SHOOT_RPM))
                 .build();
@@ -197,6 +209,7 @@ public class TwelveBlue extends LinearOpMode {
                         toIntake1_1,
                         toIntake1_2,
                         toIntake1_3,
+                        openGate,
                         backToShoot1,
                         toIntakeStart2,
                         toIntake2_1,
