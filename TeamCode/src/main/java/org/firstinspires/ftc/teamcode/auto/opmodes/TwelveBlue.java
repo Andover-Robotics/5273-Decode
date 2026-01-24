@@ -12,14 +12,15 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
 @Autonomous(name = "BlueTwelve", group = "Autonomous")
 public class TwelveBlue extends LinearOpMode {
 
-    //public static double OBELISK_X = 0;
-    //public static double OBELISK_Y = 38;
-    //public static double OBELISK_HEADING_DEG = -120;
+    public static double OBELISK_X = 0;
+    public static double OBELISK_Y = 38;
+    public static double OBELISK_HEADING_DEG = -120;
 
     public static double SHOOT_X = -12;
     public static double SHOOT_Y = 42;
@@ -57,7 +58,7 @@ public class TwelveBlue extends LinearOpMode {
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
 
-        //Pose2d obeliskPose = new Pose2d(OBELISK_X, OBELISK_Y, Math.toRadians(OBELISK_HEADING_DEG));
+        Pose2d obeliskPose = new Pose2d(OBELISK_X, OBELISK_Y, Math.toRadians(OBELISK_HEADING_DEG));
         Pose2d shootingPose = new Pose2d(SHOOT_X, SHOOT_Y, Math.toRadians(SHOOT_HEADING_DEG));
 
 
@@ -79,14 +80,15 @@ public class TwelveBlue extends LinearOpMode {
         Pose2d intake3Pose3 = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 5, INTAKE3_Y, Math.toRadians(0));
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
 
-        /*
-        org.firstinspires.ftc.teamcode.auto.utils.Action toObelisk = drive.actionBuilder(startPose)
+
+        Action toObelisk = drive.actionBuilder(startPose)
                 .strafeToLinearHeading(obeliskPose.position, obeliskPose.heading)
                 .stopAndAdd(botActions.actionScanObelisk())
                 .build();
-        */
 
-        Action toShoot = drive.actionBuilder(startPose)
+
+        Action toShoot = drive.actionBuilder(obeliskPose)
+                .stopAndAdd(botActions.indexerRotateForMotif())
                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                 .stopAndAdd(botActions.actionNonIndexedDump(SHOOT_RPM))
                 .build();
@@ -99,21 +101,21 @@ public class TwelveBlue extends LinearOpMode {
                 drive.actionBuilder(intake1PoseStart)
                         .strafeToLinearHeading(intake1Pose1.position, intake1Pose1.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(true)
+                botActions.actionIntakeOneCycle(true, Indexer.ArtifactColor.PURPLE)
         );
 
         Action toIntake1_2 = new ParallelAction(
                 drive.actionBuilder(intake1Pose1)
                         .strafeToLinearHeading(intake1Pose2.position, intake1Pose2.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(true)
+                botActions.actionIntakeOneCycle(true, Indexer.ArtifactColor.PURPLE)
         );
 
         Action toIntake1_3 = new ParallelAction(
                 drive.actionBuilder(intake1Pose2)
                         .strafeToLinearHeading(intake1Pose3.position, intake1Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeOneCycle(false, Indexer.ArtifactColor.GREEN)
         );
 
         Action openGate = drive.actionBuilder(intake1Pose3)
@@ -121,6 +123,7 @@ public class TwelveBlue extends LinearOpMode {
                 .build();
 
         Action backToShoot1 = drive.actionBuilder(openGatePose)
+                .stopAndAdd(botActions.indexerRotateForMotif())
                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                 .stopAndAdd(botActions.actionNonIndexedDump(SHOOT_RPM))
                 .build();
@@ -133,24 +136,25 @@ public class TwelveBlue extends LinearOpMode {
                 drive.actionBuilder(intake2PoseStart)
                         .strafeToLinearHeading(intake2Pose1.position, intake2Pose1.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(true)
+                botActions.actionIntakeOneCycle(true, Indexer.ArtifactColor.PURPLE)
         );
 
         Action toIntake2_2 = new ParallelAction(
                 drive.actionBuilder(intake2Pose1)
                         .strafeToLinearHeading(intake2Pose2.position, intake2Pose2.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(true)
+                botActions.actionIntakeOneCycle(true, Indexer.ArtifactColor.GREEN)
         );
 
         Action toIntake2_3 = new ParallelAction(
                 drive.actionBuilder(intake2Pose2)
                         .strafeToLinearHeading(intake2Pose3.position, intake2Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeOneCycle(false, Indexer.ArtifactColor.PURPLE)
         );
 
         Action backToShoot2 = drive.actionBuilder(intake2Pose3)
+                .stopAndAdd(botActions.indexerRotateForMotif())
                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                 .stopAndAdd(botActions.actionNonIndexedDump(SHOOT_RPM))
                 .build();
@@ -162,21 +166,22 @@ public class TwelveBlue extends LinearOpMode {
                 drive.actionBuilder(intake3PoseStart)
                         .strafeToLinearHeading(intake3Pose1.position, intake3Pose1.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(true)
+                botActions.actionIntakeOneCycle(true, Indexer.ArtifactColor.GREEN)
         );
         Action toIntake3_2 = new ParallelAction(
                 drive.actionBuilder(intake3Pose1)
                         .strafeToLinearHeading(intake3Pose2.position, intake3Pose2.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(true)
+                botActions.actionIntakeOneCycle(true, Indexer.ArtifactColor.PURPLE)
         );
         Action toIntake3_3 = new ParallelAction(
                 drive.actionBuilder(intake3Pose2)
                         .strafeToLinearHeading(intake3Pose3.position, intake3Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeOneCycle(false, Indexer.ArtifactColor.PURPLE)
         );
         Action backToShoot3 = drive.actionBuilder(intake3Pose3)
+                .stopAndAdd(botActions.indexerRotateForMotif())
                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
                 .stopAndAdd(botActions.actionNonIndexedDump(SHOOT_RPM))
                 .build();

@@ -33,6 +33,11 @@ public class Hardware {
 
         intake   = new Intake(hardwareMap);
         indexer  = new Indexer(hardwareMap);
+        indexer.ENABLE_AUTO_ADVANCE = false;
+        indexer.ALWAYS_SEEK_EMPTY_WHILE_INTAKING = false;
+        indexer.ENABLE_FULL_UNKNOWN_SCAN = false;
+
+
         outtake  = new Outtake(hardwareMap, Outtake.Mode.RPM);
         actuator = new Actuator(hardwareMap);
         aprilTag = new AprilTag(hardwareMap, telemetry);

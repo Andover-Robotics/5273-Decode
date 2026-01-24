@@ -24,12 +24,13 @@ public class Indexer {
     // Dashboard control
     public static boolean dashAdvance = false;
     public static int dashTargetSlot = -1; // -1 = disabled; 0/1/2 = slot
-    public static boolean ENABLE_AUTO_ADVANCE = true;
+    public  boolean ENABLE_AUTO_ADVANCE = true;
 
-    public static boolean ALWAYS_SEEK_EMPTY_WHILE_INTAKING = true;
+    public boolean ALWAYS_SEEK_EMPTY_WHILE_INTAKING = true;
 
     // Full+Unknown rescan toggle
-    public static boolean ENABLE_FULL_UNKNOWN_SCAN = true;
+    public boolean ENABLE_FULL_UNKNOWN_SCAN = true;
+    public boolean SCAN_COLORS = true;
 
     // Auto-advance detection mode
     public enum AutoDetectMode { HARD, SOFT }
@@ -226,7 +227,7 @@ public class Indexer {
         handleDashboardCommands();
         refreshLoadedAndServo();
 
-        if (intaking) {
+        if (intaking && SCAN_COLORS) {
             updateSlotClassification(debugClosestSlot());
         }
 

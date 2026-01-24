@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
 @Autonomous(name = "Simple Red Auto", group = "Autonomous")
@@ -99,21 +100,21 @@ public class RedCloseSimple extends LinearOpMode {
                 drive.actionBuilder(intake1PoseStart)
                         .strafeToLinearHeading(intake1Pose1.position, intake1Pose1.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(true)
+                botActions.actionIntakeOneCycle(true, Indexer.ArtifactColor.PURPLE)
         );
 
         Action toIntake1_2 = new ParallelAction(
                 drive.actionBuilder(intake1Pose1)
                         .strafeToLinearHeading(intake1Pose2.position, intake1Pose2.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(true)
+                botActions.actionIntakeOneCycle(true, Indexer.ArtifactColor.PURPLE)
         );
 
         Action toIntake1_3 = new ParallelAction(
                 drive.actionBuilder(intake1Pose2)
                         .strafeToLinearHeading(intake1Pose3.position, intake1Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeOneCycle(false, Indexer.ArtifactColor.GREEN)
         );
 
         Action backToShoot1 = drive.actionBuilder(intake1Pose3)
@@ -132,21 +133,21 @@ public class RedCloseSimple extends LinearOpMode {
                 drive.actionBuilder(intake2PoseStart)
                         .strafeToLinearHeading(intake2Pose1.position, intake2Pose1.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(true)
+                botActions.actionIntakeOneCycle(true, Indexer.ArtifactColor.PURPLE)
         );
 
         Action toIntake2_2 = new ParallelAction(
                 drive.actionBuilder(intake2Pose1)
                         .strafeToLinearHeading(intake2Pose2.position, intake2Pose2.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(true)
+                botActions.actionIntakeOneCycle(true, Indexer.ArtifactColor.GREEN)
         );
 
         Action toIntake2_3 = new ParallelAction(
                 drive.actionBuilder(intake2Pose2)
                         .strafeToLinearHeading(intake2Pose3.position, intake2Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeOneCycle(false, Indexer.ArtifactColor.PURPLE)
         );
 
         Action backToShoot2 = drive.actionBuilder(intake2Pose3)

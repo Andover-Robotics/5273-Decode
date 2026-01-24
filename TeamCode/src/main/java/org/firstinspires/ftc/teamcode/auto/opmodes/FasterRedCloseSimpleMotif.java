@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
 @Autonomous(name = "FasterSimple Red Auto With Motif", group = "Autonomous")
@@ -96,7 +97,7 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                 drive.actionBuilder(intake1PoseStart)
                         .strafeToLinearHeading(intake1Pose3.position, intake1Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeOneCycle(false, Indexer.ArtifactColor.EMPTY)
         );
 
         Action backToShoot1 = new SequentialAction(
@@ -118,7 +119,7 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                 drive.actionBuilder(intake2PoseStart)
                         .strafeToLinearHeading(intake2Pose3.position, intake2Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeOneCycle(false, Indexer.ArtifactColor.EMPTY)
         );
 
         Action backToShoot2 = new SequentialAction(

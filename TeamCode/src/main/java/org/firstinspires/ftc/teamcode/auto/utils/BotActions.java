@@ -181,9 +181,9 @@ public class BotActions {
         }
     }
 
-    public Action indexerRotateForMotifGood(int tagID, int row) {
+    public Action indexerRotateForMotif() {
         Indexer.ArtifactColor[] motifOrder = new Indexer.ArtifactColor[3];
-        switch (tagID) {
+        switch (aprilTag.getObeliskId()) {
             case 21: // G P P
                 motifOrder[0] = Indexer.ArtifactColor.GREEN;
                 motifOrder[1] = Indexer.ArtifactColor.PURPLE;
@@ -413,8 +413,11 @@ public class BotActions {
     }
 
 
-    public Action actionIntakeOneCycle(boolean moveIndexer) {
+    public Action actionIntakeOneCycle(boolean moveIndexer, Indexer.ArtifactColor color) {
         return new SequentialAction(
+                new InstantAction(() -> {
+                    indexer.assignSlotColor(indexer.getState(), color);
+                }),
                 new InstantAction(() -> {
                     indexer.setIntaking(true);
                     intake.run();
