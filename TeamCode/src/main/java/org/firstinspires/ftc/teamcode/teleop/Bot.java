@@ -46,6 +46,14 @@ public class Bot extends BotPeriodics {
         state = FSM.MotifSelection;
     }
 
+
+    //auto initialization
+    public Bot(HardwareMap hardwareMap, Telemetry tele){
+        super(hardwareMap, tele);
+        //state will be unused
+        state = FSM.MotifSelection;
+    }
+
     public void teleopInit() {
         indexer.initializeColors(Indexer.ArtifactColor.EMPTY);
         indexer.setIntaking(true);

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleop;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -10,7 +11,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.auto.helpers.BotActions;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
@@ -27,6 +30,7 @@ public class BotPeriodics {
     protected final Actuator actuator;
     protected final Outtake outtake;
     protected final Movement movement;
+    protected final MecanumDrive mecanumDrive;
     protected final AprilTag aprilTag;
     protected final AprilTagAimer aprilAimer;
     protected final IMU imu;
@@ -65,6 +69,30 @@ public class BotPeriodics {
         g2 = new GamepadEx(gamepad2);
         actionHost = new ActionHost();
         telemetry = tele;
+        mecanumDrive = null;
+    }
+
+    public BotPeriodics(HardwareMap hardwareMap, Telemetry telemetry) {
+        mecanumDrive = new MecanumDrive(
+                hardwareMap,
+                new Pose2d(0, 0, 0)
+        );
+
+        movement = null;
+        imu = mecanumDrive.lazyImu.get();
+        deadWheelLocalizer = (TwoDeadWheelLocalizer) mecanumDrive.localizer;
+
+        intake   = new Intake(hardwareMap);
+        indexer  = new Indexer(hardwareMap);
+        outtake  = new Outtake(hardwareMap, Outtake.Mode.RPM);
+        actuator = new Actuator(hardwareMap);
+        aprilTag = new AprilTag(hardwareMap, telemetry);
+        aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
+
+        this.telemetry = telemetry;
+
+        g1 = null;
+        g2 = null;
     }
     
     protected void handlePeriodics()
