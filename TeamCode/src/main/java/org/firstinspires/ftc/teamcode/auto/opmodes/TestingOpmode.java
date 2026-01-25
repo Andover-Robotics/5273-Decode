@@ -77,10 +77,11 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
                 Action testSomething = new SequentialAction(
                         new ParallelAction(
+                                /*
                                 drive.actionBuilder(startPose)
                                         .strafeToLinearHeading(startPose.position, startPose.heading)
                                         .build(),
-
+                                */
                                 new SequentialAction(
                                         new InstantAction(botActions::initializeForIntake),
                                         new SleepAction(1),
