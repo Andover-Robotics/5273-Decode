@@ -18,7 +18,7 @@ public class ColorTester extends OpMode {
 
     private Indexer indexer;
     private ColorSensorSystem colorSensor;
-    GamepadEx gp2;
+    private GamepadEx gp2;
 
     @Override
     public void init() {
@@ -28,11 +28,11 @@ public class ColorTester extends OpMode {
         );
 
         indexer = new Indexer(hardwareMap);
-        colorSensor = new ColorSensorSystem(hardwareMap);
-        indexer.setTelemetry(telemetry);   // <-- THIS
 
-        telemetry.addLine("Indexer Debug Initialized");
-        telemetry.addLine("Rotate indexer by hand");
+        // its so peak
+        colorSensor = new ColorSensorSystem(hardwareMap);
+
+        telemetry.addLine("ColorTester Initialized");
         telemetry.update();
 
         gp2 = new GamepadEx(gamepad2);
@@ -40,24 +40,40 @@ public class ColorTester extends OpMode {
 
     @Override
     public void loop() {
-
         gp2.readButtons();
 
-
-        // Run logic
         indexer.update();
 
         double angle = indexer.getMeasuredAngle();
         IndexerState closest = indexer.debugClosestSlot();
 
-        telemetry.addData("alpha", colorSensor.getAlpha());
-        telemetry.addData("alpha", colorSensor.getRGB());
+        // Read sensor ONCE per loop so values are consistent within this telemetry frame
+        float alpha = colorSensor.getAlpha();
+        float[] rgb = colorSensor.getRGB();
+        float[] hsv = colorSensor.getHSV();
+
+        telemetry.addLine("===== RAW COLOR SENSOR (ALWAYS UPDATING) =====");
+        telemetry.addData("Alpha", "%.4f", alpha);
+        telemetry.addData("R", "%.4f", rgb[0]);
+        telemetry.addData("G", "%.4f", rgb[1]);
+        telemetry.addData("B", "%.4f", rgb[2]);
+        telemetry.addData("H", "%.1f°", hsv[0]);
+        telemetry.addData("S", "%.4f", hsv[1]);
+        telemetry.addData("V", "%.4f", hsv[2]);
+        telemetry.addData("Has Artifact", colorSensor.hasArtifact());
+        telemetry.addData("Classify()", colorSensor.classify());
+        telemetry.addData("ClassifyColorOnly()", colorSensor.classifyColorOnly());
+
+        telemetry.addLine();
         telemetry.addLine("===== INDEXER STATE =====");
         telemetry.addData("Measured Angle (deg)", "%.2f", angle);
         telemetry.addData("Intaking Mode", indexer.isIntaking());
+
         telemetry.addLine();
         telemetry.addLine("===== SLOT ALIGNMENT =====");
         telemetry.addData("Closest Slot", closest);
+        telemetry.addData("Closest Slot Err (deg)", "%.2f", indexer.debugClosestSlotErrorDeg());
+        telemetry.addData("Over Sensor?", indexer.debugSlotIsOverSensor(closest));
 
         telemetry.addLine();
         telemetry.addLine("===== SLOT CONTENTS =====");
@@ -75,21 +91,16 @@ public class ColorTester extends OpMode {
         telemetry.addData("Voltage", "%.3f", indexer.getVoltage());
         telemetry.addData("Target Voltage", "%.3f", indexer.getTargetVoltage());
 
-        telemetry.addLine();
-        telemetry.addLine("===== INSTRUCTIONS =====");
-        telemetry.addLine("• Rotate indexer slowly by hand");
-        telemetry.addLine("• Insert balls while slot is over sensor");
-        telemetry.addLine("• Leave slot → observe classification");
-        telemetry.addLine("• Try intake vs outtake modes");
-
         if (gp2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
             indexer.moveTo(indexer.getState().next());
         }
 
-        if(gp2.wasJustPressed(GamepadKeys.Button.A))
+        if (gp2.wasJustPressed(GamepadKeys.Button.A)) {
             indexer.moveToColor(Indexer.ArtifactColor.PURPLE);
-        if(gp2.wasJustPressed(GamepadKeys.Button.B))
+        }
+        if (gp2.wasJustPressed(GamepadKeys.Button.B)) {
             indexer.moveToColor(Indexer.ArtifactColor.GREEN);
+        }
 
         telemetry.update();
     }
