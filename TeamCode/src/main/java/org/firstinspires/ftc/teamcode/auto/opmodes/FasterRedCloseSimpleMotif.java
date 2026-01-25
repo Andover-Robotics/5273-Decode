@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 @Autonomous(name = "Faster Simple Red Auto With Motif", group = "Autonomous")
 public class FasterRedCloseSimpleMotif extends LinearOpMode {
 
-    public static double OBELISK_X = 12;
+    public static double OBELISK_X = 5;
     public static double OBELISK_Y = 38;
     public static double OBELISK_HEADING_DEG = 300;
 
@@ -27,7 +27,7 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
     public static double SHOOT_Y = 42;
     public static double SHOOT_HEADING_DEG =225;
 
-    public static double INTAKE_X = 10;
+    public static double INTAKE_X = 5;
     public static double INTAKE1_Y = 51;
     public static double INTAKE2_Y = 75;
     public static double INTAKE_FORWARD_DIST = 8;
@@ -83,12 +83,13 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                 new ParallelAction(
                         drive.actionBuilder(startPose)
                                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                                .build(),
+                                .build()/*,
 
                         new SequentialAction(
                                 new SleepAction(0), // no need
                                 botActions.actionQuickOuttake(SHOOT_RPM)
                         )
+                        */
                 )
         );
 
@@ -100,19 +101,20 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                 drive.actionBuilder(intake1PoseStart)
                         .strafeToLinearHeading(intake1Pose3.position, intake1Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeThreeFast()
         );
 
         Action backToShoot1 = new SequentialAction(
                 new ParallelAction(
                         drive.actionBuilder(intake1Pose3)
                                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                                .build(),
+                                .build()/*,
 
                         new SequentialAction(
                                 new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
                                 botActions.actionQuickOuttake(SHOOT_RPM)
                         )
+                        */
                 )
         );
 
@@ -121,10 +123,10 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                 .build();
 
         Action toIntake2_3 = new ParallelAction(
-                drive.actionBuilder(intake2PoseStart)
-                        .strafeToLinearHeading(intake2Pose3.position, intake2Pose3.heading)
+                drive.actionBuilder(intake1PoseStart)
+                        .strafeToLinearHeading(intake1Pose3.position, intake1Pose3.heading)
                         .build(),
-                botActions.actionIntakeOneCycle(false)
+                botActions.actionIntakeThreeFast()
         );
 
         Action backToShoot2 = new SequentialAction(
@@ -132,12 +134,13 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                         drive.actionBuilder(intake2Pose3)
                                 .strafeTo(new Vector2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST, INTAKE2_Y))
                                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                                .build(),
+                                .build()/*,
 
                         new SequentialAction(
                                 new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
                                 botActions.actionQuickOuttake(SHOOT_RPM)
                         )
+                        */
                 )
         );
 
