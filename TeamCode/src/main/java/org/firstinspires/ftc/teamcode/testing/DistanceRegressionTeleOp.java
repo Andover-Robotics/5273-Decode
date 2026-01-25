@@ -176,6 +176,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         // Begin continuous lock
         if (g2.wasJustPressed(GamepadKeys.Button.X)) {
             continuousAprilTagLock = true;
+            aprilTag.setCurrentCameraScannedId(0);
         }
 
         // Stop continuous lock
