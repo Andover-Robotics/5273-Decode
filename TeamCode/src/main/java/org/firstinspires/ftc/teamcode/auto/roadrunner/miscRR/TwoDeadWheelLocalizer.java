@@ -29,8 +29,8 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.messages.TwoDeadWheelInput
 @Config
 public final class TwoDeadWheelLocalizer implements Localizer {
     public static class Params {
-        public double parYTicks = 2494.2960109075157; // y position of the parallel encoder (in tick units)
-        public double perpXTicks = -455.6935258870537; // x position of the perpendicular encoder (in tick units)
+        public double parYTicks = 0; // y position of the parallel encoder (in tick units)
+        public double perpXTicks = 2582.086621; // x position of the perpendicular encoder (in tick units)
     }
 
     public static Params PARAMS = new Params();
@@ -53,8 +53,8 @@ public final class TwoDeadWheelLocalizer implements Localizer {
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
         //todo: make sure its not reading the motor encoder it should be the deadwheel encoder
         // get the DcMotorEx objects first
-        DcMotorEx parMotor = hardwareMap.get(DcMotorEx.class, "intake");
-        DcMotorEx perpMotor = hardwareMap.get(DcMotorEx.class, "perpDeadwheel");
+        DcMotorEx perpMotor = hardwareMap.get(DcMotorEx.class, "intake");
+        DcMotorEx parMotor = hardwareMap.get(DcMotorEx.class, "perpDeadwheel");
 
         // set them to RUN_WITHOUT_ENCODER so the motor controller just reports ticks
         parMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
