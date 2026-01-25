@@ -95,7 +95,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
                 }
             }
             if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
-                shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+                //shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
             }
             else {
                 // localized handles
