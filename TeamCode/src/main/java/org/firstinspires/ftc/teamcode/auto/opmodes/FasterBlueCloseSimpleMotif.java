@@ -20,8 +20,8 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 @Autonomous(name = "Faster Simple Blue Auto With Motif", group = "Autonomous")
 public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
-    public static double OBELISK_X = -12;
-    public static double OBELISK_Y = 38;
+    public static double OBELISK_X = -5;
+    public static double OBELISK_Y = 24;
     public static double OBELISK_HEADING_DEG = -120;
 
     public static double SHOOT_X = -12;
@@ -85,9 +85,14 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 )
         );
 
-        Action toIntakeStart1 = drive.actionBuilder(shootingPose)
-                .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
-                .build();
+        Action toIntakeStart1 =
+                new ParallelAction(
+                        new InstantAction(botActions::initializeForIntake),
+
+                        drive.actionBuilder(shootingPose)
+                                .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
+                                .build()
+                );
 
         Action toIntake1_3 = new ParallelAction(
                 drive.actionBuilder(intake1PoseStart)

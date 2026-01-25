@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -20,12 +21,12 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 public class FasterRedCloseSimpleMotif extends LinearOpMode {
 
     public static double OBELISK_X = 5;
-    public static double OBELISK_Y = 38;
-    public static double OBELISK_HEADING_DEG = 300;
+    public static double OBELISK_Y = 24;
+    public static double OBELISK_HEADING_DEG = -60;
 
     public static double SHOOT_X = 12;
     public static double SHOOT_Y = 42;
-    public static double SHOOT_HEADING_DEG =225;
+    public static double SHOOT_HEADING_DEG = -135;
 
     public static double INTAKE_X = 5;
     public static double INTAKE1_Y = 51;
@@ -93,9 +94,14 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                 )
         );
 
-        Action toIntakeStart1 = drive.actionBuilder(shootingPose)
-                .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
-                .build();
+        Action toIntakeStart1 =
+                new ParallelAction(
+                        new InstantAction(botActions::initializeForIntake),
+
+                        drive.actionBuilder(shootingPose)
+                                .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
+                                .build()
+                );
 
         Action toIntake1_3 = new ParallelAction(
                 drive.actionBuilder(intake1PoseStart)

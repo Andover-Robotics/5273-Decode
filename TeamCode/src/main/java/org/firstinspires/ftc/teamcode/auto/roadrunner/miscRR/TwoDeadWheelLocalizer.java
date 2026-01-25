@@ -53,8 +53,8 @@ public final class TwoDeadWheelLocalizer implements Localizer {
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
         //todo: make sure its not reading the motor encoder it should be the deadwheel encoder
         // get the DcMotorEx objects first
-        DcMotorEx perpMotor = hardwareMap.get(DcMotorEx.class, "intake");
-        DcMotorEx parMotor = hardwareMap.get(DcMotorEx.class, "perpDeadwheel");
+        DcMotorEx parMotor = hardwareMap.get(DcMotorEx.class, "intake");
+        DcMotorEx perpMotor = hardwareMap.get(DcMotorEx.class, "perpDeadwheel");
 
         // set them to RUN_WITHOUT_ENCODER so the motor controller just reports ticks
         parMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

@@ -411,23 +411,25 @@ public class BotActions {
         );
     }
 
+    public Action initializeForIntake() {
+        return new InstantAction(() -> {
+            indexer.setIntaking(true);
+        });
+    }
+
     public Action actionIntakeThreeFast() {
         return new SequentialAction(
-                new InstantAction(() -> {
-                    indexer.setIntaking(true);
-                    intake.run();
-                }),
-
+                new InstantAction(intake::stop),
                 // slot 1
-                new SleepAction(0.45),
+                new SleepAction(0.3),
                 new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
 
                 // slot 2
-                new SleepAction(0.45),
+                new SleepAction(0.2),
                 new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
 
                 // slot 3
-                new SleepAction(0.45),
+                new SleepAction(0.2),
                 new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
 
                 // stop intakeintake
