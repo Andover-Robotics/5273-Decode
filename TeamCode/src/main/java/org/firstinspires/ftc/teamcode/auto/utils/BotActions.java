@@ -411,10 +411,11 @@ public class BotActions {
         );
     }
 
-    public Action initializeForIntake() {
-        return new InstantAction(() -> {
-            indexer.setIntaking(true);
-        });
+    public Action initializeForIntake(Indexer.IndexerState slot) {
+        return new SequentialAction(
+            new InstantAction(() -> indexer.setIntaking(true)),
+            new InstantAction(() -> indexer.moveTo(slot, true))
+        );
     }
 
     public Action actionIntakeThreeFast() {

@@ -15,8 +15,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
-        @Config
+@Config
         @Autonomous(name = "Testing opmode", group = "Autonomous")
         public class TestingOpmode extends LinearOpMode {
 
@@ -83,7 +84,7 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
                                         .build(),
                                 */
                                 new SequentialAction(
-                                        new InstantAction(botActions::initializeForIntake),
+                                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.zero)), // state should change for motif
                                         new SleepAction(1),
                                         botActions.actionQuickOuttake(3000)
                                 )

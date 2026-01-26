@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
 @Autonomous(name = "Faster Simple Blue Auto With Motif", group = "Autonomous")
@@ -87,7 +88,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
         Action toIntakeStart1 =
                 new ParallelAction(
-                        new InstantAction(botActions::initializeForIntake),
+                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.one)),
 
                         drive.actionBuilder(shootingPose)
                                 .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
