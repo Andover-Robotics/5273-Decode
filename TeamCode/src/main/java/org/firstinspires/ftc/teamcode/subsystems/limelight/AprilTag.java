@@ -60,20 +60,25 @@ public class AprilTag {
         elevation = Double.NaN;
         range = Double.NaN;
 
+        String scannedIDConcat = "";
+
         // If camera is facing to the right of the center of the cam (if it needs to move to the left) the bearing is positive.
         List<LLResultTypes.FiducialResult> scanned = limelight.getLatestResult().getFiducialResults();
         for (LLResultTypes.FiducialResult detection: scanned) {
             cameraScannedId = detection.getFiducialId();
+            scannedIDConcat += cameraScannedId + " ";
             // goalTagID should be gotten before round/during auto
             if (cameraScannedId == goalTagID) {
                 id = cameraScannedId;
                 elevation = detection.getTargetYDegrees();
+                telemetry.addData("Elevation", elevation);
                 range = calculateDistance(elevation);
                 bearing = detection.getTargetXDegrees();
                 tagSize = detection.getTargetArea();
                 break;
             }
         }
+        telemetry.addData("Scanned IDs", scannedIDConcat);
     }
 
     public void setGoalTagID(int allianceTagID) {
