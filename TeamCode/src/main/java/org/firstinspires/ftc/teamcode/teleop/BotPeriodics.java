@@ -47,6 +47,8 @@ public class BotPeriodics {
     protected int goalTagID;
     protected String colorGoalSelected;
 
+    protected boolean continuousIntake = false;
+
     public static double targetRPM = 3800;
     protected static final long AIM_UPDATE_INTERVAL_MS = 50;
 
@@ -71,6 +73,16 @@ public class BotPeriodics {
     {
         g1.readButtons();
         g2.readButtons();
+
+        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
+            continuousIntake = !continuousIntake;
+
+        double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        double leftTrigger2 = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
+        else if(continuousIntake) intake.runSlow();
+        else intake.stop();
+
         // driver one (constant
         handleAprilTagLock();
         handleMovement();
@@ -130,11 +142,6 @@ public class BotPeriodics {
         double lx = g1.getLeftX();
         double ly = g1.getLeftY();
         double rx = g1.getRightX();
-
-
-        double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
-        if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
-        else intake.stop();
 
         if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
         else movement.teleopTick(lx, ly, rx, turnCorrection);
