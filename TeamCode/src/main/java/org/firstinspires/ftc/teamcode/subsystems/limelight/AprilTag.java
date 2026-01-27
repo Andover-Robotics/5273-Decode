@@ -40,6 +40,7 @@ public class AprilTag {
 
     public void scanObeliskTag() {
         id = -1;
+        setPipeline(2);
         List<LLResultTypes.FiducialResult> scanned = limelight.getLatestResult().getFiducialResults();
 
         for (LLResultTypes.FiducialResult detection: scanned) {
@@ -56,34 +57,29 @@ public class AprilTag {
 
     public void scanGoalTag() {
         id = -1;
+        /* So that if you scan and theres no tag range stays, (bearing should be reset in the loops)*/
         bearing = Double.NaN;
         elevation = Double.NaN;
         range = Double.NaN;
-
-        String scannedIDConcat = "";
 
         // If camera is facing to the right of the center of the cam (if it needs to move to the left) the bearing is positive.
         List<LLResultTypes.FiducialResult> scanned = limelight.getLatestResult().getFiducialResults();
         for (LLResultTypes.FiducialResult detection: scanned) {
             cameraScannedId = detection.getFiducialId();
-            scannedIDConcat += cameraScannedId + " ";
             // goalTagID should be gotten before round/during auto
-            if (cameraScannedId == goalTagID) {
-                id = cameraScannedId;
-                elevation = detection.getTargetYDegrees();
-                telemetry.addData("Elevation", elevation);
-                range = calculateDistance(elevation);
-                bearing = detection.getTargetXDegrees();
-                tagSize = detection.getTargetArea();
-                break;
-            }
+            id = cameraScannedId;
+            elevation = detection.getTargetYDegrees();
+            range = calculateDistance(elevation);
+            bearing = detection.getTargetXDegrees();
+            tagSize = detection.getTargetArea();
         }
-        telemetry.addData("Scanned IDs", scannedIDConcat);
     }
 
-    public void setGoalTagID(int allianceTagID) {
-        goalTagID = allianceTagID;
+    public void setPipeline(int pipeline) {
+        // 0 blue, 1 red, 2 obelisk
+        limelight.pipelineSwitch(pipeline);
     }
+
     public int getCurrentId() {
         return cameraScannedId;
     }

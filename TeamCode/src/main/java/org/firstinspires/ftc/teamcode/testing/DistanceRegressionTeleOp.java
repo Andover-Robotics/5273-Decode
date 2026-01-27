@@ -186,14 +186,12 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
         // Alliance selection
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
-            goalTagID = 20;
-            aprilTag.setGoalTagID(goalTagID); // blue
+            aprilTag.setPipeline(0);
             colorGoalSelected = "Blue";
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
-            goalTagID = 24;
-            aprilTag.setGoalTagID(goalTagID); // red
+            aprilTag.setPipeline(1);
             colorGoalSelected = "Red";
         }
 
