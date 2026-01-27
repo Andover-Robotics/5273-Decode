@@ -227,7 +227,75 @@ public class BotActions {
                         })
                 );
     }
-    
+
+    /*
+    public Action actionMotifOffsetWithColorApi(int tagID, int row) {
+
+        switch (row) {
+            // Row 0 & 1 intake: P P G
+            case 0:
+            case 1:
+                switch (tagID) {
+                    case 21: // G P P
+                        initializeColors();
+                        break;
+                    case 22: // P G P
+                        initializeColors();
+                        break;
+                    case 23: // P P G
+                        initializeColors();
+                        break;
+                }
+                break;
+
+
+            // Row 2 intake: P G P
+            case 2:
+                switch (tagID) {
+                    case 21: // G P P
+                        initializeColors();
+                        break;
+                    case 22: // P G P
+                        initializeColors();
+                        break;
+                    case 23: // P P G
+                        initializeColors();
+                        break;
+                }
+                break;
+
+            // Row 3 intake: G P P
+            case 3:
+                switch (tagID) {
+                    case 21: // G P P
+                        initializeColors();
+                        break;
+                    case 22: // P G P
+                        initializeColors();
+                        break;
+                    case 23: // P P G
+                        initializeColors();
+                        break;
+                }
+                break;
+        }
+
+        return new SequentialAction(
+                offset >= 1
+                        ? new InstantAction(() ->
+                        indexer.moveTo(indexer.getState().next(), true))
+                        : new InstantAction(() -> {
+                }),
+
+                // rotate second time if true
+                offset >= 2
+                        ? new InstantAction(() ->
+                        indexer.moveTo(indexer.getState().next(), true))
+                        : new InstantAction(() -> {
+                })
+        );
+    }
+    */
 
     // should probably not do instant action and while loop but it works, maybe change
     public Action actionScanObelisk() {
