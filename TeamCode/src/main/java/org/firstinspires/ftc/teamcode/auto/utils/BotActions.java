@@ -227,50 +227,7 @@ public class BotActions {
                         })
                 );
     }
-
-    // locks in for 1 sec, then runs actionOuttake while locked in, when that finishes stops locking in
-    public Action actionShootWithLock(int tagID, double shootDuration, MecanumDrive mecanumDrive) {
-        return new Action() {
-            private long startTime = -1;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                long now = System.currentTimeMillis();
-
-                if (startTime < 0) {
-                    startTime = now;
-                    continuousAprilTagLock = true; // turn on lock mode
-                }
-
-                // Update Limelight aiming continuously
-                aprilTag.scanGoalTag();
-                double bearing = aprilTag.getBearing();
-                lastTurnCorrection = !Double.isNaN(bearing)
-                        ? aprilAimer.calculateTurnPowerFromBearing(bearing)
-                        : 0;
-                double turnCorrection = 0.9 * lastTurnCorrection;
-
-                mecanumDrive.setDrivePowers(
-                        new PoseVelocity2d(new Vector2d(0, 0), turnCorrection)
-                );
-
-                // Set shooter RPM based on distance
-                int shooterRPM = 0;
-                if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
-                    shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
-                }
-
-                actionQuickOuttake(shooterRPM).run(telemetryPacket);
-
-                if (now - startTime >= shootDuration * 1000) {
-                    continuousAprilTagLock = false;
-                    return true;
-                }
-
-                return false;
-            }
-        };
-    }
+    
 
     // should probably not do instant action and while loop but it works, maybe change
     public Action actionScanObelisk() {
