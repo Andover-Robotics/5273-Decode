@@ -79,9 +79,13 @@ public class BotPeriodics {
 
         double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         double leftTrigger2 = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        double rightTrigger2 = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
+        else if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || rightTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.runBackwards();
         else if(continuousIntake) intake.runSlow();
         else intake.stop();
+
 
         // driver one (constant
         handleAprilTagLock();
@@ -139,9 +143,9 @@ public class BotPeriodics {
     }
 
     protected void handleMovement() {
-        double lx = g1.getLeftX();
-        double ly = g1.getLeftY();
-        double rx = g1.getRightX();
+        double lx = g2.getLeftX();
+        double ly = g2.getLeftY();
+        double rx = g2.getRightX();
 
         if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
         else movement.teleopTick(lx, ly, rx, turnCorrection);
