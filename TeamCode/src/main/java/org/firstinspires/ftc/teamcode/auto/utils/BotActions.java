@@ -60,30 +60,6 @@ public class BotActions {
         indexer.initializeColors(one, two, three);
     }
 
-    public Action actionNonIndexedDump(int shootRPM) {
-        final double rpm = shootRPM * Bot.QUICKSPIN_OUTTAKE_RPM_SCALE;
-        return new SequentialAction(
-                new InstantAction(actuator::upQuick),
-                new InstantAction(() -> outtake.set(rpm)),
-                new Action() {
-                    @Override
-                    public boolean run(TelemetryPacket packet) {
-                        return !outtake.inRange(100.0);
-                    }
-                },
-                new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),
-                new SleepAction(NON_INDEX_SPIN_TIME),
-                new InstantAction(indexer::stopIndexerPower),
-                new InstantAction(outtake::stop),
-                new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.setIntaking(true)),
-                new InstantAction(indexer::initializeColors),
-                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.zero))
-        );
-    }
-
-
-
     public Action actionQuickOuttake(int rpm) {
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),// lower up position for quick dump
@@ -201,8 +177,6 @@ public class BotActions {
                     case 23: // P P G
                         offset = 2;
                         break;
-                    default:
-                        return new InstantAction(() -> {});
                 }
                 break;
 
@@ -219,8 +193,6 @@ public class BotActions {
                     case 23: // P P G
                         offset = 0;
                         break;
-                    default:
-                        return new InstantAction(() -> {});
                 }
                 break;
 
@@ -236,8 +208,6 @@ public class BotActions {
                     case 23: // P P G
                         offset = 1;
                         break;
-                    default:
-                        return new InstantAction(() -> {});
                 }
                 break;
         }
@@ -256,32 +226,6 @@ public class BotActions {
                                 : new InstantAction(() -> {
                         })
                 );
-    }
-
-
-    public Action actionOuttakeWithColor(int tagID, int rpm) {
-        switch (tagID) {
-            case 21:
-                return new SequentialAction(
-                        actionFireGreen(rpm),
-                        actionFirePurple(rpm),
-                        actionFirePurple(rpm)
-                );
-            case 22:
-                return new SequentialAction(
-                        actionFirePurple(rpm),
-                        actionFireGreen(rpm),
-                        actionFirePurple(rpm)
-                );
-            case 23:
-                return new SequentialAction(
-                        actionFirePurple(rpm),
-                        actionFirePurple(rpm),
-                        actionFireGreen(rpm)
-                );
-            default:
-                return new InstantAction(() -> {}); // do nothing if invalid
-        }
     }
 
     // locks in for 1 sec, then runs actionOuttake while locked in, when that finishes stops locking in
@@ -316,7 +260,7 @@ public class BotActions {
                     shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
                 }
 
-                actionOuttakeWithColor(tagID, shooterRPM).run(telemetryPacket);
+                actionQuickOuttake(shooterRPM).run(telemetryPacket);
 
                 if (now - startTime >= shootDuration * 1000) {
                     continuousAprilTagLock = false;
@@ -339,59 +283,6 @@ public class BotActions {
             aprilTag.setCurrentCameraScannedId(scannedId);
         });
     }
-
-    public Action actionFireGreen(int rpm) {
-        final Indexer.IndexerState slot =
-                indexer.findBestSlotForColor(Indexer.ArtifactColor.GREEN);
-
-        if (slot == null) {
-            return new InstantAction(() -> {});
-        }
-
-        return new SequentialAction(
-                new InstantAction(() -> indexer.setIntaking(false)),
-                new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.moveTo(slot, true)),
-                new InstantAction(() -> outtake.set(rpm)),
-                new SleepAction(SHOOTER_SPINUP),
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(1),
-
-                new InstantAction(() ->
-                        indexer.assignSlotColor(slot, Indexer.ArtifactColor.EMPTY)
-                ),
-
-                new InstantAction(outtake::stop),
-                new InstantAction(actuator::down)
-        );
-    }
-
-    public Action actionFirePurple(int rpm) {
-        final Indexer.IndexerState slot =
-                indexer.findBestSlotForColor(Indexer.ArtifactColor.PURPLE);
-
-        if (slot == null) {
-            return new InstantAction(() -> {});
-        }
-
-        return new SequentialAction(
-                new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.moveTo(slot, true)),
-
-                new InstantAction(() -> outtake.set(rpm)),
-                new SleepAction(SHOOTER_SPINUP),
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(1),
-
-                new InstantAction(() ->
-                        indexer.assignSlotColor(slot, Indexer.ArtifactColor.EMPTY)
-                ),
-
-                new InstantAction(outtake::stop),
-                new InstantAction(actuator::down)
-        );
-    }
-
 
     public Action actionIntakeOneCycle(boolean moveIndexer) {
         return new SequentialAction(

@@ -21,8 +21,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Autonomous(name = "Faster Simple Red Auto With Motif", group = "Autonomous")
 public class FasterRedCloseSimpleMotif extends LinearOpMode {
 
-    public static double OBELISK_X = 5;
-    public static double OBELISK_Y = 24;
+    public static double OBELISK_X = 8;
+    public static double OBELISK_Y = 36;
     public static double OBELISK_HEADING_DEG = -60;
 
     public static double SHOOT_X = 12;
