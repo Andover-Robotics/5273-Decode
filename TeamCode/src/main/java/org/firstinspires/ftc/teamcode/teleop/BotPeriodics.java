@@ -54,6 +54,8 @@ public class BotPeriodics {
 
     protected boolean twoMovementMode = false;
 
+    public static double rangeOffset = -20;
+
     public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
         intake = new Intake(hardwareMap);
         indexer = new Indexer(hardwareMap);
@@ -184,7 +186,7 @@ public class BotPeriodics {
             }
 
             if (!Double.isNaN(aprilTag.getRange())) {
-                targetRPM = outtake.getRegressionRPM(aprilTag.getRange());
+                targetRPM = outtake.getRegressionRPM(aprilTag.getRange() + rangeOffset);
             }
         } else {
             turnCorrection = 0;
