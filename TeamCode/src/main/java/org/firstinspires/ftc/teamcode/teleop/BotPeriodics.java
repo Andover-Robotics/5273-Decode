@@ -143,9 +143,9 @@ public class BotPeriodics {
     }
 
     protected void handleMovement() {
-        double lx = g2.getLeftX();
-        double ly = g2.getLeftY();
-        double rx = g2.getRightX();
+        double lx = g1.getLeftX();
+        double ly = g1.getLeftY();
+        double rx = g1.getRightX();
 
         if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
         else movement.teleopTick(lx, ly, rx, turnCorrection);
