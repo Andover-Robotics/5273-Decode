@@ -117,7 +117,7 @@ public class Outtake {
         if (Double.isNaN(range) || range <= 0) {
             return INTAKE_MIN_RPM;
         }
-        return 0.00211836 * Math.pow(range, 3) - 0.614769 * Math.pow(range, 2) + 65.69185 * range + 1508.69255;
+        return 0.0107081 * Math.pow(range, 3) -2.16323 * Math.pow(range, 2) +147.59773 * range + 186.44772;
     }
 
     // Within the range and has been in range for spinupInRangeMinTime
