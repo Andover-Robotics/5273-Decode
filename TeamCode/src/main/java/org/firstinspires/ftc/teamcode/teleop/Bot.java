@@ -41,8 +41,8 @@ public class Bot extends BotPeriodics {
     // Press-and-hold pre-spin minimum RPM
     public static double INTAKE_MIN_RPM = 3500.0;
 
-    public Bot(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
-        super(hardwareMap, tele, gamepad1, gamepad2);
+    public Bot(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
+        super(hardwareMap, tele, gamepad1, gamepad2, twoMovement);
         state = FSM.MotifSelection;
     }
 

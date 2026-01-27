@@ -52,7 +52,9 @@ public class BotPeriodics {
     public static double targetRPM = 3800;
     protected static final long AIM_UPDATE_INTERVAL_MS = 50;
 
-    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
+    protected boolean twoMovementMode = false;
+
+    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
         intake = new Intake(hardwareMap);
         indexer = new Indexer(hardwareMap);
         actuator = new Actuator(hardwareMap);
@@ -67,6 +69,7 @@ public class BotPeriodics {
         g2 = new GamepadEx(gamepad2);
         actionHost = new ActionHost();
         telemetry = tele;
+        twoMovementMode = useMovement;
     }
     
     protected void handlePeriodics()
@@ -143,10 +146,15 @@ public class BotPeriodics {
     }
 
     protected void handleMovement() {
+
         double lx = g1.getLeftX();
         double ly = g1.getLeftY();
         double rx = g1.getRightX();
-
+        if(twoMovementMode){
+             lx = g2.getLeftX();
+             ly = g2.getLeftY();
+             rx = g2.getRightX();
+        }
         if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
         else movement.teleopTick(lx, ly, rx, turnCorrection);
     }

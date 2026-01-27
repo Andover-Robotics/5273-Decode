@@ -5,8 +5,8 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "MainTeleOp", group = "AA_main")
-public class MainTeleop extends LinearOpMode {
+@TeleOp(name = "OneDriver", group = "AA_main")
+public class OneDriverTeleop extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
