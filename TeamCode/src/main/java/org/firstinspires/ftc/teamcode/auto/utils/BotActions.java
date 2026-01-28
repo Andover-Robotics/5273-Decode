@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SleepAction;
@@ -141,9 +141,11 @@ public class BotActions {
         });
     }
 
+    // TODO: using consider making it using actionIntakeThreeUsingDisp since the momentum should carry over,
+    //       should make it easier/more accurate rather than timing and better for voltage change
     public Action actionIntakeThreeFast() {
         return new SequentialAction(
-                new InstantAction(intake::stop),
+                new InstantAction(intake::run),
                 // slot 1
                 new SleepAction(0.3),
                 new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
@@ -160,6 +162,24 @@ public class BotActions {
                 new SleepAction(0.15),
                 new InstantAction(intake::stop)
         );
+    }
+
+    public Action actionIntakeThreeUsingDisp(Pose2d startPose, Pose2d endPose, MecanumDrive drive) {
+        // Prob have to do the math and stuff depending on startpose and endPose and where balls are to get proper after Disp vals
+        double ball1Disp = 0.25;
+        double ball2Disp = 0.50;
+        double ball3Disp = 0.75;
+
+        return drive.actionBuilder(startPose)
+                .afterDisp(0, intake::run)
+
+                .strafeToLinearHeading(endPose.position, endPose.heading)
+
+                .afterDisp(ball1Disp, () -> indexer.moveTo(indexer.getState().next()))
+                .afterDisp(ball2Disp, () -> indexer.moveTo(indexer.getState().next()))
+                .afterDisp(ball3Disp, () -> indexer.moveTo(indexer.getState().next()))
+                .afterDisp(1.0, intake::stop)
+                .build();
     }
 
     public Action actionIntakeOneCycle(boolean moveIndexer) {
