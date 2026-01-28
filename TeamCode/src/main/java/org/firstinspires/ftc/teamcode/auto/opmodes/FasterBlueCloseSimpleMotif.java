@@ -79,7 +79,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4.5, INTAKE2_Y, Math.toRadians(0));
         Pose2d dodgeGate = new Pose2d(INTAKE_X + 2 * INTAKE_FORWARD_DIST, INTAKE2_Y - 2, Math.toRadians(-20));
 
-        Pose2d intake3PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(0));
+        Pose2d intake3PoseStart = new Pose2d(INTAKE_X, INTAKE3_Y, Math.toRadians(0));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4.5, INTAKE3_Y, Math.toRadians(0));
 
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
@@ -102,12 +102,18 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 */
         );
 
-        Action intake1 = drive.actionBuilder(shootingPose)
-                .afterDisp(0,botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
-                .strafeToSplineHeading(intake1PoseStart.position, intake1PoseStart.heading)
-                .afterDisp(0, botActions.actionIntakeThreeFast())
-                .strafeToLinearHeading(intake1PoseEnd.position, intake1PoseEnd.heading)
-                .build();
+        Action intake1 = new ParallelAction(
+                drive.actionBuilder(shootingPose)
+                        .strafeToSplineHeading(intake1PoseStart.position, intake1PoseStart.heading)
+                        .strafeToLinearHeading(intake1PoseEnd.position, intake1PoseEnd.heading)
+                        .build(),
+
+                new SequentialAction(
+                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
+                        new SleepAction(timeUntilStartIntake),
+                        botActions.actionIntakeThreeFast()
+                )
+        );
 
         Action backToShoot1 = new ParallelAction(
                 drive.actionBuilder(intake1PoseEnd)
@@ -122,12 +128,18 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 */
         );
 
-        Action intake2 = drive.actionBuilder(shootingPose)
-                .afterDisp(0,botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
-                .strafeToSplineHeading(intake2PoseStart.position, intake2PoseStart.heading)
-                .afterDisp(0, botActions.actionIntakeThreeFast())
-                .strafeToLinearHeading(intake2PoseEnd.position, intake2PoseEnd.heading)
-                .build();
+        Action intake2 = new ParallelAction(
+                drive.actionBuilder(shootingPose)
+                        .strafeToSplineHeading(intake2PoseStart.position, intake2PoseStart.heading)
+                        .strafeToLinearHeading(intake2PoseEnd.position, intake2PoseEnd.heading)
+                        .build(),
+
+                new SequentialAction(
+                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
+                        new SleepAction(timeUntilStartIntake),
+                        botActions.actionIntakeThreeFast()
+                )
+        );
 
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
@@ -143,12 +155,18 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 */
         );
 
-        Action intake3 = drive.actionBuilder(shootingPose)
-                .afterDisp(0,botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
-                .strafeToSplineHeading(intake3PoseStart.position, intake3PoseStart.heading)
-                .afterDisp(0, botActions.actionIntakeThreeFast())
-                .strafeToLinearHeading(intake3PoseEnd.position, intake3PoseEnd.heading)
-                .build();
+        Action intake3 = new ParallelAction(
+                drive.actionBuilder(shootingPose)
+                        .strafeToSplineHeading(intake3PoseStart.position, intake3PoseStart.heading)
+                        .strafeToLinearHeading(intake3PoseEnd.position, intake3PoseEnd.heading)
+                        .build(),
+
+                new SequentialAction(
+                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
+                        new SleepAction(timeUntilStartIntake),
+                        botActions.actionIntakeThreeFast()
+                )
+        );
 
         Action backToShoot3 = new ParallelAction(
                 drive.actionBuilder(intake3PoseEnd)
