@@ -42,7 +42,6 @@ public class FasterBlueCloseSimpleMotifDisp extends LinearOpMode {
 
     public static int SHOOT_RPM = 4010;
 
-    public static double timeUntilStartIntake = 1.5; // has to be very accurate, subject to issues depending on voltage
     public static double timeUntilStartOuttake = 1.0; // Time until you start the outtake action, which still includes the spinup time
 
     // has quick outtake and quick intake

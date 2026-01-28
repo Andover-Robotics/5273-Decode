@@ -21,6 +21,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
         @Autonomous(name = "Testing opmode", group = "Autonomous")
         public class TestingOpmode extends LinearOpMode {
 
+            public static int row = 1;
+            public static int id = 21;
             public static double OBELISK_X = 5;
             public static double OBELISK_Y = 24;
             public static double OBELISK_HEADING_DEG = -60;
@@ -55,7 +57,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
                 );
 
                 Pose2d startPose = new Pose2d(0, 0, Math.toRadians(180));
-                MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
+                MecanumDrive drive = hardware.mecanumDrive;
 
                 Pose2d obeliskPose = new Pose2d(
                         OBELISK_X,
@@ -86,13 +88,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
                                 new SequentialAction(
                                         new SleepAction(1),
                                         botActions.initializeAuto(Indexer.IndexerState.two),
-                                        new SleepAction(3),
-                                        botActions.initializeForIntake(Indexer.IndexerState.two), // state should change for motif
-                                        new SleepAction(3),
-                                        botActions.initializeForIntake(Indexer.IndexerState.zero), // state should change for motif
-                                        new SleepAction(3),
-                                        botActions.initializeForIntake(Indexer.IndexerState.one), // state should change for motif
-                                        //botActions.rotateToMotifColorBeforeOuttake(0, 22, 0),
+                                        new SleepAction(1),
+                                        botActions.rotateToMotifColorBeforeOuttake(row, id, 0),
                                         new SleepAction(3)
                                 )
                         )
@@ -110,6 +107,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
                     Thread.currentThread().interrupt();
                 }
             }
+            telemetry.update();
         });
         periodicThread.start();
 

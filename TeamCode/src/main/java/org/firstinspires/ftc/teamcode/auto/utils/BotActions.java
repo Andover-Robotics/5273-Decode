@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.auto.utils;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
@@ -21,7 +22,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.teleop.Bot;
 
-
+@Config
 public class BotActions {
     private final Telemetry telemetry;
     private final Intake intake;
@@ -34,6 +35,10 @@ public class BotActions {
     public static double NON_INDEX_SPIN_TIME = 3;//seconds of full-power indexer blast
     public static double SHOOTER_SPINUP = 2.0;
     public static double FULL_BLAST_POWER =0.25;
+
+    public static double ball1TimeDisp = 0.4;
+    public static double  ball2TimeDisp = 0.6;
+    public static double  timeToIntake = 2.0;
 
     public static boolean continuousAprilTagLock;
     private double lastTurnCorrection;
@@ -126,6 +131,7 @@ public class BotActions {
     // helpers at the end of the file
     public Action rotateToMotifColorBeforeOuttake(int row, int id, int startingSlot) {
         return new InstantAction(() -> {
+            // set current color configuration
             applyCurrentColorsFromRow(row, startingSlot);
 
             // get desired firing order from obelisk id
@@ -133,8 +139,12 @@ public class BotActions {
 
             // values gets an array of the enums
             for (Indexer.IndexerState state : Indexer.IndexerState.values()) {
+                telemetry.addData("Started search for index of proper", "color");
                 if (matchesOrder(state.index, desiredOrder)) {
-                    indexer.moveTo(state, true);
+                    telemetry.addData("Rotated To Motif", "Color");
+                    // Indexer.IndexerState gotoState = Indexer.IndexerState.values()[(state.index - 1) % Indexer.IndexerState.values().length];
+                    Indexer.IndexerState gotoState = state;
+                    indexer.moveTo(gotoState, true);
                     return;
                 }
             }
@@ -161,18 +171,13 @@ public class BotActions {
     }
 
     public Action actionIntakeThreeUsingDisp(Pose2d startActionPose, Pose2d startIntakePose, Pose2d endPose, MecanumDrive drive) {
-        // gotta use Math.hypot if its not a straight line
-        // double intakeLength = Math.abs(startIntakePose.position.x - endPose.position.x);
-        double ball1Disp = 5.0/*/ intakeLength*/;
-        double ball2Disp = 10.0/*/ intakeLength*/;
-
         return drive.actionBuilder(startActionPose)
                 .strafeToSplineHeading(startIntakePose.position, startIntakePose.heading)
+                .afterTime(0, intake::run)
+                .afterTime(ball1TimeDisp, () -> indexer.moveTo(indexer.getState().next()))
+                .afterTime(ball2TimeDisp, () -> indexer.moveTo(indexer.getState().next()))
+                .afterTime(timeToIntake, intake::stop)
                 .strafeToLinearHeading(endPose.position, endPose.heading)
-                .afterDisp(0, intake::run)
-                .afterDisp(ball1Disp, () -> indexer.moveTo(indexer.getState().next()))
-                .afterDisp(ball2Disp, () -> indexer.moveTo(indexer.getState().next()))
-                .afterDisp(1.0, intake::stop)
                 .build();
     }
 
@@ -205,9 +210,9 @@ public class BotActions {
     }
 
     public Action initializeForIntake(Indexer.IndexerState slot) { // only temporary for testing, this is done in actionQuickOuttake
+
         return new SequentialAction(
-            new InstantAction(() -> indexer.setIntaking(true)),
-            new InstantAction(() -> indexer.moveTo(slot, true))
+            new InstantAction(() -> indexer.moveTo(slot))
         );
     }
 
