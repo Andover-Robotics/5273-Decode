@@ -35,21 +35,8 @@ public class PoseMapTrajectoryBuilder {
         return this;
     }
 
-    public PoseMapTrajectoryBuilder waitMovement(int start, int end, double wait) {
-        TrajectorySequence path = builder.build();
-        double time = 0;
-        for (int i = start; i <= end; i++) time += path.get(path.size() - 1 + i).getDuration();
-        builder = builder.waitSeconds(Math.max(wait - time, 0));
-        return this;
-    }
-
-    public PoseMapTrajectoryBuilder lineToLinearHeading(Pose2d pose, double waitTime) {
-        builder = builder.lineToLinearHeading(mapPose(pose));
-        return waitMovement(0, 0, waitTime);
-    }
-
-    public PoseMapTrajectoryBuilder strafeTo(Vector2d pos) {
-        builder = builder.strafeTo(posMap.apply(pos));
+    public PoseMapTrajectoryBuilder lineToSplineHeading(Pose2d pose) {
+        builder = builder.lineToSplineHeading(mapPose(pose));
         return this;
     }
 

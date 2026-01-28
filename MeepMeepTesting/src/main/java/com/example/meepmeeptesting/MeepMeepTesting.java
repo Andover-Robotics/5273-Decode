@@ -16,16 +16,14 @@ public class MeepMeepTesting {
     public static void main(String[] args) throws IOException {
         System.setProperty("sun.java2d.opengl", "true");
         MeepMeep meepMeep = new MeepMeep(600);
-        RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
-                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+        RoadRunnerBotEntity fasterBlueCloseSimpleMotif = new DefaultBotBuilder(meepMeep)
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .setColorScheme(new ColorSchemeBlueDark())
-                .followTrajectorySequence(BlueCloseSimpleMotif::createPath);
-        RoadRunnerBotEntity myBot2 = new DefaultBotBuilder(meepMeep)
-                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+                .followTrajectorySequence(FasterBlueCloseSimpleMotif::createPath);
+        RoadRunnerBotEntity fasterRedCloseSimpleMotif = new DefaultBotBuilder(meepMeep)
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .setColorScheme(new ColorSchemeRedDark())
-                .followTrajectorySequence(RedCloseSimpleMotif::createPath);
+                .followTrajectorySequence(FasterRedCloseSimpleMotif::createPath);
 
         // See https://github.com/rh-robotics/MeepMeep/pull/23
         Image background = ImageIO.read(
@@ -34,8 +32,8 @@ public class MeepMeepTesting {
         meepMeep.setBackground(background)
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
-                .addEntity(myBot)
-                .addEntity(myBot2)
+                .addEntity(fasterBlueCloseSimpleMotif)
+                .addEntity(fasterRedCloseSimpleMotif)
                 .start();
 
     }
