@@ -54,7 +54,7 @@ public class BotPeriodics {
 
     protected boolean twoMovementMode = false;
 
-    public static double rangeOffset = -20;
+    public static double rangeOffset = 6.67;
 
     public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
         intake = new Intake(hardwareMap);
