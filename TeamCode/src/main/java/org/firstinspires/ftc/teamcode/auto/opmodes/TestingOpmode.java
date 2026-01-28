@@ -88,6 +88,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
                                         new SleepAction(1),
                                                                 botActions.rotateToMotifColorBeforeOuttake(0, 22, 0)
                                 )
+                        )
                 );
 
         waitForStart();
