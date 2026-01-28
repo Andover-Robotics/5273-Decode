@@ -39,7 +39,9 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
     public static double PARK_Y = 68;
 
     public static int SHOOT_RPM = 4010;
-    public static int timeUntilStartOuttake = 1;
+
+    public static double timeUntileStartIntake = 1.5;
+    public static double timeUntilStartOuttake = 1.0;
 
     // has quick outtake and quick intake
     @Override
