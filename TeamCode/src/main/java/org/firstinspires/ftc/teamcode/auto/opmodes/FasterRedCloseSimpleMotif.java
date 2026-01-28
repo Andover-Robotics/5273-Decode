@@ -87,19 +87,17 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                 .stopAndAdd(botActions.actionScanObelisk())
                 .build();
 
-        Action toShoot = new SequentialAction(
-                new ParallelAction(
-                        drive.actionBuilder(startPose)
-                                .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                                .build()/*,
+        Action toShoot = new ParallelAction(
+                drive.actionBuilder(obeliskPose)
+                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
+                        .build()/*,
 
-                        new SequentialAction(
-                                botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0),
-                                new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
-                                botActions.actionQuickOuttake(SHOOT_RPM)
-                        )
-                        */
+                new SequentialAction(
+                        botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0),
+                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        botActions.actionQuickOuttake(SHOOT_RPM)
                 )
+                */
         );
 
         Action toIntakeStart1 =
@@ -118,19 +116,17 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                 botActions.actionIntakeThreeFast()
         );
 
-        Action backToShoot1 = new SequentialAction(
-                new ParallelAction(
-                        drive.actionBuilder(intake1PoseEnd)
-                                .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                                .build()/*,
+        Action backToShoot1 = new ParallelAction(
+                drive.actionBuilder(intake1PoseEnd)
+                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
+                        .build()/*,
 
-                        new SequentialAction(
-                                botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
-                                new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
-                                botActions.actionQuickOuttake(SHOOT_RPM)
-                        )
-                        */
+                new SequentialAction(
+                        botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
+                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        botActions.actionQuickOuttake(SHOOT_RPM)
                 )
+                */
         );
 
         Action toIntakeStart2 =
@@ -149,20 +145,18 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                 botActions.actionIntakeThreeFast()
         );
 
-        Action backToShoot2 = new SequentialAction(
-                new ParallelAction(
-                        drive.actionBuilder(intake2PoseEnd)
-                                .strafeToSplineHeading(dodgeGate.position, dodgeGate.heading)
-                                .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                                .build()/*,
+        Action backToShoot2 = new ParallelAction(
+                drive.actionBuilder(intake2PoseEnd)
+                        .strafeToSplineHeading(dodgeGate.position, dodgeGate.heading)
+                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
+                        .build()/*,
 
-                        new SequentialAction(
-                                botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
-                                new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
-                                botActions.actionQuickOuttake(SHOOT_RPM)
-                        )
-                        */
+                new SequentialAction(
+                        botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
+                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        botActions.actionQuickOuttake(SHOOT_RPM)
                 )
+                */
         );
 
         Action toIntakeStart3 =
@@ -181,22 +175,20 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
                 botActions.actionIntakeThreeFast()
         );
 
-        Action backToShoot3 = new SequentialAction(
-                new ParallelAction(
-                        drive.actionBuilder(intake3PoseEnd)
-                                .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                                .build()/*,
+        Action backToShoot3 = new ParallelAction(
+                drive.actionBuilder(intake3PoseEnd)
+                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
+                        .build()/*,
 
-                        new SequentialAction(
-                                botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
-                                new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
-                                botActions.actionQuickOuttake(SHOOT_RPM)
-                        )
-                        */
+                new SequentialAction(
+                        botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
+                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        botActions.actionQuickOuttake(SHOOT_RPM)
                 )
+                */
         );
 
-        Action toPark = drive.actionBuilder(startPose)
+        Action toPark = drive.actionBuilder(shootingPose)
                 .strafeToSplineHeading(
                         parkPose.position,
                         parkPose.heading
