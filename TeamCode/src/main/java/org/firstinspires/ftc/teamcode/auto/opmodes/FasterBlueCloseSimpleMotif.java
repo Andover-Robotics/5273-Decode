@@ -30,6 +30,8 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
     public static double SHOOT_HEADING_DEG = -50;
 
     public static double INTAKE_X = -8;
+
+    public static double gate_Y = 63;
     public static double INTAKE1_Y = 51;
     public static double INTAKE2_Y = 75;
     public static double INTAKE3_Y = 99;
@@ -74,6 +76,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
         Pose2d intake1PoseStart = new Pose2d(INTAKE_X, INTAKE1_Y, Math.toRadians(0));
         Pose2d intake1PoseEnd = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4, INTAKE1_Y, Math.toRadians(0));
+        Pose2d gate = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4, gate_Y, Math.toRadians(-90));
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(0));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4.5, INTAKE2_Y, Math.toRadians(0));
@@ -207,6 +210,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 new SequentialAction(
                         toObelisk,
                         toShoot,
+                        /*gate,*/
                         intake1,
                         backToShoot1,
                         intake2,
