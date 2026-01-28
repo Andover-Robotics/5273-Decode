@@ -86,9 +86,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
                                 new SequentialAction(
                                         new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.zero)), // state should change for motif
                                         new SleepAction(1),
-                                        botActions.actionQuickOuttake(3000)
+                                                                botActions.rotateToMotifColorBeforeOuttake(0, 22, 0)
                                 )
-                        )
                 );
 
         waitForStart();
