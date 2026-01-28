@@ -40,8 +40,8 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
     public static int SHOOT_RPM = 4010;
 
-    public static double timeUntileStartIntake = 1.5;
-    public static double timeUntilStartOuttake = 1.0;
+    public static double timeUntilStartIntake = 1.5; // has to be very accurate, subject to issues depending on voltage
+    public static double timeUntilStartOuttake = 1.0; // Time until you start the outtake action, which still includes the spinup time
 
     // has quick outtake and quick intake
     @Override
@@ -96,26 +96,23 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
                 new SequentialAction(
                         botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake(SHOOT_RPM)
                 )
                 */
         );
 
-        Action toIntakeStart1 =
-                new ParallelAction(
-                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
-
-                        drive.actionBuilder(shootingPose)
-                                .strafeToLinearHeading(intake1PoseStart.position, intake1PoseStart.heading)
-                                .build()
-                );
-
-        Action toIntakeEnd1 = new ParallelAction(
-                drive.actionBuilder(intake1PoseStart)
+        Action intake1 = new ParallelAction(
+                drive.actionBuilder(shootingPose)
+                        .strafeToSplineHeading(intake1PoseStart.position, intake1PoseStart.heading)
                         .strafeToLinearHeading(intake1PoseEnd.position, intake1PoseEnd.heading)
                         .build(),
-                botActions.actionIntakeThreeFast()
+
+                new SequentialAction(
+                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
+                        new SleepAction(timeUntilStartIntake),
+                        botActions.actionIntakeThreeFast()
+                )
         );
 
         Action backToShoot1 = new ParallelAction(
@@ -125,26 +122,23 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
                 new SequentialAction(
                         botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake(SHOOT_RPM)
                 )
                 */
         );
 
-        Action toIntakeStart2 =
-                new ParallelAction(
-                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
-
-                        drive.actionBuilder(shootingPose)
-                                .strafeToSplineHeading(intake2PoseStart.position, intake2PoseStart.heading)
-                                .build()
-                );
-
-        Action toIntakeEnd2 = new ParallelAction(
-                drive.actionBuilder(intake2PoseStart)
+        Action intake2 = new ParallelAction(
+                drive.actionBuilder(shootingPose)
+                        .strafeToSplineHeading(intake2PoseStart.position, intake2PoseStart.heading)
                         .strafeToLinearHeading(intake2PoseEnd.position, intake2PoseEnd.heading)
                         .build(),
-                botActions.actionIntakeThreeFast()
+
+                new SequentialAction(
+                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
+                        new SleepAction(timeUntilStartIntake),
+                        botActions.actionIntakeThreeFast()
+                )
         );
 
         Action backToShoot2 = new ParallelAction(
@@ -155,26 +149,23 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
                 new SequentialAction(
                         botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake(SHOOT_RPM)
                 )
                 */
         );
 
-        Action toIntakeStart3 =
-                new ParallelAction(
-                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
-
-                        drive.actionBuilder(shootingPose)
-                                .strafeToSplineHeading(intake3PoseStart.position, intake3PoseStart.heading)
-                                .build()
-                );
-
-        Action toIntakeEnd3 = new ParallelAction(
-                drive.actionBuilder(intake3PoseStart)
+        Action intake3 = new ParallelAction(
+                drive.actionBuilder(shootingPose)
+                        .strafeToSplineHeading(intake3PoseStart.position, intake3PoseStart.heading)
                         .strafeToLinearHeading(intake3PoseEnd.position, intake3PoseEnd.heading)
                         .build(),
-                botActions.actionIntakeThreeFast()
+
+                new SequentialAction(
+                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
+                        new SleepAction(timeUntilStartIntake),
+                        botActions.actionIntakeThreeFast()
+                )
         );
 
         Action backToShoot3 = new ParallelAction(
@@ -184,7 +175,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
                 new SequentialAction(
                         botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake(SHOOT_RPM)
                 )
                 */
@@ -216,15 +207,12 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 new SequentialAction(
                         toObelisk,
                         toShoot,
-                        toIntakeStart1,
-                        toIntakeEnd1,
+                        intake1,
                         backToShoot1,
-                        toIntakeStart2,
-                        toIntakeEnd2,
+                        intake2,
                         backToShoot2,
                         /*
-                        toIntakeStart3,
-                        toIntakeEnd3,
+                        intake3,
                         backToShoot3,
                          */
                         toPark

@@ -40,7 +40,7 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
 
     public static int SHOOT_RPM = 4010;
 
-    public static double timeUntilStartIntake = 0.5; // theres not an issue with runnig early, just time to wait just to save power cus why not
+    public static double timeUntilStartIntake = 1.5; // has to be very accurate, subject to issues depending on voltage
     public static double timeUntilStartOuttake = 1.0; // Time until you start the outtake action, which still includes the spinup time
 
     // has quick outtake and quick intake
@@ -122,7 +122,7 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
 
                 new SequentialAction(
                         botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake(SHOOT_RPM)
                 )
                 */
@@ -149,7 +149,7 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
 
                 new SequentialAction(
                         botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake(SHOOT_RPM)
                 )
                 */
@@ -175,7 +175,7 @@ public class FasterRedCloseSimpleMotif extends LinearOpMode {
 
                 new SequentialAction(
                         botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake), // Time until you start the outtake action, which still includes the spinup time
+                        new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake(SHOOT_RPM)
                 )
                 */
