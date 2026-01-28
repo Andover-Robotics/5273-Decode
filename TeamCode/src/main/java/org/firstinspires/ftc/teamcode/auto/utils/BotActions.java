@@ -194,6 +194,16 @@ public class BotActions {
         );
     }
 
+    public Action initializeAuto(Indexer.IndexerState startingSlot) { // only temporary for testing, this is done in actionQuickOuttake
+        return new SequentialAction(
+                new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
+                new InstantAction(() -> indexer.setIntaking(true)),
+                new InstantAction(() -> outtake.stop()),
+                new InstantAction(() -> actuator.down()),
+                new InstantAction(() -> indexer.moveTo(startingSlot, true))
+        );
+    }
+
     public Action initializeForIntake(Indexer.IndexerState slot) { // only temporary for testing, this is done in actionQuickOuttake
         return new SequentialAction(
             new InstantAction(() -> indexer.setIntaking(true)),

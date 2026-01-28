@@ -84,9 +84,16 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
                                         .build(),
                                 */
                                 new SequentialAction(
-                                        new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.zero)), // state should change for motif
                                         new SleepAction(1),
-                                                                botActions.rotateToMotifColorBeforeOuttake(0, 22, 0)
+                                        botActions.initializeAuto(Indexer.IndexerState.two),
+                                        new SleepAction(3),
+                                        botActions.initializeForIntake(Indexer.IndexerState.two), // state should change for motif
+                                        new SleepAction(3),
+                                        botActions.initializeForIntake(Indexer.IndexerState.zero), // state should change for motif
+                                        new SleepAction(3),
+                                        botActions.initializeForIntake(Indexer.IndexerState.one), // state should change for motif
+                                        //botActions.rotateToMotifColorBeforeOuttake(0, 22, 0),
+                                        new SleepAction(3)
                                 )
                         )
                 );
