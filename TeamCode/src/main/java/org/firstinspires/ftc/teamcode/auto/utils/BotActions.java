@@ -154,10 +154,6 @@ public class BotActions {
                 new SleepAction(0.2),
                 new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
 
-                // slot 3
-                new SleepAction(0.2),
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
-
                 // stop intakeintake
                 new SleepAction(0.15),
                 new InstantAction(intake::stop)
@@ -165,10 +161,10 @@ public class BotActions {
     }
 
     public Action actionIntakeThreeUsingDisp(Pose2d startPose, Pose2d endPose, MecanumDrive drive) {
-        // Prob have to do the math and stuff depending on startpose and endPose and where balls are to get proper after Disp vals
-        double ball1Disp = 0.25;
-        double ball2Disp = 0.50;
-        double ball3Disp = 0.75;
+        // gotta use Math.hypot if its not a straight line
+        double intakeLength = Math.abs(startPose.position.x - endPose.position.x);
+        double ball1Disp = 5.0 / intakeLength;
+        double ball2Disp = 10.0 / intakeLength;
 
         return drive.actionBuilder(startPose)
                 .afterDisp(0, intake::run)
@@ -177,7 +173,6 @@ public class BotActions {
 
                 .afterDisp(ball1Disp, () -> indexer.moveTo(indexer.getState().next()))
                 .afterDisp(ball2Disp, () -> indexer.moveTo(indexer.getState().next()))
-                .afterDisp(ball3Disp, () -> indexer.moveTo(indexer.getState().next()))
                 .afterDisp(1.0, intake::stop)
                 .build();
     }
