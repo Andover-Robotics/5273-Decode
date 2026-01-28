@@ -160,17 +160,16 @@ public class BotActions {
         );
     }
 
-    public Action actionIntakeThreeUsingDisp(Pose2d startPose, Pose2d endPose, MecanumDrive drive) {
+    public Action actionIntakeThreeUsingDisp(Pose2d startActionPose, Pose2d startIntakePose, Pose2d endPose, MecanumDrive drive) {
         // gotta use Math.hypot if its not a straight line
-        double intakeLength = Math.abs(startPose.position.x - endPose.position.x);
+        double intakeLength = Math.abs(startIntakePose.position.x - endPose.position.x);
         double ball1Disp = 5.0 / intakeLength;
         double ball2Disp = 10.0 / intakeLength;
 
-        return drive.actionBuilder(startPose)
-                .afterDisp(0, intake::run)
-
+        return drive.actionBuilder(startActionPose)
+                .strafeToSplineHeading(startIntakePose.position, startIntakePose.heading)
                 .strafeToLinearHeading(endPose.position, endPose.heading)
-
+                .afterDisp(0, intake::run)
                 .afterDisp(ball1Disp, () -> indexer.moveTo(indexer.getState().next()))
                 .afterDisp(ball2Disp, () -> indexer.moveTo(indexer.getState().next()))
                 .afterDisp(1.0, intake::stop)
