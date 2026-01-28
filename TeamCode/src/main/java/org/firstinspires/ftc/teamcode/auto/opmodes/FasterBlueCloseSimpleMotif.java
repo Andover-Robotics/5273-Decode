@@ -29,7 +29,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
     public static double SHOOT_Y = 42;
     public static double SHOOT_HEADING_DEG = -50;
 
-    public static double INTAKE_X = -10;
+    public static double INTAKE_X = -8;
     public static double INTAKE1_Y = 51;
     public static double INTAKE2_Y = 75;
     public static double INTAKE3_Y = 99;
@@ -75,6 +75,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(0));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4.5, INTAKE2_Y, Math.toRadians(0));
+        Pose2d dodgeGate = new Pose2d(INTAKE_X + 2 * INTAKE_FORWARD_DIST, INTAKE2_Y - 2, Math.toRadians(-20));
 
         Pose2d intake3PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(0));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4.5, INTAKE3_Y, Math.toRadians(0));
@@ -82,14 +83,14 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
 
         Action toObelisk = drive.actionBuilder(startPose)
-                .strafeToLinearHeading(obeliskPose.position, obeliskPose.heading)
+                .strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)
                 .stopAndAdd(botActions.actionScanObelisk())
                 .build();
 
         Action toShoot = new SequentialAction(
                 new ParallelAction(
                         drive.actionBuilder(startPose)
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                                 .build()/*,
 
                         new SequentialAction(
@@ -120,7 +121,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
         Action backToShoot1 = new SequentialAction(
                 new ParallelAction(
                         drive.actionBuilder(intake1PoseEnd)
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                                 .build()/*,
 
                         new SequentialAction(
@@ -137,7 +138,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                         new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
 
                         drive.actionBuilder(shootingPose)
-                                .strafeToLinearHeading(intake2PoseStart.position, intake2PoseStart.heading)
+                                .strafeToSplineHeading(intake2PoseStart.position, intake2PoseStart.heading)
                                 .build()
                 );
 
@@ -151,8 +152,8 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
         Action backToShoot2 = new SequentialAction(
                 new ParallelAction(
                         drive.actionBuilder(intake2PoseEnd)
-                                .strafeTo(new Vector2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST, INTAKE2_Y))
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                .strafeToSplineHeading(dodgeGate.position, dodgeGate.heading)
+                                .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                                 .build()/*,
 
                         new SequentialAction(
@@ -169,7 +170,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                         new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
 
                         drive.actionBuilder(shootingPose)
-                                .strafeToLinearHeading(intake3PoseStart.position, intake3PoseStart.heading)
+                                .strafeToSplineHeading(intake3PoseStart.position, intake3PoseStart.heading)
                                 .build()
                 );
 
@@ -183,8 +184,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
         Action backToShoot3 = new SequentialAction(
                 new ParallelAction(
                         drive.actionBuilder(intake3PoseEnd)
-                                .strafeTo(new Vector2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST, INTAKE3_Y))
-                                .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
+                                .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                                 .build()/*,
 
                         new SequentialAction(
@@ -197,7 +197,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
         );
 
         Action toPark = drive.actionBuilder(startPose)
-                .strafeToLinearHeading(
+                .strafeToSplineHeading(
                         parkPose.position,
                         parkPose.heading
                 )
