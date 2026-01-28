@@ -36,6 +36,7 @@ public class Hardware {
         indexer.ENABLE_AUTO_ADVANCE = false;
         indexer.ALWAYS_SEEK_EMPTY_WHILE_INTAKING = false;
         indexer.ENABLE_FULL_UNKNOWN_SCAN = false;
+        indexer.SCAN_COLORS = false;
 
         outtake  = new Outtake(hardwareMap, Outtake.Mode.RPM);
         actuator = new Actuator(hardwareMap);
