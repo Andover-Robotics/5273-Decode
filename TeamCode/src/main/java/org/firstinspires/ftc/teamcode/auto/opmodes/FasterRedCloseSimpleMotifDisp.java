@@ -25,12 +25,12 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
     public static double OBELISK_Y = 36;
     public static double OBELISK_HEADING_DEG = -60;
 
-    public static double SHOOT_X = 18;
+    public static double SHOOT_X = 15;
     public static double SHOOT_Y = 42;
     public static double SHOOT_HEADING_DEG = -130;
 
-    public static double INTAKE_X = 18;
-    public static double INTAKE_END_X = -2;
+    public static double INTAKE_X = 10.5;
+    public static double INTAKE_END_X = -14;
 
     public static double gate_X = -2;
     public static double gate_Y = 63;
@@ -90,10 +90,14 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(180));
 
         // Later combine this with toShoot for smoother
-        Action toObelisk = drive.actionBuilder(startPose)
-                .strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)
+        Action toObelisk = new ParallelAction(
+                drive.actionBuilder(startPose)
+                        .strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)
+                        .build(),
+
+                botActions.initializeAuto(Indexer.IndexerState.two)
                 // .stopAndAdd(botActions.actionScanObelisk()) - Gotta update from Quali-2 for the pipeline
-                .build();
+        );
 
         Action toShoot = new ParallelAction(
                 drive.actionBuilder(obeliskPose)

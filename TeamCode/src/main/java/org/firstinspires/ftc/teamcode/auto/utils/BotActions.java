@@ -36,8 +36,8 @@ public class BotActions {
     public static double SHOOTER_SPINUP = 2.0;
     public static double FULL_BLAST_POWER =0.25;
 
-    public static double ball1TimeDisp = 0.4;
-    public static double  ball2TimeDisp = 0.6;
+    public static double ball1TimeDisp = 0.35;
+    public static double  ball2TimeDisp = 0.55;
     public static double  timeToIntake = 2.0;
 
     public static boolean continuousAprilTagLock;
