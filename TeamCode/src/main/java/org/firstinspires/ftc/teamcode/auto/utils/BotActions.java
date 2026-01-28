@@ -56,26 +56,6 @@ public class BotActions {
         this.telemetry = telemetry;
     }
 
-    public void initializeColors(Indexer.ArtifactColor one, Indexer.ArtifactColor two, Indexer.ArtifactColor three) {
-        indexer.initializeColors(one, two, three);
-    }
-
-    public Action actionQuickOuttake(int rpm) {
-        return new SequentialAction(
-                new InstantAction(actuator::upQuick),// lower up position for quick dump
-                new InstantAction(() -> outtake.set(rpm)),
-                new SleepAction(SHOOTER_SPINUP),                      // spin up shooter
-                new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),// full blast
-                new SleepAction(NON_INDEX_SPIN_TIME),
-                new InstantAction(indexer::stopIndexerPower),
-                new InstantAction(outtake::stop),
-                new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.setIntaking(true)),
-                new InstantAction(indexer::initializeColors),
-                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.zero))
-        );
-    }
-
     // very slow ver
     public Action actionOuttake(int rpm) {
         return new SequentialAction(
@@ -121,217 +101,44 @@ public class BotActions {
                     actuator.down();
                     outtake.stop();
                     indexer.setIntaking(true);
+                    indexer.initializeColors();
+                    indexer.moveTo(Indexer.IndexerState.two);
                 })
         );
     }
-    public  Action indexerRotateForMotif(int tagId, int row) {
-        int rotations = 0;
 
-        if (row == 0 || row == 1) { // G P P
-            switch (tagId) {
-                case 21: rotations = 2; break;
-                case 22: rotations = 1; break;
-                case 23: rotations = 0; break;
-            }
-        } else if (row == 2) { // P G P
-            switch (tagId) {
-                case 21: rotations = 1; break;
-                case 22: rotations = 0; break;
-                case 23: rotations = 2; break;
-            }
-        }
-
-        switch (rotations) {
-            case 2:
-                return new SequentialAction(
-                        actionIndexerNext(),
-                        actionIndexerNext()
-                );
-            case 1:
-                return actionIndexerNext();
-            default:
-                return new Action() {
-                    @Override public boolean run(@NonNull com.acmerobotics.dashboard.telemetry.TelemetryPacket p) {
-                        return true;
-                    }
-                };
-        }
-    }
-
-    // Separate to run while moving
-    public Action actionOuttakeOffsetForMotif(int tagID, int row) {
-
-        int offset = 0;
-
-        switch (row) {
-            // Row 0 & 1 intake: P P G
-            case 0:
-            case 1:
-                switch (tagID) {
-                    case 21: // G P P
-                        offset = 0;
-                        break;
-                    case 22: // P G P
-                        offset = 1;
-                        break;
-                    case 23: // P P G
-                        offset = 2;
-                        break;
-                }
-                break;
-
-
-            // Row 2 intake: P G P
-            case 2:
-                switch (tagID) {
-                    case 21: // G P P
-                        offset = 1;
-                        break;
-                    case 22: // P G P
-                        offset = 2;
-                        break;
-                    case 23: // P P G
-                        offset = 0;
-                        break;
-                }
-                break;
-
-            // Row 3 intake: G P P
-            case 3:
-                switch (tagID) {
-                    case 21: // G P P
-                        offset = 2;
-                        break;
-                    case 22: // P G P
-                        offset = 0;
-                        break;
-                    case 23: // P P G
-                        offset = 1;
-                        break;
-                }
-                break;
-        }
-
-                return new SequentialAction(
-                        offset >= 1
-                                ? new InstantAction(() ->
-                                indexer.moveTo(indexer.getState().next(), true))
-                                : new InstantAction(() -> {
-                        }),
-
-                        // rotate second time if true
-                        offset >= 2
-                                ? new InstantAction(() ->
-                                indexer.moveTo(indexer.getState().next(), true))
-                                : new InstantAction(() -> {
-                        })
-                );
-    }
-
-    /*
-    public Action actionMotifOffsetWithColorApi(int tagID, int row) {
-
-        switch (row) {
-            // Row 0 & 1 intake: P P G
-            case 0:
-            case 1:
-                switch (tagID) {
-                    case 21: // G P P
-                        initializeColors();
-                        break;
-                    case 22: // P G P
-                        initializeColors();
-                        break;
-                    case 23: // P P G
-                        initializeColors();
-                        break;
-                }
-                break;
-
-
-            // Row 2 intake: P G P
-            case 2:
-                switch (tagID) {
-                    case 21: // G P P
-                        initializeColors();
-                        break;
-                    case 22: // P G P
-                        initializeColors();
-                        break;
-                    case 23: // P P G
-                        initializeColors();
-                        break;
-                }
-                break;
-
-            // Row 3 intake: G P P
-            case 3:
-                switch (tagID) {
-                    case 21: // G P P
-                        initializeColors();
-                        break;
-                    case 22: // P G P
-                        initializeColors();
-                        break;
-                    case 23: // P P G
-                        initializeColors();
-                        break;
-                }
-                break;
-        }
-
+    public Action actionQuickOuttake(int rpm) {
         return new SequentialAction(
-                offset >= 1
-                        ? new InstantAction(() ->
-                        indexer.moveTo(indexer.getState().next(), true))
-                        : new InstantAction(() -> {
-                }),
-
-                // rotate second time if true
-                offset >= 2
-                        ? new InstantAction(() ->
-                        indexer.moveTo(indexer.getState().next(), true))
-                        : new InstantAction(() -> {
-                })
+                new InstantAction(actuator::upQuick),// lower up position for quick dump
+                new InstantAction(() -> outtake.set(rpm)),
+                new SleepAction(SHOOTER_SPINUP),                      // spin up shooter
+                new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),// full blast
+                new SleepAction(NON_INDEX_SPIN_TIME),
+                new InstantAction(indexer::stopIndexerPower),
+                new InstantAction(outtake::stop),
+                new InstantAction(actuator::down),
+                new InstantAction(() -> indexer.setIntaking(true)),
+                new InstantAction(indexer::initializeColors),
+                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.two)) // This means, if you don't move the indexer, the next intaken will enter slot 0
         );
     }
-    */
 
-    // should probably not do instant action and while loop but it works, maybe change
-    public Action actionScanObelisk() {
+    // helpers at the end of the file
+    public Action rotateToMotifColorBeforeOuttake(int row, int id, int startingSlot) {
         return new InstantAction(() -> {
-            int scannedId = -1; // Keep scanning until we get a valid obelisk ID
-            while (scannedId < 21 || scannedId > 23) {
-                aprilTag.scanObeliskTag();
-                scannedId = aprilTag.getObeliskId();
+            applyCurrentColorsFromRow(row, startingSlot);
+
+            // get desired firing order from obelisk id
+            Indexer.ArtifactColor[] desiredOrder = getDesiredShootOrder(id);
+
+            // values gets an array of the enums
+            for (Indexer.IndexerState state : Indexer.IndexerState.values()) {
+                if (matchesOrder(state.index, desiredOrder)) {
+                    indexer.moveTo(state, true);
+                    return;
+                }
             }
-            aprilTag.setCurrentCameraScannedId(scannedId);
         });
-    }
-
-    public Action actionIntakeOneCycle(boolean moveIndexer) {
-        return new SequentialAction(
-                new InstantAction(() -> {
-                    indexer.setIntaking(true);
-                    intake.run();
-                }),
-                new SleepAction(0.9),
-                // Only move the indexer if moveIndexer is true
-                new InstantAction(() -> {
-                    if (moveIndexer) {
-                        indexer.moveTo(indexer.getState().next());
-                    }
-                }),
-                new SleepAction(0.167),
-                new InstantAction(intake::stop)
-        );
-    }
-
-    public Action initializeForIntake(Indexer.IndexerState slot) {
-        return new SequentialAction(
-            new InstantAction(() -> indexer.setIntaking(true)),
-            new InstantAction(() -> indexer.moveTo(slot, true))
-        );
     }
 
     public Action actionIntakeThreeFast() {
@@ -355,10 +162,40 @@ public class BotActions {
         );
     }
 
-    // for now to fix issues
-    public Action actionIndexerNext() {
+    public Action actionIntakeOneCycle(boolean moveIndexer) {
+        return new SequentialAction(
+                new InstantAction(() -> {
+                    indexer.setIntaking(true);
+                    intake.run();
+                }),
+                new SleepAction(0.9),
+                // Only move the indexer if moveIndexer is true
+                new InstantAction(() -> {
+                    if (moveIndexer) {
+                        indexer.moveTo(indexer.getState().next());
+                    }
+                }),
+                new SleepAction(0.167),
+                new InstantAction(intake::stop)
+        );
+    }
+
+    public Action initializeForIntake(Indexer.IndexerState slot) { // only temporary for testing, this is done in actionQuickOuttake
+        return new SequentialAction(
+            new InstantAction(() -> indexer.setIntaking(true)),
+            new InstantAction(() -> indexer.moveTo(slot, true))
+        );
+    }
+
+    // apparantly its bad to do instant action and while loop but it works from testing
+    public Action actionScanObelisk() {
         return new InstantAction(() -> {
-                indexer.moveTo(indexer.getState().next());
+            int scannedId = -1; // Keep scanning until we get a valid obelisk ID
+            while (scannedId < 21 || scannedId > 23) {
+                aprilTag.scanObeliskTag();
+                scannedId = aprilTag.getObeliskId();
+            }
+            aprilTag.setCurrentCameraScannedId(scannedId);
         });
     }
 
@@ -388,11 +225,79 @@ public class BotActions {
         };
     }
 
-
     public Action actionPark() {
     // vert slides
         return new ParallelAction(
                 new SleepAction(1)
         );
+    }
+
+    public int getObeliskId() {
+        return aprilTag.getObeliskId();
+    }
+
+
+    private boolean matchesOrder(int stateIndex, Indexer.ArtifactColor[] desired) {
+        return indexer.getColorAt(Indexer.IndexerState.values()[stateIndex % 3]) == desired[0]
+                && indexer.getColorAt(Indexer.IndexerState.values()[(stateIndex + 1) % 3]) == desired[1];
+    }
+
+
+    // HELPERS
+
+    // Sets the indexer's color configuration based on a given row,
+    // rotated so that the first intaken ball is placed in startingSlot
+    private void applyCurrentColorsFromRow(int row, int startingSlot /* basically (the last moved to slot + 1) % 3 [in intaking mode]*/) {
+        Indexer.ArtifactColor[] intakeOrder;
+
+        switch (row) {
+            case 1: // P P G
+                intakeOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN};
+                break;
+
+            case 2: // P G P
+                intakeOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE};
+                break;
+
+            case 0:
+            case 3: // G P P
+                intakeOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE};
+                break;
+
+            default:
+                return;
+        }
+
+        // Rotate array so the first intaken ball lands in startingSlot
+        Indexer.ArtifactColor[] rotated = new Indexer.ArtifactColor[3];
+        for (int i = 0; i < 3; i++) {
+            rotated[(startingSlot + i) % 3] = intakeOrder[i];
+        }
+
+        indexer.initializeColors(rotated[0], rotated[1], rotated[2]);
+    }
+
+    private Indexer.ArtifactColor[] getDesiredShootOrder(int id) {
+        // After the tag ID cases, you want to change the physical rows into shooting that motif
+        Indexer.ArtifactColor[] desiredShootOrder;
+        switch (id) {
+            case 21: // G -> P -> P - will shoot out in this order
+                desiredShootOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE};
+                break;
+
+            case 22: // P -> G -> P
+                desiredShootOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE};
+                break;
+
+            case 23: // P -> P -> G
+                desiredShootOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN};
+                break;
+
+            default:
+                desiredShootOrder = new Indexer.ArtifactColor[] {};
+                break;
+        }
+
+        return desiredShootOrder;
     }
 }
