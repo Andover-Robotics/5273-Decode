@@ -162,9 +162,9 @@ public class BotActions {
 
     public Action actionIntakeThreeUsingDisp(Pose2d startActionPose, Pose2d startIntakePose, Pose2d endPose, MecanumDrive drive) {
         // gotta use Math.hypot if its not a straight line
-        double intakeLength = Math.abs(startIntakePose.position.x - endPose.position.x);
-        double ball1Disp = 5.0 / intakeLength;
-        double ball2Disp = 10.0 / intakeLength;
+        // double intakeLength = Math.abs(startIntakePose.position.x - endPose.position.x);
+        double ball1Disp = 5.0/*/ intakeLength*/;
+        double ball2Disp = 10.0/*/ intakeLength*/;
 
         return drive.actionBuilder(startActionPose)
                 .strafeToSplineHeading(startIntakePose.position, startIntakePose.heading)
