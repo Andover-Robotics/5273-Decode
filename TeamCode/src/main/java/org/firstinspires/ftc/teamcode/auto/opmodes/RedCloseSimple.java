@@ -88,7 +88,7 @@ public class RedCloseSimple extends LinearOpMode {
                         shootingPose.position,
                         shootingPose.heading
                 )
-                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
+                //.stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
                 .build();
 
         Action toIntakeStart1 = drive.actionBuilder(shootingPose)
@@ -121,7 +121,7 @@ public class RedCloseSimple extends LinearOpMode {
                         shootingPose.position,
                         shootingPose.heading
                 )
-                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
+                //.stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
                 .build();
 
         Action toIntakeStart2 = drive.actionBuilder(shootingPose)
@@ -151,7 +151,7 @@ public class RedCloseSimple extends LinearOpMode {
 
         Action backToShoot2 = drive.actionBuilder(intake2Pose3)
                 .strafeToLinearHeading(shootingPose.position, shootingPose.heading)
-                .stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
+                //.stopAndAdd(botActions.actionOuttake(SHOOT_RPM))
                 .build();
 
         Action toPark = drive.actionBuilder(startPose)

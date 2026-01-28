@@ -26,26 +26,27 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
     public static double OBELISK_HEADING_DEG = -60;
 
     public static double SHOOT_X = 15;
-    public static double SHOOT_Y = 42;
-    public static double SHOOT_HEADING_DEG = -130;
+    public static double SHOOT_Y = 46;
+    public static double SHOOT_HEADING_DEG = -134;
+    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 6;
 
-    public static double INTAKE_X = 10.5;
-    public static double INTAKE_END_X = -14;
+    public static double INTAKE_X = 12;
+    public static double INTAKE_END_X = -12;
 
     public static double gate_X = -2;
     public static double gate_Y = 63;
 
-    public static double INTAKE1_Y = 51;
-    public static double INTAKE2_Y = 75;
-    public static double INTAKE3_Y = 99;
+    public static double INTAKE1_Y = 52;
+    public static double INTAKE2_Y = 77;
+    public static double INTAKE3_Y = 101;
     public static double intake2And3_XIncrease = 2.0;
 
     public static double PARK_X = 6;
     public static double PARK_Y = 68;
 
-    public static int SHOOT_RPM = 3800;
+    public static int SHOOT_RPM = 3480;
 
-    public static double timeUntilStartOuttake = 1.0; // Time until you start the outtake action, which still includes the spinup time
+    public static double timeUntilStartOuttake = 0.0; // Time until you start the outtake action, which still includes the spinup time
 
     // has quick outtake and quick intake
     @Override
@@ -82,7 +83,7 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake2And3_XIncrease, INTAKE2_Y, Math.toRadians(180));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake2And3_XIncrease + 8, INTAKE2_Y - 2, Math.toRadians(-160));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake2And3_XIncrease + 6, INTAKE2_Y - 2, Math.toRadians(-160));
 
         Pose2d intake3PoseStart = new Pose2d(INTAKE_X, INTAKE3_Y, Math.toRadians(180));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake2And3_XIncrease, INTAKE3_Y, Math.toRadians(180));
@@ -118,7 +119,7 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
 
         Action backToShoot1 = new ParallelAction(
                 drive.actionBuilder(intake1PoseEnd)
-                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
+                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
                 new SequentialAction(
@@ -136,7 +137,7 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
                         .strafeToSplineHeading(dodgeGate.position, dodgeGate.heading)
-                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
+                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
                 new SequentialAction(
@@ -153,7 +154,7 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
 
         Action backToShoot3 = new ParallelAction(
                 drive.actionBuilder(intake3PoseEnd)
-                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
+                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build()/*,
 
                 new SequentialAction(
@@ -197,10 +198,8 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
                         backToShoot1,
                         intake2,
                         backToShoot2,
-                        /*
                         intake3,
                         backToShoot3,
-                         */
                         toPark
                 )
         );

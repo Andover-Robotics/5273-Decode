@@ -32,13 +32,12 @@ public class BotActions {
     public final AprilTag aprilTag;
     private final AprilTagAimer aprilAimer;
 
-    public static double NON_INDEX_SPIN_TIME = 3;//seconds of full-power indexer blast
-    public static double SHOOTER_SPINUP = 2.0;
+    public static double NON_INDEX_SPIN_TIME = 1.35; //seconds of full-power indexer blast
     public static double FULL_BLAST_POWER =0.25;
 
     public static double ball1TimeDisp = 0.35;
     public static double  ball2TimeDisp = 0.55;
-    public static double  timeToIntake = 2.0;
+    public static double  timeToIntake = 1.75;
 
     public static boolean continuousAprilTagLock;
     private double lastTurnCorrection;
@@ -61,56 +60,6 @@ public class BotActions {
         this.telemetry = telemetry;
     }
 
-    // very slow ver
-    public Action actionOuttake(int rpm) {
-        return new SequentialAction(
-                new InstantAction(() -> indexer.setIntaking(false)),
-                new InstantAction(actuator::down),
-
-                new Action() {
-                    private long startTime = -1;
-                    @Override
-                    public boolean run(@NonNull TelemetryPacket telemetry) {
-                        if (startTime < 0) startTime = System.currentTimeMillis();
-                        outtake.set(rpm);
-                        return System.currentTimeMillis() - startTime >= BotActions.SHOOTER_SPINUP * 1000;
-                    }
-                },
-
-                // 1st
-                // This movestate is needed to make sure its outtake in the same order its intaken(unless changed elsewhere)
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(1.6),
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(0.2),
-                new InstantAction(actuator::down),
-                new SleepAction(0.6),
-
-                // 2nd
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(0.9),
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(0.2),
-                new InstantAction(actuator::down),
-                new SleepAction(0.6),
-
-                // 3rd
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(0.8),
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(0.15),
-                new InstantAction(actuator::down),
-
-                // Finish
-                new InstantAction(() -> {
-                    actuator.down();
-                    outtake.stop();
-                    indexer.setIntaking(true);
-                    indexer.initializeColors();
-                    indexer.moveTo(Indexer.IndexerState.two);
-                })
-        );
-    }
     public Action actionStartOuttake(double rpm) {
         return new InstantAction(() -> outtake.set(rpm));
     }
@@ -118,7 +67,7 @@ public class BotActions {
     public Action actionQuickOuttake() {
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),// lower up position for quick dump
-                new SleepAction(SHOOTER_SPINUP),                      // spin up shooter
+                new SleepAction(1.0),// for actuator
                 new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),// full blast
                 new SleepAction(NON_INDEX_SPIN_TIME),
                 new InstantAction(indexer::stopIndexerPower),
@@ -206,7 +155,7 @@ public class BotActions {
                 new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
                 new InstantAction(() -> indexer.setIntaking(true)),
                 //new InstantAction(() -> outtake.stop()),
-                //new InstantAction(() -> actuator.down()),
+                new InstantAction(() -> actuator.down()),
                 new InstantAction(() -> indexer.moveTo(startingSlot, true))
         );
     }
