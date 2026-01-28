@@ -111,11 +111,13 @@ public class BotActions {
                 })
         );
     }
+    public Action actionStartOuttake(double rpm) {
+        return new InstantAction(() -> outtake.set(rpm));
+    }
 
-    public Action actionQuickOuttake(int rpm) {
+    public Action actionQuickOuttake() {
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),// lower up position for quick dump
-                new InstantAction(() -> outtake.set(rpm)),
                 new SleepAction(SHOOTER_SPINUP),                      // spin up shooter
                 new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),// full blast
                 new SleepAction(NON_INDEX_SPIN_TIME),
@@ -203,8 +205,8 @@ public class BotActions {
         return new SequentialAction(
                 new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
                 new InstantAction(() -> indexer.setIntaking(true)),
-                new InstantAction(() -> outtake.stop()),
-                new InstantAction(() -> actuator.down()),
+                //new InstantAction(() -> outtake.stop()),
+                //new InstantAction(() -> actuator.down()),
                 new InstantAction(() -> indexer.moveTo(startingSlot, true))
         );
     }

@@ -95,7 +95,7 @@ public class RedClose extends LinearOpMode {
 
                         new SequentialAction(
                                 new SleepAction(0), // no need
-                                botActions.actionQuickOuttake(SHOOT_RPM)
+                                botActions.actionQuickOuttake()
                         )
                 )
         );
@@ -133,7 +133,7 @@ public class RedClose extends LinearOpMode {
 
                         new SequentialAction(
                                 new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
-                                botActions.actionQuickOuttake(SHOOT_RPM)
+                                botActions.actionQuickOuttake()
                         )
                 )
         );
@@ -172,7 +172,7 @@ public class RedClose extends LinearOpMode {
 
                         new SequentialAction(
                                 new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
-                                botActions.actionQuickOuttake(SHOOT_RPM)
+                                botActions.actionQuickOuttake()
                         )
                 )
         );

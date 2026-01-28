@@ -36,7 +36,7 @@ public class BlueClose extends LinearOpMode {
     public static double PARK_Y = 68;
 
     public static int SHOOT_RPM = 4010;
-    public static int timeToStartOuttakeBeforeToOuttake = 1;
+    public static double timeToStartOuttakeBeforeToOuttake = 1.0;
 
     // has quick outtake, no quick intake
     @Override
@@ -84,7 +84,7 @@ public class BlueClose extends LinearOpMode {
 
                         new SequentialAction(
                                 new SleepAction(0), // no need
-                                botActions.actionQuickOuttake(SHOOT_RPM)
+                                botActions.actionQuickOuttake()
                         )
                 )
         );
@@ -123,7 +123,7 @@ public class BlueClose extends LinearOpMode {
 
                         new SequentialAction(
                                 new SleepAction(timeToStartOuttakeBeforeToOuttake),
-                                botActions.actionQuickOuttake(SHOOT_RPM)
+                                botActions.actionQuickOuttake()
                         )
                 )
         );
@@ -162,7 +162,7 @@ public class BlueClose extends LinearOpMode {
 
                         new SequentialAction(
                                 new SleepAction(timeToStartOuttakeBeforeToOuttake), // just waits
-                                botActions.actionQuickOuttake(SHOOT_RPM)
+                                botActions.actionQuickOuttake()
                         )
                 )
         );

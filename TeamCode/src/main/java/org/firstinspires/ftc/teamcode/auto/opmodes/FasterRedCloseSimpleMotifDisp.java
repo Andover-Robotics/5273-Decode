@@ -43,7 +43,7 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
     public static double PARK_X = 6;
     public static double PARK_Y = 68;
 
-    public static int SHOOT_RPM = 4010;
+    public static int SHOOT_RPM = 3800;
 
     public static double timeUntilStartOuttake = 1.0; // Time until you start the outtake action, which still includes the spinup time
 
@@ -95,22 +95,23 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
                         .strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)
                         .build(),
 
-                botActions.initializeAuto(Indexer.IndexerState.two)
-                // .stopAndAdd(botActions.actionScanObelisk()) - Gotta update from Quali-2 for the pipeline
+                botActions.initializeAuto(Indexer.IndexerState.two),
+                botActions.actionStartOuttake(SHOOT_RPM)
+            // .stopAndAdd(botActions.actionScanObelisk()) - Gotta update from Quali-2 for the pipeline
         );
 
         Action toShoot = new ParallelAction(
                 drive.actionBuilder(obeliskPose)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                        .build(),/*
+                        .build(),
 
                 new SequentialAction(
-                        botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0),
+                        //botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0),
                         new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake(SHOOT_RPM)
+                        botActions.actionQuickOuttake()
                 )
-                */
-                new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
+
+                //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action intake1 = botActions.actionIntakeThreeUsingDisp(shootingPose, intake1PoseStart, intake1PoseEnd, drive);
@@ -118,15 +119,16 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
         Action backToShoot1 = new ParallelAction(
                 drive.actionBuilder(intake1PoseEnd)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                        .build(),/*
+                        .build(),
 
                 new SequentialAction(
-                        botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
+                        botActions.actionStartOuttake(SHOOT_RPM),
+                        //botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
                         new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake(SHOOT_RPM)
+                        botActions.actionQuickOuttake()
                 )
-                */
-                new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
+
+                //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action intake2 = botActions.actionIntakeThreeUsingDisp(shootingPose, intake2PoseStart, intake2PoseEnd, drive);
@@ -135,15 +137,16 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
                 drive.actionBuilder(intake2PoseEnd)
                         .strafeToSplineHeading(dodgeGate.position, dodgeGate.heading)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                        .build(),/*
+                        .build(),
 
                 new SequentialAction(
-                        botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
+                        botActions.actionStartOuttake(SHOOT_RPM),
+                        //botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
                         new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake(SHOOT_RPM)
+                        botActions.actionQuickOuttake()
                 )
-                */
-                new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
+
+                //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action intake3 = botActions.actionIntakeThreeUsingDisp(shootingPose, intake3PoseStart, intake3PoseEnd, drive);
@@ -151,15 +154,16 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
         Action backToShoot3 = new ParallelAction(
                 drive.actionBuilder(intake3PoseEnd)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                        .build(),/*
+                        .build()/*,
 
                 new SequentialAction(
-                        botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
+                        botActions.actionStartOuttake(SHOOT_RPM),
+                        //botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
                         new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake(SHOOT_RPM)
+                        botActions.actionQuickOuttake()
                 )
                 */
-                new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
+                //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action toPark = drive.actionBuilder(shootingPose)
