@@ -98,8 +98,8 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .build(),
 
                 botActions.initializeAuto(Indexer.IndexerState.two),
-                botActions.actionStartOuttake(SHOOT_RPM)
-            // .stopAndAdd(botActions.actionScanObelisk()) - Gotta update from Quali-2 for the pipeline
+                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.actionScanObelisk()
         );
 
         Action toShoot = new ParallelAction(
@@ -107,13 +107,12 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build(),
 
+                //botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0), - no need in 12 ball or more
+
                 new SequentialAction(
-                        //botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0), - no need in 12 ball or more
                         new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake()
                 )
-
-                //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action intake1 = botActions.actionIntakeThree(shootingPose, intake1PoseStart, intake1PoseEnd, drive);
@@ -123,14 +122,13 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
+                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
+
                 new SequentialAction(
-                        botActions.actionStartOuttake(SHOOT_RPM),
-                        //botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
                         new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake()
                 )
-
-                //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action intake2 = botActions.actionIntakeThree(shootingPose, intake2PoseStart, intake2PoseEnd, drive);
@@ -141,14 +139,13 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
+                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
+
                 new SequentialAction(
-                        botActions.actionStartOuttake(SHOOT_RPM),
-                        //botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
                         new SleepAction(timeUntilStartOuttake + 0.5),
                         botActions.actionQuickOuttake()
                 )
-
-                //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action intake3 = botActions.actionIntakeThree(shootingPose, intake3PoseStart, intake3PoseEnd, drive);
@@ -158,14 +155,13 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
+                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
+
                 new SequentialAction(
-                        botActions.actionStartOuttake(SHOOT_RPM),
-                        //botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
                         new SleepAction(timeUntilStartOuttake + 1.0),
                         botActions.actionQuickOuttake()
                 )
-
-                //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action toPark = drive.actionBuilder(shootingPose)
