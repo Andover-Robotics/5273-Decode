@@ -159,6 +159,13 @@ public class Indexer {
         }
     }
 
+    public void setIntaking(boolean isIntaking,IndexerState moveToState) {
+        if (this.intaking != isIntaking) {
+            this.intaking = isIntaking;
+            moveTo(moveToState); // no forcerecommend for now,
+        }
+    }
+
     public boolean moveToColor(ArtifactColor desired) {
         IndexerState target = findBestSlotForColor(desired);
         if (target == null) return false;

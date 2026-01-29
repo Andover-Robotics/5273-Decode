@@ -106,17 +106,19 @@ public class BotActions {
                 .afterTime(0, intake::run)
                 .afterTime(ball1TimeDisp, () -> indexer.moveTo(indexer.getState().next()))
                 .afterTime(ball2TimeDisp, () -> indexer.moveTo(indexer.getState().next()))
-                .afterTime(timeToIntake, intake::stop)
+                .afterTime(timeToIntake, intake::runSlow)
                 .strafeToLinearHeading(endPose.position, endPose.heading)
                 .build();
     }
 
     public Action initializeAuto(Indexer.IndexerState startingSlot) { // only temporary for testing, this is done in actionQuickOuttake
-        return new SequentialAction(
+        return new ParallelAction(
+            new SequentialAction(
                 new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
-                new InstantAction(() -> indexer.setIntaking(true)),
-                new InstantAction(() -> actuator.down()),
-                new InstantAction(() -> indexer.moveTo(startingSlot))
+                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two))
+            ),
+            actuator.down(),
+            intake.runSlow()
         );
     }
 
