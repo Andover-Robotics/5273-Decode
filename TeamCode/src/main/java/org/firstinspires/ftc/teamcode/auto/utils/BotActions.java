@@ -35,8 +35,8 @@ public class BotActions {
     public static double NON_INDEX_SPIN_TIME = 1.35; //seconds of full-power indexer blast
     public static double FULL_BLAST_POWER =0.25;
 
-    public static double ball1TimeDisp = 0.35;
-    public static double  ball2TimeDisp = 0.55;
+    public static double ball1TimeDisp = 0.33;
+    public static double  ball2TimeDisp = 0.545;
     public static double  timeToIntake = 1.75;
 
     public static boolean continuousAprilTagLock;
@@ -154,9 +154,8 @@ public class BotActions {
         return new SequentialAction(
                 new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
                 new InstantAction(() -> indexer.setIntaking(true)),
-                //new InstantAction(() -> outtake.stop()),
                 new InstantAction(() -> actuator.down()),
-                new InstantAction(() -> indexer.moveTo(startingSlot, true))
+                new InstantAction(() -> indexer.moveTo(startingSlot))
         );
     }
 

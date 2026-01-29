@@ -31,7 +31,10 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
     public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 6;
 
     public static double INTAKE_X = 12;
-    public static double INTAKE_END_X = -12;
+    public static double INTAKE2_OFFSET_X = 2;
+    public static double INTAKE3_OFFSET_X = 4;
+
+    public static double INTAKE_END_X = -18;
 
     public static double gate_X = -2;
     public static double gate_Y = 63;
@@ -81,11 +84,11 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
         Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(180));
         Pose2d gate = new Pose2d(gate_X, gate_Y, Math.toRadians(-90));
 
-        Pose2d intake2PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(180));
+        Pose2d intake2PoseStart = new Pose2d(INTAKE_X + INTAKE2_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake2And3_XIncrease, INTAKE2_Y, Math.toRadians(180));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake2And3_XIncrease + 6, INTAKE2_Y - 2, Math.toRadians(-160));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake2And3_XIncrease + 8, INTAKE2_Y - 2, Math.toRadians(-160));
 
-        Pose2d intake3PoseStart = new Pose2d(INTAKE_X, INTAKE3_Y, Math.toRadians(180));
+        Pose2d intake3PoseStart = new Pose2d(INTAKE_X + INTAKE3_OFFSET_X, INTAKE3_Y, Math.toRadians(180));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake2And3_XIncrease, INTAKE3_Y, Math.toRadians(180));
 
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(180));
@@ -143,7 +146,7 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
                 new SequentialAction(
                         botActions.actionStartOuttake(SHOOT_RPM),
                         //botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake),
+                        new SleepAction(timeUntilStartOuttake + 0.5),
                         botActions.actionQuickOuttake()
                 )
 
@@ -155,15 +158,15 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
         Action backToShoot3 = new ParallelAction(
                 drive.actionBuilder(intake3PoseEnd)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
-                        .build()/*,
+                        .build(),
 
                 new SequentialAction(
                         botActions.actionStartOuttake(SHOOT_RPM),
                         //botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake),
+                        new SleepAction(timeUntilStartOuttake + 1.0),
                         botActions.actionQuickOuttake()
                 )
-                */
+
                 //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
