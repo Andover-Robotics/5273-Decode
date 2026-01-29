@@ -65,7 +65,7 @@ public class BotActions {
     public Action actionQuickOuttake() {
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),// lower up position for quick dump
-                new SleepAction(1.0),// for actuator
+                new SleepAction(.35),// for actuator
                 new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),// full blast
                 new SleepAction(NON_INDEX_SPIN_TIME),
                 new InstantAction(indexer::stopIndexerPower),

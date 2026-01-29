@@ -47,7 +47,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
     public static int SHOOT_RPM = 3480;
 
-    public static double timeUntilStartOuttake = 0.0; // Time until you start the outtake action, which still includes the spinup time
+    public static double timeUntilStartOuttake = 0.65; // Time until you start the outtake action, which still includes the spinup time
 
     // has quick outtake and quick intake
     @Override
@@ -108,7 +108,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .build(),
 
                 new SequentialAction(
-                        //botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0),
+                        //botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0), - no need in 12 ball or more
                         new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake()
                 )
