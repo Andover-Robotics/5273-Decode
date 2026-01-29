@@ -2,12 +2,10 @@ package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -18,8 +16,8 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
-@Autonomous(name = "Faster Simple Red Auto With Motif using Disp Intaking", group = "Autonomous")
-public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
+@Autonomous(name = "Faster Red Auto With Motif", group = "Autonomous")
+public class FasterRedCloseMotif extends LinearOpMode {
 
     public static double OBELISK_X = 8;
     public static double OBELISK_Y = 36;
@@ -118,7 +116,7 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
                 //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
-        Action intake1 = botActions.actionIntakeThreeUsingDisp(shootingPose, intake1PoseStart, intake1PoseEnd, drive);
+        Action intake1 = botActions.actionIntakeThree(shootingPose, intake1PoseStart, intake1PoseEnd, drive);
 
         Action backToShoot1 = new ParallelAction(
                 drive.actionBuilder(intake1PoseEnd)
@@ -135,7 +133,7 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
                 //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
-        Action intake2 = botActions.actionIntakeThreeUsingDisp(shootingPose, intake2PoseStart, intake2PoseEnd, drive);
+        Action intake2 = botActions.actionIntakeThree(shootingPose, intake2PoseStart, intake2PoseEnd, drive);
 
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
@@ -153,7 +151,7 @@ public class FasterRedCloseSimpleMotifDisp extends LinearOpMode {
                 //new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
-        Action intake3 = botActions.actionIntakeThreeUsingDisp(shootingPose, intake3PoseStart, intake3PoseEnd, drive);
+        Action intake3 = botActions.actionIntakeThree(shootingPose, intake3PoseStart, intake3PoseEnd, drive);
 
         Action backToShoot3 = new ParallelAction(
                 drive.actionBuilder(intake3PoseEnd)

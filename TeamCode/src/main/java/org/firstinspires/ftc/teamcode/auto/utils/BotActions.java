@@ -10,7 +10,6 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Vector2d;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
@@ -20,7 +19,6 @@ import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
-import org.firstinspires.ftc.teamcode.teleop.Bot;
 
 @Config
 public class BotActions {
@@ -102,26 +100,7 @@ public class BotActions {
         });
     }
 
-    // TODO: using consider making it using actionIntakeThreeUsingDisp since the momentum should carry over,
-    //       should make it easier/more accurate rather than timing and better for voltage change
-    public Action actionIntakeThreeFast() {
-        return new SequentialAction(
-                new InstantAction(intake::run),
-                // slot 1
-                new SleepAction(0.3),
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
-
-                // slot 2
-                new SleepAction(0.2),
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
-
-                // stop intakeintake
-                new SleepAction(0.15),
-                new InstantAction(intake::stop)
-        );
-    }
-
-    public Action actionIntakeThreeUsingDisp(Pose2d startActionPose, Pose2d startIntakePose, Pose2d endPose, MecanumDrive drive) {
+    public Action actionIntakeThree(Pose2d startActionPose, Pose2d startIntakePose, Pose2d endPose, MecanumDrive drive) {
         return drive.actionBuilder(startActionPose)
                 .strafeToSplineHeading(startIntakePose.position, startIntakePose.heading)
                 .afterTime(0, intake::run)
@@ -130,24 +109,6 @@ public class BotActions {
                 .afterTime(timeToIntake, intake::stop)
                 .strafeToLinearHeading(endPose.position, endPose.heading)
                 .build();
-    }
-
-    public Action actionIntakeOneCycle(boolean moveIndexer) {
-        return new SequentialAction(
-                new InstantAction(() -> {
-                    indexer.setIntaking(true);
-                    intake.run();
-                }),
-                new SleepAction(0.9),
-                // Only move the indexer if moveIndexer is true
-                new InstantAction(() -> {
-                    if (moveIndexer) {
-                        indexer.moveTo(indexer.getState().next());
-                    }
-                }),
-                new SleepAction(0.167),
-                new InstantAction(intake::stop)
-        );
     }
 
     public Action initializeAuto(Indexer.IndexerState startingSlot) { // only temporary for testing, this is done in actionQuickOuttake

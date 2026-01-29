@@ -18,12 +18,8 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
-@Autonomous(name = "Faster Simple Blue Auto With Motif", group = "Autonomous")
-public class FasterBlueCloseSimpleMotif extends LinearOpMode {
-
-    public static double OBELISK_X = -8;
-    public static double OBELISK_Y = 36;
-    public static double OBELISK_HEADING_DEG = -120;
+@Autonomous(name = "Faster Red Auto No Motif", group = "Autonomous")
+public class FasterBlueClose extends LinearOpMode {
 
     public static double SHOOT_X = -12;
     public static double SHOOT_Y = 42;
@@ -62,12 +58,6 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(180));
 
-        Pose2d obeliskPose = new Pose2d(
-                OBELISK_X,
-                OBELISK_Y,
-                Math.toRadians(OBELISK_HEADING_DEG)
-        );
-
         Pose2d shootingPose = new Pose2d(
                 SHOOT_X,
                 SHOOT_Y,
@@ -87,13 +77,8 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
 
-        Action toObelisk = drive.actionBuilder(startPose)
-                .strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)
-                .stopAndAdd(botActions.actionScanObelisk())
-                .build();
-
         Action toShoot = new ParallelAction(
-                drive.actionBuilder(obeliskPose)
+                drive.actionBuilder(startPose)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build()/*,
 
@@ -114,7 +99,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 new SequentialAction(
                         new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
                         new SleepAction(timeUntilStartIntake),
-                        botActions.actionIntakeThreeFast()
+                        botActions.actionIntakeThree(shootingPose, intake1PoseStart, intake1PoseEnd, drive)
                 )
         );
 
@@ -140,7 +125,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 new SequentialAction(
                         new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
                         new SleepAction(timeUntilStartIntake),
-                        botActions.actionIntakeThreeFast()
+                        botActions.actionIntakeThree(shootingPose, intake2PoseStart, intake2PoseEnd, drive)
                 )
         );
 
@@ -167,7 +152,7 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
                 new SequentialAction(
                         new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)), // only temporary for testing, this is done in actionQuickOuttake
                         new SleepAction(timeUntilStartIntake),
-                        botActions.actionIntakeThreeFast()
+                        botActions.actionIntakeThree(shootingPose, intake3PoseStart, intake3PoseEnd, drive)
                 )
         );
 
@@ -208,7 +193,6 @@ public class FasterBlueCloseSimpleMotif extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        toObelisk,
                         toShoot,
                         /*gate,*/
                         intake1,
