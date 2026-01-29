@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
-@Autonomous(name = "Faster Red Auto No Motif", group = "Autonomous")
+@Autonomous(name = "Faster Blue Auto No Motif", group = "Autonomous")
 public class FasterBlueClose extends LinearOpMode {
 
     public static double SHOOT_X = -15;
