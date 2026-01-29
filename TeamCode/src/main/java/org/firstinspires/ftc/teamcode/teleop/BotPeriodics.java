@@ -141,13 +141,11 @@ public class BotPeriodics {
 
     protected void handleAllianceSelection() {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
-            goalTagID = 20;
-            aprilTag.setGoalTagID(goalTagID);
+            aprilTag.setPipeline(0);
             colorGoalSelected = "Blue";
         }
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
-            goalTagID = 24;
-            aprilTag.setGoalTagID(goalTagID);
+            aprilTag.setPipeline(1);
             colorGoalSelected = "Red";
         }
     }

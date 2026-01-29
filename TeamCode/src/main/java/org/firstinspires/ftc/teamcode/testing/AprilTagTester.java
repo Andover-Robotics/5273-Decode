@@ -113,12 +113,12 @@ public class AprilTagTester extends LinearOpMode {
 
             if(gamePadTwo.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
                 goalTagID = 20; // blue
-                aprilTag.setGoalTagID(goalTagID);
+                aprilTag.setPipeline(0);
                 telemetry.addData("Set to", "Blue Alliance") ;
             }
             if(gamePadTwo.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
                 goalTagID = 24; // red
-                aprilTag.setGoalTagID(goalTagID);
+                aprilTag.setPipeline(1);
                 telemetry.addData("Set to", "Red Alliance");
             }
 

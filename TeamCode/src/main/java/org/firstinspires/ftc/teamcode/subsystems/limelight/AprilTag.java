@@ -40,6 +40,7 @@ public class AprilTag {
 
     public void scanObeliskTag() {
         id = -1;
+        setPipeline(2);
         List<LLResultTypes.FiducialResult> scanned = limelight.getLatestResult().getFiducialResults();
 
         for (LLResultTypes.FiducialResult detection: scanned) {
@@ -56,6 +57,7 @@ public class AprilTag {
 
     public void scanGoalTag() {
         id = -1;
+        /* So that if you scan and theres no tag range stays, (bearing should be reset in the loops)*/
         bearing = Double.NaN;
         elevation = Double.NaN;
         range = Double.NaN;
@@ -65,19 +67,17 @@ public class AprilTag {
         for (LLResultTypes.FiducialResult detection: scanned) {
             cameraScannedId = detection.getFiducialId();
             // goalTagID should be gotten before round/during auto
-            if (cameraScannedId == goalTagID) {
-                id = cameraScannedId;
-                elevation = detection.getTargetYDegrees();
-                range = calculateDistance(elevation);
-                bearing = detection.getTargetXDegrees();
-                tagSize = detection.getTargetArea();
-                break;
-            }
+            id = cameraScannedId;
+            elevation = detection.getTargetYDegrees();
+            range = calculateDistance(elevation);
+            bearing = detection.getTargetXDegrees();
+            tagSize = detection.getTargetArea();
         }
     }
 
-    public void setGoalTagID(int allianceTagID) {
-        goalTagID = allianceTagID;
+    public void setPipeline(int pipeline) {
+        // 0 blue, 1 red, 2 obelisk
+        limelight.pipelineSwitch(pipeline);
     }
     public int getCurrentId() {
         return cameraScannedId;
