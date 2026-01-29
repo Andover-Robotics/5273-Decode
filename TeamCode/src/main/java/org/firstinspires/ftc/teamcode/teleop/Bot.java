@@ -30,7 +30,7 @@ public class Bot extends BotPeriodics {
     public static double NON_INDEX_SPIN_TIME = 3; //seconds of full-power indexer blast
     public static double SHOOTER_SPINUP = 2.0;
     public static double FULL_BLAST_POWER = 0.25;
-    public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 1.12;
+    public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.967; // 1.12
 
     public Indexer.ArtifactColor[] motif;
 
@@ -41,16 +41,8 @@ public class Bot extends BotPeriodics {
     // Press-and-hold pre-spin minimum RPM
     public static double INTAKE_MIN_RPM = 3500.0;
 
-    public Bot(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
-        super(hardwareMap, tele, gamepad1, gamepad2);
-        state = FSM.MotifSelection;
-    }
-
-
-    //auto initialization
-    public Bot(HardwareMap hardwareMap, Telemetry tele){
-        super(hardwareMap, tele);
-        //state will be unused
+    public Bot(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
+        super(hardwareMap, tele, gamepad1, gamepad2, twoMovement);
         state = FSM.MotifSelection;
     }
 
