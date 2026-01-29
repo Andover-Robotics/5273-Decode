@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Action;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
@@ -28,7 +27,6 @@ public class BotPeriodics {
     protected final Actuator actuator;
     protected final Outtake outtake;
     protected final Movement movement;
-    protected final MecanumDrive mecanumDrive;
     protected final AprilTag aprilTag;
     protected final AprilTagAimer aprilAimer;
     protected final IMU imu;
@@ -49,10 +47,16 @@ public class BotPeriodics {
     protected int goalTagID;
     protected String colorGoalSelected;
 
-    public static double targetRPM = 0;
+    protected boolean continuousIntake = false;
+
+    public static double targetRPM = 3800;
     protected static final long AIM_UPDATE_INTERVAL_MS = 50;
 
-    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
+    protected boolean twoMovementMode = false;
+
+    public static double rangeOffset = 6.67;
+
+    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
         intake = new Intake(hardwareMap);
         indexer = new Indexer(hardwareMap);
         actuator = new Actuator(hardwareMap);
@@ -67,36 +71,27 @@ public class BotPeriodics {
         g2 = new GamepadEx(gamepad2);
         actionHost = new ActionHost();
         telemetry = tele;
-        mecanumDrive = null;
+        twoMovementMode = useMovement;
     }
 
-    public BotPeriodics(HardwareMap hardwareMap, Telemetry telemetry) {
-        mecanumDrive = new MecanumDrive(
-                hardwareMap,
-                new Pose2d(0, 0, 0)
-        );
-
-        movement = null;
-        imu = mecanumDrive.lazyImu.get();
-        deadWheelLocalizer = (TwoDeadWheelLocalizer) mecanumDrive.localizer;
-
-        intake   = new Intake(hardwareMap);
-        indexer  = new Indexer(hardwareMap);
-        outtake  = new Outtake(hardwareMap, Outtake.Mode.RPM);
-        actuator = new Actuator(hardwareMap);
-        aprilTag = new AprilTag(hardwareMap, telemetry);
-        aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
-
-        this.telemetry = telemetry;
-
-        g1 = null;
-        g2 = null;
-    }
-    
     protected void handlePeriodics()
     {
         g1.readButtons();
         g2.readButtons();
+
+        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
+            continuousIntake = !continuousIntake;
+
+        double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        double leftTrigger2 = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        double rightTrigger2 = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
+        else if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || rightTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.runBackwards();
+        else if(continuousIntake) intake.runSlow();
+        else intake.stop();
+
+
         // driver one (constant
         handleAprilTagLock();
         handleMovement();
@@ -151,10 +146,15 @@ public class BotPeriodics {
     }
 
     protected void handleMovement() {
+
         double lx = g1.getLeftX();
         double ly = g1.getLeftY();
         double rx = g1.getRightX();
-
+        if(twoMovementMode){
+            lx = g2.getLeftX();
+            ly = g2.getLeftY();
+            rx = g2.getRightX();
+        }
         if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
         else movement.teleopTick(lx, ly, rx, turnCorrection);
     }
@@ -186,7 +186,7 @@ public class BotPeriodics {
             }
 
             if (!Double.isNaN(aprilTag.getRange())) {
-                targetRPM = outtake.getRegressionRPM(aprilTag.getRange());
+                targetRPM = outtake.getRegressionRPM(aprilTag.getRange() + rangeOffset);
             }
         } else {
             turnCorrection = 0;
