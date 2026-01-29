@@ -117,8 +117,8 @@ public class BotActions {
                 new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
                 new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two))
             ),
-            actuator.down(),
-            intake.runSlow()
+            new InstantAction(actuator::down),
+            new InstantAction(intake::runSlow)
         );
     }
 
