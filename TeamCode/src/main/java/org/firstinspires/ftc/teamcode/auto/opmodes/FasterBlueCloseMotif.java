@@ -2,10 +2,10 @@ package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -23,24 +23,33 @@ public class FasterBlueCloseMotif extends LinearOpMode {
     public static double OBELISK_Y = 36;
     public static double OBELISK_HEADING_DEG = -120;
 
-    public static double SHOOT_X = -12;
-    public static double SHOOT_Y = 42;
-    public static double SHOOT_HEADING_DEG = -50;
+    public static double SHOOT_X = -15;
+    public static double SHOOT_Y = 46;
+    public static double SHOOT_HEADING_DEG = -46;
+    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = -6;
 
-    public static double INTAKE_X = -8;
+    public static double INTAKE_START_X = -12;
+    public static double INTAKE2_START_OFFSET_X = -2;
+    public static double INTAKE3_START_OFFSET_X = -4;
+    public static double INTAKE_END_X = 18;
+    public static double intake_END_2And3_XOffset = -2.0;
 
-    public static double gate_Y = 63;
-    public static double INTAKE1_Y = 51;
-    public static double INTAKE2_Y = 75;
-    public static double INTAKE3_Y = 99;
-    public static double INTAKE_FORWARD_DIST = 8;
+    public static double INTAKE1_Y = 52;
+    public static double INTAKE2_Y = 77;
+    public static double INTAKE3_Y = 101;
+
+    public static double gateStart_X = -2;
+    public static double gateStart_Y = 77;
+    public static double gateEnd_X = 14;
+    public static double gateEnd_Y = 63;
+    public static double gateWaitTime = 1.5;
 
     public static double PARK_X = -6;
     public static double PARK_Y = 68;
 
-    public static int SHOOT_RPM = 4010;
+    public static int SHOOT_RPM = 3480;
 
-    public static double timeUntilStartOuttake = 1.0; // Time until you start the outtake action, which still includes the spinup time
+    public static double timeUntilStartOuttake = 0.65; // Time until you start the outtake action, which still includes the wait for actuator
 
     // has quick outtake and quick intake
     @Override
@@ -71,85 +80,97 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                 Math.toRadians(SHOOT_HEADING_DEG)
         );
 
-        Pose2d intake1PoseStart = new Pose2d(INTAKE_X, INTAKE1_Y, Math.toRadians(0));
-        Pose2d intake1PoseEnd = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4, INTAKE1_Y, Math.toRadians(0));
-        Pose2d gate = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4, gate_Y, Math.toRadians(-90));
+        Pose2d intake1PoseStart = new Pose2d(INTAKE_START_X, INTAKE1_Y, Math.toRadians(0));
+        Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(0));
+        Pose2d gateStart = new Pose2d(gateStart_X, gateStart_Y, Math.toRadians(45));
+        Pose2d gateEnd = new Pose2d(gateEnd_X, gateEnd_Y, Math.toRadians(90));
 
-        Pose2d intake2PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(0));
-        Pose2d intake2PoseEnd = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4.5, INTAKE2_Y, Math.toRadians(0));
-        Pose2d dodgeGate = new Pose2d(INTAKE_X + 2 * INTAKE_FORWARD_DIST, INTAKE2_Y - 2, Math.toRadians(-20));
+        Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(0));
+        Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(0));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset - 8, INTAKE2_Y + 2, Math.toRadians(20));
 
-        Pose2d intake3PoseStart = new Pose2d(INTAKE_X, INTAKE3_Y, Math.toRadians(0));
-        Pose2d intake3PoseEnd = new Pose2d(INTAKE_X + 3 * INTAKE_FORWARD_DIST + 4.5, INTAKE3_Y, Math.toRadians(0));
+        Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(0));
+        Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(0));
 
-        Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
+        Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(180));
 
-        Action toObelisk = drive.actionBuilder(startPose)
-                .strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)
-                .stopAndAdd(botActions.actionScanObelisk())
-                .build();
+        // Later combine this with toShoot for smoother
+        Action toObelisk = new ParallelAction(
+                drive.actionBuilder(startPose)
+                        .strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)
+                        .build(),
+
+                botActions.initializeAuto(Indexer.IndexerState.two),
+                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.actionScanObelisk()
+        );
 
         Action toShoot = new ParallelAction(
                 drive.actionBuilder(obeliskPose)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                        .build(),/*
+                        .build(),
+
+                //botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0), - no need in 12 ball or more
 
                 new SequentialAction(
-                        botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0),
                         new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake(SHOOT_RPM)
+                        botActions.actionQuickOuttake()
                 )
-                */
-                new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action intake1 = botActions.actionIntakeThree(shootingPose, intake1PoseStart, intake1PoseEnd, drive);
 
         Action backToShoot1 = new ParallelAction(
                 drive.actionBuilder(intake1PoseEnd)
-                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                        .build(),/*
+                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
+                        .build(),
+
+                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
 
                 new SequentialAction(
-                        botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
                         new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake(SHOOT_RPM)
+                        botActions.actionQuickOuttake()
                 )
-                */
-                new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action intake2 = botActions.actionIntakeThree(shootingPose, intake2PoseStart, intake2PoseEnd, drive);
 
+        Action goToGate = drive.actionBuilder(intake2PoseEnd)
+                .strafeToSplineHeading(gateStart.position, gateStart.heading)
+                .strafeToSplineHeading(gateEnd.position, gateEnd.heading)
+                .waitSeconds(gateWaitTime)
+                .build();
+
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
                         .strafeToSplineHeading(dodgeGate.position, dodgeGate.heading)
-                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                        .build(),/*
+                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
+                        .build(),
+
+                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
 
                 new SequentialAction(
-                        botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake(SHOOT_RPM)
+                        new SleepAction(timeUntilStartOuttake + 0.5),
+                        botActions.actionQuickOuttake()
                 )
-                */
-                new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action intake3 = botActions.actionIntakeThree(shootingPose, intake3PoseStart, intake3PoseEnd, drive);
 
         Action backToShoot3 = new ParallelAction(
                 drive.actionBuilder(intake3PoseEnd)
-                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
-                        .build(),/*
+                        .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
+                        .build(),
+
+                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
 
                 new SequentialAction(
-                        botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
-                        new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake(SHOOT_RPM)
+                        new SleepAction(timeUntilStartOuttake + 1.0),
+                        botActions.actionQuickOuttake()
                 )
-                */
-                new InstantAction(() -> botActions.initializeForIntake(Indexer.IndexerState.two)) // only temporary for testing, this is done in actionQuickOuttake
         );
 
         Action toPark = drive.actionBuilder(shootingPose)
@@ -178,15 +199,13 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                 new SequentialAction(
                         toObelisk,
                         toShoot,
-                        /*gate,*/
+                        /*goToGate,*/
                         intake1,
                         backToShoot1,
                         intake2,
                         backToShoot2,
-                        /*
                         intake3,
                         backToShoot3,
-                         */
                         toPark
                 )
         );
