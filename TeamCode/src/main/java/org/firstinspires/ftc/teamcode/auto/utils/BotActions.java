@@ -126,7 +126,7 @@ public class BotActions {
         return new ParallelAction(
             new SequentialAction(
                 new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
-                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.one))
+                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two))
             ),
             new InstantAction(actuator::down),
             new InstantAction(intake::runSlow)
