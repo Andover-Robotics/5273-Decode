@@ -79,11 +79,10 @@ public class BotActions {
                 new SleepAction(NON_INDEX_SPIN_TIME),
                 new InstantAction(indexer::stopIndexerPower),
                 new InstantAction(() -> indexer.setAutoOuttaking(false)),
-                new InstantAction(() -> indexer.setIntaking(true)),
+                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two)), // This means, if you don't move the indexer, the next intaken will enter slot 0
                 new InstantAction(outtake::stop),
                 new InstantAction(actuator::down),
-                new InstantAction(indexer::initializeColors),
-                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.two, true)) // This means, if you don't move the indexer, the next intaken will enter slot 0
+                new InstantAction(indexer::initializeColors)
         );
     }
 

@@ -161,11 +161,9 @@ public class Indexer {
         }
     }
 
-    public void setIntaking(boolean isIntaking,IndexerState moveToState) {
-        if (this.intaking != isIntaking) {
-            this.intaking = isIntaking;
-            moveTo(moveToState); // no forcerecommend for now,
-        }
+    public void setIntaking(boolean isIntaking, IndexerState moveToState) {
+        this.intaking = isIntaking;
+        moveTo(moveToState, true);
     }
 
     public void setAutoOuttaking(boolean isAutoOuttaking) {
