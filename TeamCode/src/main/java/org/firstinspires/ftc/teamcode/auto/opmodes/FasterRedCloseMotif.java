@@ -55,16 +55,9 @@ public class FasterRedCloseMotif extends LinearOpMode {
     // has quick outtake and quick intake
     @Override
     public void runOpMode() {
-        Hardware hardware = new Hardware(hardwareMap, telemetry);
-        BotActions botActions = new BotActions(
-                telemetry,
-                hardware.intake,
-                hardware.indexer,
-                hardware.outtake,
-                hardware.actuator,
-                hardware.aprilTag,
-                hardware.aprilAimer
-        );
+        Hardware hardware = new Hardware(hardwareMap, telemetry, this);
+        BotActions botActions = hardware.actions;
+
         MecanumDrive drive = hardware.mecanumDrive;
 
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));

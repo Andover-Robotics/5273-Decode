@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.auto.utils;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
@@ -22,7 +23,7 @@ public class Hardware {
     public final MecanumDrive mecanumDrive;
     public final IMU imu;
     public final TwoDeadWheelLocalizer deadWheelLocalizer;
-    public Hardware(HardwareMap hardwareMap, Telemetry telemetry) {
+    public Hardware(HardwareMap hardwareMap, Telemetry telemetry, LinearOpMode opMode) {
         mecanumDrive = new MecanumDrive(
                 hardwareMap,
                 new Pose2d(0, 0, 0)
@@ -43,6 +44,6 @@ public class Hardware {
         aprilTag = new AprilTag(hardwareMap, telemetry);
         aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
 
-        actions = new BotActions(telemetry, intake, indexer, outtake, actuator, aprilTag, aprilAimer);
+        actions = new BotActions(telemetry, intake, indexer, outtake, actuator, aprilTag, aprilAimer, opMode);
     }
 }

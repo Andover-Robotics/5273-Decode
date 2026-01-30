@@ -16,6 +16,8 @@ import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.VelConstraint;
 import com.arcrobotics.ftclib.trajectory.constraint.TrajectoryConstraint;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
@@ -28,6 +30,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
 public class BotActions {
+    private final LinearOpMode opMode;
     private final Telemetry telemetry;
     private final Intake intake;
     private final Indexer indexer;
@@ -53,7 +56,8 @@ public class BotActions {
             Outtake outtake,
             Actuator actuator,
             AprilTag aprilTag,
-            AprilTagAimer aprilAimer
+            AprilTagAimer aprilAimer,
+            LinearOpMode opMode
     ) {
         this.intake = intake;
         this.indexer = indexer;
@@ -62,6 +66,7 @@ public class BotActions {
         this.aprilTag = aprilTag;
         this.aprilAimer = aprilAimer;
         this.telemetry = telemetry;
+        this.opMode = opMode;
     }
 
     public Action actionStartOuttake(double rpm) {
@@ -133,13 +138,6 @@ public class BotActions {
         );
     }
 
-    public Action initializeForIntake(Indexer.IndexerState slot) { // only temporary for testing, this is done in actionQuickOuttake
-
-        return new SequentialAction(
-            new InstantAction(() -> indexer.moveTo(slot))
-        );
-    }
-
     // bad to do instant action and while loop
     public Action actionScanObelisk() {
         return new Action() {
@@ -147,6 +145,10 @@ public class BotActions {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
+                    return false;
+                }
+
                 if (scannedId != 21 && scannedId != 22 && scannedId != 23) {
                     aprilTag.scanObeliskTag();
                     scannedId = aprilTag.getObeliskId();
@@ -166,6 +168,9 @@ public class BotActions {
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
+                    return false;
+                }
 
                 outtake.periodic();
                 indexer.update();

@@ -45,16 +45,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
             // has quick outtake and quick intake
             @Override
             public void runOpMode() {
-                Hardware hardware = new Hardware(hardwareMap, telemetry);
-                BotActions botActions = new BotActions(
-                        telemetry,
-                        hardware.intake,
-                        hardware.indexer,
-                        hardware.outtake,
-                        hardware.actuator,
-                        hardware.aprilTag,
-                        hardware.aprilAimer
-                );
+                Hardware hardware = new Hardware(hardwareMap, telemetry, this);
+                BotActions botActions = hardware.actions;
 
                 Pose2d startPose = new Pose2d(0, 0, Math.toRadians(180));
                 MecanumDrive drive = hardware.mecanumDrive;

@@ -45,9 +45,7 @@ public class AprilTag {
 
         for (LLResultTypes.FiducialResult detection: scanned) {
             int id = detection.getFiducialId();
-            if (id >= 21 && id <= 23) {
-                obeliskId = id;
-            }
+            obeliskId = id;
         }
     }
 
