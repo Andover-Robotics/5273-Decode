@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Autonomous(name = "Faster Red Auto With Motif", group = "Autonomous")
 public class FasterRedCloseMotif extends LinearOpMode {
 
-    public static double maxIntakeVel = 30;
+    public static double maxIntakeDrivingVel = 30;
 
     public static double OBELISK_X = 8;
     public static double OBELISK_Y = 36;
@@ -80,7 +80,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(180));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 8, INTAKE2_Y, Math.toRadians(160));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 12, INTAKE2_Y, Math.toRadians(140));
 
         Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(180));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(180));
@@ -112,7 +112,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                 )
         );
 
-        Action intake1 = botActions.actionIntakeThree(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeVel);
+        Action intake1 = botActions.actionIntakeThree(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeDrivingVel);
 
         Action goToGate = drive.actionBuilder(intake1PoseEnd)
                 .strafeToLinearHeading(gate.position, gate.heading)
@@ -133,7 +133,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                 )
         );
 
-        Action intake2 = botActions.actionIntakeThree(shootingPose, intake2PoseStart, intake2PoseEnd, drive, maxIntakeVel);
+        Action intake2 = botActions.actionIntakeThree(shootingPose, intake2PoseStart, intake2PoseEnd, drive, maxIntakeDrivingVel);
 
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
@@ -150,7 +150,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                 )
         );
 
-        Action intake3 = botActions.actionIntakeThree(shootingPose, intake3PoseStart, intake3PoseEnd, drive, maxIntakeVel);
+        Action intake3 = botActions.actionIntakeThree(shootingPose, intake3PoseStart, intake3PoseEnd, drive, maxIntakeDrivingVel);
 
         Action backToShoot3 = new ParallelAction(
                 drive.actionBuilder(intake3PoseEnd)
