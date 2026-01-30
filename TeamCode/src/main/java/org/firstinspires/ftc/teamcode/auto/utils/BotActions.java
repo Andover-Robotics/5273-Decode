@@ -42,8 +42,8 @@ public class BotActions {
     public static double NON_INDEX_SPIN_TIME = 1.35; //seconds of full-power indexer blast
     public static double FULL_BLAST_POWER =0.25;
 
-    public static double ball1TimeDisp = 0.33;
-    public static double  ball2TimeDisp = 0.53;
+    public static double ball1TimeDisp = 0.66;
+    public static double  ball2TimeDisp = 1.10;
     public static double  timeToIntake = 2.50;
 
     public static boolean continuousAprilTagLock;
