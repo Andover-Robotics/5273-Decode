@@ -21,6 +21,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Autonomous(name = "Faster Blue Auto No Motif", group = "Autonomous")
 public class FasterBlueClose extends LinearOpMode {
 
+    public static double maxIntakeVel= 30;
+
     public static double SHOOT_X = -15;
     public static double SHOOT_Y = 46;
     public static double SHOOT_HEADING_DEG = -46;
@@ -100,7 +102,7 @@ public class FasterBlueClose extends LinearOpMode {
                 )
         );
 
-        Action intake1 = botActions.actionIntakeThree(shootingPose, intake1PoseStart, intake1PoseEnd, drive);
+        Action intake1 = botActions.actionIntakeThree(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeVel);
 
         Action backToShoot1 = new ParallelAction(
                 drive.actionBuilder(intake1PoseEnd)
@@ -115,7 +117,7 @@ public class FasterBlueClose extends LinearOpMode {
                 )
         );
 
-        Action intake2 = botActions.actionIntakeThree(shootingPose, intake2PoseStart, intake2PoseEnd, drive);
+        Action intake2 = botActions.actionIntakeThree(shootingPose, intake2PoseStart, intake2PoseEnd, drive, maxIntakeVel);
 
         Action goToGate = drive.actionBuilder(intake2PoseEnd)
                 .strafeToSplineHeading(gateStart.position, gateStart.heading)
@@ -137,7 +139,7 @@ public class FasterBlueClose extends LinearOpMode {
                 )
         );
 
-        Action intake3 = botActions.actionIntakeThree(shootingPose, intake3PoseStart, intake3PoseEnd, drive);
+        Action intake3 = botActions.actionIntakeThree(shootingPose, intake3PoseStart, intake3PoseEnd, drive, maxIntakeVel);
 
         Action backToShoot3 = new ParallelAction(
                 drive.actionBuilder(intake3PoseEnd)

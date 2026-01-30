@@ -5,11 +5,17 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Arclength;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Pose2dDual;
+import com.acmerobotics.roadrunner.PosePath;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
+import com.acmerobotics.roadrunner.VelConstraint;
+import com.arcrobotics.ftclib.trajectory.constraint.TrajectoryConstraint;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
@@ -33,8 +39,8 @@ public class BotActions {
     public static double NON_INDEX_SPIN_TIME = 1.35; //seconds of full-power indexer blast
     public static double FULL_BLAST_POWER =0.25;
 
-    public static double ball1TimeDisp = 0.37;
-    public static double  ball2TimeDisp = 0.57;
+    public static double ball1TimeDisp = 0.33;
+    public static double  ball2TimeDisp = 0.53;
     public static double  timeToIntake = 1.25;
 
     public static boolean continuousAprilTagLock;
@@ -59,7 +65,10 @@ public class BotActions {
     }
 
     public Action actionStartOuttake(double rpm) {
-        return new InstantAction(() -> outtake.set(rpm));
+        return new ParallelAction(
+            new InstantAction(() -> indexer.setAutoOuttaking(true)),
+            new InstantAction(() -> outtake.set(rpm))
+        );
     }
 
     public Action actionQuickOuttake() {
@@ -69,10 +78,12 @@ public class BotActions {
                 new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),// full blast
                 new SleepAction(NON_INDEX_SPIN_TIME),
                 new InstantAction(indexer::stopIndexerPower),
+                new InstantAction(() -> indexer.setAutoOuttaking(false)),
+                new InstantAction(() -> indexer.setIntaking(true)),
                 new InstantAction(outtake::stop),
                 new InstantAction(actuator::down),
                 new InstantAction(indexer::initializeColors),
-                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.two)) // This means, if you don't move the indexer, the next intaken will enter slot 0
+                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.two, true)) // This means, if you don't move the indexer, the next intaken will enter slot 0
         );
     }
 
@@ -99,14 +110,16 @@ public class BotActions {
         });
     }
 
-    public Action actionIntakeThree(Pose2d startActionPose, Pose2d startIntakePose, Pose2d endPose, MecanumDrive drive) {
+    public Action actionIntakeThree(Pose2d startActionPose, Pose2d startIntakePose, Pose2d endPose, MecanumDrive drive, double maxVel) {
+        TranslationalVelConstraint velConstraint = new TranslationalVelConstraint(maxVel);
+
         return drive.actionBuilder(startActionPose)
                 .strafeToSplineHeading(startIntakePose.position, startIntakePose.heading)
                 .afterTime(0, intake::run)
                 .afterTime(ball1TimeDisp, () -> indexer.moveTo(indexer.getState().next()))
                 .afterTime(ball2TimeDisp, () -> indexer.moveTo(indexer.getState().next()))
                 .afterTime(timeToIntake, intake::runSlow)
-                .strafeToLinearHeading(endPose.position, endPose.heading)
+                .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint)
                 .build();
     }
 

@@ -43,7 +43,8 @@ public class Indexer {
     public static long UNKNOWN_SCAN_COOLDOWN_MS = 250;
 
     // Config
-    public static double offsetAngle = 77.0;
+    public static double offsetAngle = 77.0; // 77 for normal, 105 is for auto
+    public static double autoOuttakeOffsetAngle = 32.0;
     public static double outtakeOffsetAngle = 200.0;
 
     // Slot spacing for color sensing
@@ -79,6 +80,7 @@ public class Indexer {
     // Internal state
     private IndexerState state = IndexerState.zero;
     private boolean intaking = true;
+    private boolean autoOuttaking = false;
     private boolean loaded = false;   // "anything present" (sensor OR stored memory)
     private boolean noEmpty = false;  // FULL: true when there are NO stored EMPTY slots
 
@@ -164,6 +166,11 @@ public class Indexer {
             this.intaking = isIntaking;
             moveTo(moveToState); // no forcerecommend for now,
         }
+    }
+
+    public void setAutoOuttaking(boolean isAutoOuttaking) {
+        this.autoOuttaking = isAutoOuttaking;
+        moveTo(state);
     }
 
     public boolean moveToColor(ArtifactColor desired) {
@@ -302,7 +309,10 @@ public class Indexer {
         double angle = s.index * SLOT_SPACING_DEG;
         angle += offsetAngle;
 
-        if (!intaking) {
+        if (autoOuttaking) {
+            angle += autoOuttakeOffsetAngle; // NOT 180 unless confirmed mechanically
+        }
+        else if (!intaking) {
             angle += outtakeOffsetAngle; // NOT 180 unless confirmed mechanically
         }
 
