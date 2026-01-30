@@ -33,9 +33,9 @@ public class BotActions {
     public static double NON_INDEX_SPIN_TIME = 1.35; //seconds of full-power indexer blast
     public static double FULL_BLAST_POWER =0.25;
 
-    public static double ball1TimeDisp = 0.33;
-    public static double  ball2TimeDisp = 0.545;
-    public static double  timeToIntake = 1.75;
+    public static double ball1TimeDisp = 0.37;
+    public static double  ball2TimeDisp = 0.57;
+    public static double  timeToIntake = 1.25;
 
     public static boolean continuousAprilTagLock;
     private double lastTurnCorrection;
@@ -71,7 +71,6 @@ public class BotActions {
                 new InstantAction(indexer::stopIndexerPower),
                 new InstantAction(outtake::stop),
                 new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.setIntaking(true)),
                 new InstantAction(indexer::initializeColors),
                 new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.two)) // This means, if you don't move the indexer, the next intaken will enter slot 0
         );
@@ -115,7 +114,7 @@ public class BotActions {
         return new ParallelAction(
             new SequentialAction(
                 new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
-                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two))
+                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.one))
             ),
             new InstantAction(actuator::down),
             new InstantAction(intake::runSlow)

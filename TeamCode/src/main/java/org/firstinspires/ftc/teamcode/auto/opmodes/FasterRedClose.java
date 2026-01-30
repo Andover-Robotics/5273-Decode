@@ -21,19 +21,19 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 public class FasterRedClose extends LinearOpMode {
 
     public static double SHOOT_X = 15;
-    public static double SHOOT_Y = 46;
-    public static double SHOOT_HEADING_DEG = -134;
-    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 6;
+    public static double SHOOT_Y = 42;
+    public static double SHOOT_HEADING_DEG = -132;
+    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 4;
 
-    public static double INTAKE_START_X = 12;
-    public static double INTAKE2_START_OFFSET_X = 2;
-    public static double INTAKE3_START_OFFSET_X = 4;
-    public static double INTAKE_END_X = -18;
-    public static double intake_END_2And3_XOffset = 2.0;
+    public static double INTAKE_START_X = 16;
+    public static double INTAKE2_START_OFFSET_X = 2.5;
+    public static double INTAKE3_START_OFFSET_X = 5;
+    public static double INTAKE_END_X = -13;
+    public static double intake_END_2And3_XOffset = 6.0;
 
-    public static double INTAKE1_Y = 52;
+    public static double INTAKE1_Y = 50;
     public static double INTAKE2_Y = 77;
-    public static double INTAKE3_Y = 101;
+    public static double INTAKE3_Y = 97;
 
     public static double gateStart_X = 2;
     public static double gateStart_Y = 77;
@@ -44,9 +44,9 @@ public class FasterRedClose extends LinearOpMode {
     public static double PARK_X = 6;
     public static double PARK_Y = 68;
 
-    public static int SHOOT_RPM = 3480;
+    public static int SHOOT_RPM = 3380;
 
-    public static double timeUntilStartOuttake = 0.65; // Time until you start the outtake action, which still includes the wait for actuator
+    public static double timeUntilStartOuttake = 1.65; // Time until you start the outtake action, which still includes the wait for actuator
 
     // has quick outtake and quick intake
     @Override
@@ -78,7 +78,7 @@ public class FasterRedClose extends LinearOpMode {
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(180));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 8, INTAKE2_Y - 2, Math.toRadians(160));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 8, INTAKE2_Y, Math.toRadians(160));
 
         Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(180));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(180));
