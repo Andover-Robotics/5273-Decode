@@ -37,7 +37,7 @@ public class FasterRedClose extends LinearOpMode {
     public static double INTAKE3_Y = 96;
 
     public static double gate_X = -12;
-    public static double gate_Y = 70;
+    public static double gate_Y = 60;
 
     public static double gateWaitTime = 1.5;
 

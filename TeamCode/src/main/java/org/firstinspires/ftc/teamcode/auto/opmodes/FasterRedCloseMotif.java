@@ -40,8 +40,8 @@ public class FasterRedCloseMotif extends LinearOpMode {
     public static double INTAKE2_Y = 77;
     public static double INTAKE3_Y = 96;
 
-    public static double gate_X = 2;
-    public static double gate_Y = 70;
+    public static double gate_X = -12;
+    public static double gate_Y = 60;
 
     public static double gateWaitTime = 1.5;
 
