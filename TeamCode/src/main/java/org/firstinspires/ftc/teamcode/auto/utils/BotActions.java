@@ -127,6 +127,76 @@ public class BotActions {
                 .build();
     }
 
+
+
+    //feedback based version of actionIntakeT
+
+    public Action actionIntakeThreeFeedback(
+            Pose2d startActionPose,
+            Pose2d startIntakePose,
+            Pose2d endPose,
+            MecanumDrive drive,
+            double maxVel
+    ) {
+        VelConstraint velConstraint = new TranslationalVelConstraint(maxVel);
+
+        Action driveAction = drive.actionBuilder(startActionPose)
+                .strafeToSplineHeading(startIntakePose.position, startIntakePose.heading)
+                .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint)
+                .build();
+
+        Action manageIntakeAndIndexing = new Action() {
+            private boolean lastAlignedNonEmpty = false;
+            private int acquired = 0;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket p) {
+                // stop if opmode ends
+                if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
+                    intake.runSlow(); // or intake.stop()
+                    return false;
+                }
+
+                // keep  indexer logic alive
+                indexer.update();
+
+                boolean alignedNonEmpty = indexer.artifactPresentAndAligned();
+
+                //  intake mode continuously
+                if (alignedNonEmpty) intake.runSlow();
+                else intake.run();
+
+                // Count only on rising edge
+                if (!lastAlignedNonEmpty && alignedNonEmpty) {
+                    acquired++;
+
+                    // advance indexer for next artifact
+                    if (acquired < 3) {
+                        indexer.moveTo(indexer.getState().next());
+                    }
+                }
+
+                lastAlignedNonEmpty = alignedNonEmpty;
+
+                // keep running until we've acquired 3
+                return acquired < 3;
+            }
+        };
+
+        return new SequentialAction(
+                // start in the expected mode
+                new InstantAction(intake::run),
+
+                //drive and do stuff
+                new ParallelAction(
+                        driveAction,
+                        manageIntakeAndIndexing
+                ),
+
+                new InstantAction(intake::runSlow)
+                //or just stop it
+        );
+    }
     public Action initializeAuto(Indexer.IndexerState startingSlot) { // only temporary for testing, this is done in actionQuickOuttake
         return new ParallelAction(
             new SequentialAction(

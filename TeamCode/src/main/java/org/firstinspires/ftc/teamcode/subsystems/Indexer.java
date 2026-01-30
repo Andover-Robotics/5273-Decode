@@ -691,4 +691,10 @@ public class Indexer {
                 && slots[x].color == desired[1]
                 && slots[(x + 1) % 3].color == desired[2];
     }
+
+    public boolean artifactPresentAndAligned() {
+        boolean hasArtifact = colorSensor.hasArtifact();
+        boolean aligned = isWithinTargetDegrees(15.0);
+        return hasArtifact && aligned;
+    }
 }
