@@ -12,25 +12,33 @@ public class FasterRedCloseSimpleMotif {
     public static double OBELISK_Y = 36;
     public static double OBELISK_HEADING_DEG = -60;
 
-    public static double SHOOT_X = 12;
-    public static double SHOOT_Y = 42;
-    public static double SHOOT_HEADING_DEG = -130;
+    public static double SHOOT_X = 15;
+    public static double SHOOT_Y = 46;
+    public static double SHOOT_HEADING_DEG = -134;
+    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 6;
 
-    public static double INTAKE_X = 8;
+    public static double INTAKE_START_X = 12;
+    public static double INTAKE2_START_OFFSET_X = 2;
+    public static double INTAKE3_START_OFFSET_X = 4;
+    public static double INTAKE_END_X = -18;
+    public static double intake_END_2And3_XOffset = 2.0;
 
-    public static double gate_Y = 63;
-    public static double INTAKE1_Y = 51;
-    public static double INTAKE2_Y = 75;
-    public static double INTAKE3_Y = 99;
-    public static double INTAKE_FORWARD_DIST = 8;
+    public static double INTAKE1_Y = 52;
+    public static double INTAKE2_Y = 77;
+    public static double INTAKE3_Y = 101;
+
+    public static double gateStart_X = 2;
+    public static double gateStart_Y = 77;
+    public static double gateEnd_X = -14;
+    public static double gateEnd_Y = 63;
+    public static double gateWaitTime = 1.5;
 
     public static double PARK_X = 6;
     public static double PARK_Y = 68;
 
-    public static int SHOOT_RPM = 4010;
+    public static int SHOOT_RPM = 3480;
 
-    public static double timeUntilStartIntake = 1.5; // has to be very accurate, subject to issues depending on voltage
-    public static double timeUntilStartOuttake = 1.0; // Time uTime until you start the outtake action, which still includes the spinup time
+    public static double timeUntilStartOuttake = 0.65; // Time until you start the outtake action, which still includes the wait for actuator
 
     // has quick outtake and quick intake
     public static TrajectorySequence createPath(DriveShim drive) {
@@ -48,16 +56,17 @@ public class FasterRedCloseSimpleMotif {
                 Math.toRadians(SHOOT_HEADING_DEG)
         );
 
-        Pose2d intake1PoseStart = new Pose2d(INTAKE_X, INTAKE1_Y, Math.toRadians(180));
-        Pose2d intake1PoseEnd = new Pose2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST - 4, INTAKE1_Y, Math.toRadians(180));
-        Pose2d gate = new Pose2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST - 4, gate_Y, Math.toRadians(-90));
+        Pose2d intake1PoseStart = new Pose2d(INTAKE_START_X, INTAKE1_Y, Math.toRadians(180));
+        Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(180));
+        Pose2d gateStart = new Pose2d(gateStart_X, gateStart_Y, Math.toRadians(135));
+        Pose2d gateEnd = new Pose2d(gateEnd_X, gateEnd_Y, Math.toRadians(90));
 
-        Pose2d intake2PoseStart = new Pose2d(INTAKE_X, INTAKE2_Y, Math.toRadians(180));
-        Pose2d intake2PoseEnd = new Pose2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST - 4.5, INTAKE2_Y, Math.toRadians(180));
-        Pose2d dodgeGate = new Pose2d(INTAKE_X - 2 * INTAKE_FORWARD_DIST, INTAKE2_Y - 2, Math.toRadians(-160));
+        Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
+        Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(180));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 8, INTAKE2_Y - 2, Math.toRadians(160));
 
-        Pose2d intake3PoseStart = new Pose2d(INTAKE_X, INTAKE3_Y, Math.toRadians(180));
-        Pose2d intake3PoseEnd = new Pose2d(INTAKE_X - 3 * INTAKE_FORWARD_DIST - 4.5, INTAKE3_Y, Math.toRadians(180));
+        Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(180));
+        Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(180));
 
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(180));
 
