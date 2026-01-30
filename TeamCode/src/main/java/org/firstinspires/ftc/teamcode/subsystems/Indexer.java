@@ -43,8 +43,8 @@ public class Indexer {
     public static long UNKNOWN_SCAN_COOLDOWN_MS = 250;
 
     // Config
-    public static double offsetAngle = 78.0;
-    public static double outtakeOffsetAngle = 63.0;
+    public static double offsetAngle = 77.0;
+    public static double outtakeOffsetAngle = 200.0;
 
     // Slot spacing for color sensing
     private static final double SLOT_SPACING_DEG = 120.0;
