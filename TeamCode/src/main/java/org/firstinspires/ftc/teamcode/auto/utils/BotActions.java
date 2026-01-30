@@ -140,19 +140,28 @@ public class BotActions {
         );
     }
 
-    // apparantly its bad to do instant action and while loop but it works from testing
+    // bad to do instant action and while loop
     public Action actionScanObelisk() {
-        return new InstantAction(() -> {
-            int scannedId = -1; // Keep scanning until we get a valid obelisk ID
-            while (scannedId < 21 || scannedId > 23) {
-                aprilTag.scanObeliskTag();
-                scannedId = aprilTag.getObeliskId();
+        return new Action() {
+            private int scannedId = -1;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (scannedId != 21 && scannedId != 22 && scannedId != 23) {
+                    aprilTag.scanObeliskTag();
+                    scannedId = aprilTag.getObeliskId();
+                    return true;
+                }
+                else {
+                    aprilTag.setCurrentCameraScannedId(scannedId);
+                    return false;
+                }
             }
-            aprilTag.setCurrentCameraScannedId(scannedId);
-        });
+        };
     }
 
     // doesn't seem to work with parallel actions
+    // Oops return false tells it to stop true tells it to go which is why it prob didn't work before?
     public Action actionPeriodic() {
         return new Action() {
             @Override
@@ -173,7 +182,7 @@ public class BotActions {
 
                 }
 
-                return false;
+                return true;
             }
         };
     }

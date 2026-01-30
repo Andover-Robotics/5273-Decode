@@ -164,36 +164,21 @@ public class FasterBlueClose extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        Thread periodicThread = new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted() && opModeIsActive()) {
-                botActions.actionPeriodic().run(null);
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        });
-        periodicThread.start();
-
         Actions.runBlocking(
-                new SequentialAction(
-                        toShoot,
-                        /*goToGate,*/
-                        intake1,
-                        backToShoot1,
-                        intake2,
-                        backToShoot2,
-                        intake3,
-                        backToShoot3,
-                        toPark
+                new ParallelAction(
+                        botActions.actionPeriodic(),
+                        new SequentialAction(
+                                toShoot,
+                                intake1,
+                                /*goToGate,*/
+                                backToShoot1,
+                                intake2,
+                                backToShoot2,
+                                intake3,
+                                backToShoot3,
+                                toPark
+                        )
                 )
         );
-
-        periodicThread.interrupt();
-        try {
-            periodicThread.join();
-        } catch (InterruptedException ignored) {
-        }
     }
 }

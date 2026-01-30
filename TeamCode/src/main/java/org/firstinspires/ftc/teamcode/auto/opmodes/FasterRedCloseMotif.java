@@ -19,39 +19,38 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Autonomous(name = "Faster Red Auto With Motif", group = "Autonomous")
 public class FasterRedCloseMotif extends LinearOpMode {
 
-    public static double maxIntakeVel= 30;
+    public static double maxIntakeVel = 30;
 
     public static double OBELISK_X = 8;
     public static double OBELISK_Y = 36;
     public static double OBELISK_HEADING_DEG = -60;
 
-    public static double SHOOT_X = 15;
-    public static double SHOOT_Y = 46;
-    public static double SHOOT_HEADING_DEG = -134;
-    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 6;
+    public static double SHOOT_X = 17;
+    public static double SHOOT_Y = 40;
+    public static double SHOOT_HEADING_DEG = -130;
+    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 4;
 
-    public static double INTAKE_START_X = 12;
-    public static double INTAKE2_START_OFFSET_X = 2;
-    public static double INTAKE3_START_OFFSET_X = 4;
-    public static double INTAKE_END_X = -18;
-    public static double intake_END_2And3_XOffset = 2.0;
+    public static double INTAKE_START_X = 11;
+    public static double INTAKE2_START_OFFSET_X = 0.5;
+    public static double INTAKE3_START_OFFSET_X = 2.5;
+    public static double INTAKE_END_X = -13;
+    public static double intake_END_2And3_XOffset = 6.0;
 
-    public static double INTAKE1_Y = 52;
-    public static double INTAKE2_Y = 75;
-    public static double INTAKE3_Y = 101;
+    public static double INTAKE1_Y = 50;
+    public static double INTAKE2_Y = 77;
+    public static double INTAKE3_Y = 96;
 
-    public static double gateStart_X = 2;
-    public static double gateStart_Y = 77;
-    public static double gateEnd_X = -14;
-    public static double gateEnd_Y = 63;
+    public static double gate_X = 2;
+    public static double gate_Y = 70;
+
     public static double gateWaitTime = 1.5;
 
     public static double PARK_X = 6;
     public static double PARK_Y = 68;
 
-    public static int SHOOT_RPM = 3480;
+    public static int SHOOT_RPM = 3340;
 
-    public static double timeUntilStartOuttake = 1.5; // Time until you start the outtake action, which still includes the wait for actuator
+    public static double timeUntilStartOuttake = 1.65; // Time until you start the outtake action, which still includes the wait for actuator
 
     // has quick outtake and quick intake
     @Override
@@ -84,8 +83,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Pose2d intake1PoseStart = new Pose2d(INTAKE_START_X, INTAKE1_Y, Math.toRadians(180));
         Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(180));
-        Pose2d gateStart = new Pose2d(gateStart_X, gateStart_Y, Math.toRadians(135));
-        Pose2d gateEnd = new Pose2d(gateEnd_X, gateEnd_Y, Math.toRadians(90));
+        Pose2d gate = new Pose2d(gate_X, gate_Y, Math.toRadians(-90));
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(180));
@@ -112,7 +110,8 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build(),
 
-                //botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0), - no need in 12 ball or more
+                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0), // - no need in 12 ball or more
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake),
@@ -122,13 +121,18 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Action intake1 = botActions.actionIntakeThree(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeVel);
 
+        Action goToGate = drive.actionBuilder(intake1PoseEnd)
+                .strafeToLinearHeading(gate.position, gate.heading)
+                .waitSeconds(gateWaitTime)
+                .build();
+
         Action backToShoot1 = new ParallelAction(
-                drive.actionBuilder(intake1PoseEnd)
+                drive.actionBuilder(intake1PoseEnd) // goToGate
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 0),
+                botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 1),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake),
@@ -137,12 +141,6 @@ public class FasterRedCloseMotif extends LinearOpMode {
         );
 
         Action intake2 = botActions.actionIntakeThree(shootingPose, intake2PoseStart, intake2PoseEnd, drive, maxIntakeVel);
-
-        Action goToGate = drive.actionBuilder(intake2PoseEnd)
-                .strafeToSplineHeading(gateStart.position, gateStart.heading)
-                .strafeToSplineHeading(gateEnd.position, gateEnd.heading)
-                .waitSeconds(gateWaitTime)
-                .build();
 
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
@@ -185,37 +183,22 @@ public class FasterRedCloseMotif extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        Thread periodicThread = new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted() && opModeIsActive()) {
-                botActions.actionPeriodic().run(null);
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        });
-        periodicThread.start();
-
         Actions.runBlocking(
-                new SequentialAction(
-                        toObelisk,
-                        toShoot,
-                        /*goToGate,*/
-                        intake1,
-                        backToShoot1,
-                        intake2,
-                        backToShoot2,
-                        intake3,
-                        backToShoot3,
-                        toPark
+                new ParallelAction(
+                        botActions.actionPeriodic(),
+                        new SequentialAction(
+                                toObelisk,
+                                toShoot,
+                                intake1,
+                                /*goToGate,*/
+                                backToShoot1,
+                                intake2,
+                                backToShoot2,
+                                intake3,
+                                backToShoot3,
+                                toPark
+                        )
                 )
         );
-
-        periodicThread.interrupt();
-        try {
-            periodicThread.join();
-        } catch (InterruptedException ignored) {
-        }
     }
 }
