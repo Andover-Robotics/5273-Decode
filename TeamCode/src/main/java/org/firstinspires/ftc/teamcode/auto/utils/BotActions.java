@@ -44,7 +44,7 @@ public class BotActions {
 
     public static double ball1TimeDisp = 0.33;
     public static double  ball2TimeDisp = 0.53;
-    public static double  timeToIntake = 1.25;
+    public static double  timeToIntake = 2.50;
 
     public static boolean continuousAprilTagLock;
     private double lastTurnCorrection;
