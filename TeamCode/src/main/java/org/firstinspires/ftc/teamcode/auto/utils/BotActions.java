@@ -163,7 +163,7 @@ public class BotActions {
                 boolean alignedNonEmpty = indexer.artifactPresentAndAligned();
 
                 //  intake mode continuously
-                if (alignedNonEmpty) intake.runSlow();
+                if (alignedNonEmpty) intake.runSlow(); // Lowkey the play so that once one is intaken another doesn't get stuck until indexer moves
                 else intake.run();
 
                 // Count only on rising edge

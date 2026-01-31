@@ -43,27 +43,26 @@ import java.util.Arrays;
                 BotActions botActions = hardware.actions;
                 MecanumDrive drive = hardware.mecanumDrive;
 
+                //TranslationalVelConstraint velConstraint1 = new TranslationalVelConstraint(maxVel1);
 
-                Pose2d poseStart = new Pose2d(0, 0, Math.toRadians(0));
-                Pose2d pose3 = new Pose2d(0, 72, Math.toRadians(0));
+                Pose2d poseStart = new Pose2d(0, 0, Math.toRadians(90));
+                Pose2d endPose = new Pose2d(0, 36, Math.toRadians(90));
 
-                VelConstraint velConstraint1 = new MinVelConstraint(Arrays.asList(new TranslationalVelConstraint(maxVel1)));
-                TranslationalVelConstraint velConstraint2 = new TranslationalVelConstraint(maxVel1);
+                Action intakeThreeAction = botActions.actionIntakeThreeFeedback(
+                        poseStart,
+                        endPose,
+                        endPose,
+                        drive,
+                        maxVel1
+                );
+
 
                 Action testSomething = new SequentialAction(
                         new ParallelAction(
+                                /*drive.actionBuilder(poseStart)
+                                        .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint1)
+                                        .build()*/
 
-                                drive.actionBuilder(poseStart)
-                                        .strafeToLinearHeading(pose3.position, pose3.heading, velConstraint2)
-                                        .build()/*,
-
-                                new SequentialAction(
-                                        new SleepAction(1),
-                                        botActions.initializeAuto(Indexer.IndexerState.two),
-                                        new SleepAction(1),
-                                        botActions.rotateToMotifColorBeforeOuttake(row, id, 0),
-                                        new SleepAction(3)
-                                )*/
                         )
                 );
 
@@ -74,7 +73,8 @@ import java.util.Arrays;
                         new ParallelAction(
                                 botActions.actionPeriodic(),
                                 new SequentialAction(
-                                        testSomething
+                                        testSomething,
+                                        intakeThreeAction
                                 )
                         )
                 );
