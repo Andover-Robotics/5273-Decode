@@ -103,7 +103,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(0, botActions.getObeliskId(), 0), // - no need in 12 ball or more
+                botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 0), // - no need in 12 ball or more
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake),
@@ -124,7 +124,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(1, botActions.getObeliskId(), 1),
+                botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 1),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake),
@@ -141,7 +141,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(2, botActions.getObeliskId(), 0),
+                botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 0),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake + 0.5),
@@ -157,7 +157,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(3, botActions.getObeliskId(), 0),
+                botActions.rotateToMotifColorBeforeOuttake(3, botActions::getObeliskId, 0),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake + 1.0),

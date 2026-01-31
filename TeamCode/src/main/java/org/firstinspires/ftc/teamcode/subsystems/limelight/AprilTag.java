@@ -12,7 +12,7 @@ import java.util.List;
 // TODO We will see whether we want separate auto for either alliance, probably yes its just easier that way and there may be some functionality requiring that.
 public class AprilTag {
     private int id = -1;
-    public static int obeliskId;
+    public static int obeliskId = -1;
     private int goalTagID; // our current alliance goal
     private int cameraScannedId;
     private double bearing;
@@ -39,13 +39,16 @@ public class AprilTag {
     }
 
     public void scanObeliskTag() {
-        id = -1;
         setPipeline(2);
-        List<LLResultTypes.FiducialResult> scanned = limelight.getLatestResult().getFiducialResults();
 
-        for (LLResultTypes.FiducialResult detection: scanned) {
-            int id = detection.getFiducialId();
-            obeliskId = id;
+        List<LLResultTypes.FiducialResult> scanned = limelight
+                .getLatestResult()
+                .getFiducialResults();
+
+        for (LLResultTypes.FiducialResult detection : scanned) {
+            int fid = detection.getFiducialId();
+            obeliskId = fid;
+            return;
         }
     }
 

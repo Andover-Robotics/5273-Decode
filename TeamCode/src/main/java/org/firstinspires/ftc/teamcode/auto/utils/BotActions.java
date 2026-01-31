@@ -29,6 +29,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
+import java.util.function.IntSupplier;
+
 @Config
 public class BotActions {
     private final LinearOpMode opMode;
@@ -94,13 +96,17 @@ public class BotActions {
     }
 
     // helpers at the end of the file
-    public Action rotateToMotifColorBeforeOuttake(int row, int id, int startingSlot) {
+    public Action rotateToMotifColorBeforeOuttake(int row, IntSupplier id, int startingSlot) {
+        if (id.getAsInt() < 21) {
+            return new InstantAction(() ->{});
+        }
+
         return new InstantAction(() -> {
             // set current color configuration
             applyCurrentColorsFromRow(row, startingSlot);
 
             // get desired firing order from obelisk id
-            Indexer.ArtifactColor[] desiredOrder = getDesiredShootOrder(id);
+            Indexer.ArtifactColor[] desiredOrder = getDesiredShootOrder(id.getAsInt());
 
             // values gets an array of the enums
             for (Indexer.IndexerState state : Indexer.IndexerState.values()) {
@@ -230,7 +236,7 @@ public class BotActions {
     // bad to do instant action and while loop
     public Action actionScanObelisk() {
         return new Action() {
-            private int scannedId = -1;
+            private final ElapsedTime timer = new ElapsedTime();
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
@@ -238,15 +244,15 @@ public class BotActions {
                     return false;
                 }
 
-                if (scannedId != 21 && scannedId != 22 && scannedId != 23) {
-                    aprilTag.scanObeliskTag();
-                    scannedId = aprilTag.getObeliskId();
-                    return true;
-                }
-                else {
-                    aprilTag.setCurrentCameraScannedId(scannedId);
+                if (timer.seconds() > 8.0) {
+                    telemetry.addLine("Obelisk scan timed out");
                     return false;
                 }
+
+                aprilTag.scanObeliskTag();
+                int id = aprilTag.getObeliskId();
+
+                return !(id == 21 || id == 22 || id == 23);
             }
         };
     }
