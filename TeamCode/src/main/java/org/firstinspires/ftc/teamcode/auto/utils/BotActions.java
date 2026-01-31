@@ -244,7 +244,7 @@ public class BotActions {
                     return false;
                 }
 
-                if (timer.seconds() > 8.0) {
+                if (timer.seconds() > 5.0) {
                     telemetry.addLine("Obelisk scan timed out");
                     return false;
                 }
