@@ -18,6 +18,7 @@ import com.acmerobotics.roadrunner.VelConstraint;
 import com.arcrobotics.ftclib.trajectory.constraint.TrajectoryConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
@@ -130,7 +131,6 @@ public class BotActions {
 
 
     //feedback based version of actionIntakeT
-
     public Action actionIntakeThreeFeedback(
             Pose2d startActionPose,
             Pose2d startIntakePose,
@@ -148,6 +148,7 @@ public class BotActions {
         Action manageIntakeAndIndexing = new Action() {
             private boolean lastAlignedNonEmpty = false;
             private int acquired = 0;
+            private final ElapsedTime acquireCooldown = new ElapsedTime();
 
             @Override
             public boolean run(@NonNull TelemetryPacket p) {
@@ -166,11 +167,13 @@ public class BotActions {
                 if (alignedNonEmpty) intake.runSlow(); // Lowkey the play so that once one is intaken another doesn't get stuck until indexer moves
                 else intake.run();
 
-                // Count only on rising edge
-                if (!lastAlignedNonEmpty && alignedNonEmpty) {
-                    acquired++;
+                if (!lastAlignedNonEmpty
+                        && alignedNonEmpty
+                        && acquireCooldown.milliseconds() > 150) {
 
-                    // advance indexer for next artifact
+                    acquired++;
+                    acquireCooldown.reset();
+
                     if (acquired < 3) {
                         indexer.moveTo(indexer.getState().next());
                     }
@@ -179,24 +182,31 @@ public class BotActions {
                 lastAlignedNonEmpty = alignedNonEmpty;
 
                 // keep running until we've acquired 3
-                return acquired < 3;
+                if (acquired >= 3) {
+                    intake.runSlow(); // or intake.stop()
+                    return false;
+                }
+
+                p.put("acquired", acquired);
+                p.put("alignedNonEmpty", alignedNonEmpty);
+                p.put("indexerState", indexer.getState());
+
+                return true;
             }
         };
 
         return new SequentialAction(
-                // start in the expected mode
                 new InstantAction(intake::run),
 
-                //drive and do stuff
                 new ParallelAction(
                         driveAction,
                         manageIntakeAndIndexing
                 ),
 
                 new InstantAction(intake::runSlow)
-                //or just stop it
         );
     }
+
     public Action initializeAuto(Indexer.IndexerState startingSlot) { // only temporary for testing, this is done in actionQuickOuttake
         return new ParallelAction(
             new SequentialAction(
