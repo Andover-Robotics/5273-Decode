@@ -188,12 +188,12 @@ public class BotPeriodics {
             if (!Double.isNaN(aprilTag.getRange())) {
                 targetRPM = outtake.getRegressionRPM(aprilTag.getRange() + rangeOffset);
             }
-            else {
+            /*else {
                 targetRPM = 3800;
-            }
+            }*/
         } else {
             turnCorrection = 0;
-            targetRPM = 3800;
+            //targetRPM = 3800;
         }
     }
 
