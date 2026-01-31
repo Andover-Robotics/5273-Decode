@@ -45,8 +45,9 @@ import java.util.Arrays;
 
                 //TranslationalVelConstraint velConstraint1 = new TranslationalVelConstraint(maxVel1);
 
-                Pose2d poseStart = new Pose2d(0, 0, Math.toRadians(90));
-                Pose2d endPose = new Pose2d(0, 36, Math.toRadians(90));
+                Pose2d poseStart = new Pose2d(0, 0, Math.toRadians(0));
+                Pose2d endPose = new Pose2d(1, 1, Math.toRadians(1));
+
 
                 Action intakeThreeAction = botActions.actionIntakeThreeFeedback(
                         poseStart,
@@ -59,6 +60,7 @@ import java.util.Arrays;
 
                 Action testSomething = new SequentialAction(
                         new ParallelAction(
+                                botActions.actionSetSomeShizzle()
                                 /*drive.actionBuilder(poseStart)
                                         .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint1)
                                         .build()*/

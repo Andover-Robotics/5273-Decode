@@ -33,7 +33,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
     public static double INTAKE_START_X = 11;
     public static double INTAKE2_START_OFFSET_X = 0.5;
     public static double INTAKE3_START_OFFSET_X = 2.5;
-    public static double INTAKE_END_X = -13;
+    public static double INTAKE_END_X = -6;
     public static double intake_END_2And3_XOffset = 6.0;
 
     public static double INTAKE1_Y = 50;

@@ -48,6 +48,7 @@ public class BotActions {
     public static double  timeToIntake = 2.50;
 
     public static boolean continuousAprilTagLock;
+    public static double cooldownFeedbackIntake = 150;
     private double lastTurnCorrection;
 
     public BotActions(
@@ -115,6 +116,14 @@ public class BotActions {
         });
     }
 
+    public Action actionSetSomeShizzle() {
+        return new SequentialAction(
+                new InstantAction(() -> indexer.setAutoOuttaking(false)),
+                new InstantAction(() -> indexer.setIntaking(true)),
+                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.two, true))
+                );
+    }
+
     public Action actionIntakeThree(Pose2d startActionPose, Pose2d startIntakePose, Pose2d endPose, MecanumDrive drive, double maxVel) {
         TranslationalVelConstraint velConstraint = new TranslationalVelConstraint(maxVel);
 
@@ -169,7 +178,7 @@ public class BotActions {
 
                 if (!lastAlignedNonEmpty
                         && alignedNonEmpty
-                        && acquireCooldown.milliseconds() > 150) {
+                        && acquireCooldown.milliseconds() > cooldownFeedbackIntake) {
 
                     acquired++;
                     acquireCooldown.reset();
@@ -183,7 +192,7 @@ public class BotActions {
 
                 // keep running until we've acquired 3
                 if (acquired >= 3) {
-                    intake.runSlow(); // or intake.stop()
+                    intake.stop(); // or intake.stop()
                     return false;
                 }
 
