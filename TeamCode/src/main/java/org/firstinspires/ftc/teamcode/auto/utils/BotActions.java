@@ -115,7 +115,7 @@ public class BotActions {
                     telemetry.addData("Rotated To Motif", "Color");
                     // Indexer.IndexerState gotoState = Indexer.IndexerState.values()[(state.index - 1) % Indexer.IndexerState.values().length];
                     Indexer.IndexerState gotoState = state;
-                    indexer.moveTo(gotoState);
+                    indexer.moveTo(gotoState, true);
                     return;
                 }
             }
@@ -173,6 +173,11 @@ public class BotActions {
                     return false;
                 }
 
+                if (acquireCooldown.seconds() > 3.0) {
+                    telemetry.addLine("Obelisk scan timed out");
+                    return false;
+                }
+
                 // keep  indexer logic alive
                 indexer.update();
 
@@ -226,7 +231,7 @@ public class BotActions {
         return new ParallelAction(
             new SequentialAction(
                 new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
-                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two))
+                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.one))
             ),
             new InstantAction(actuator::down),
             new InstantAction(intake::runSlow)

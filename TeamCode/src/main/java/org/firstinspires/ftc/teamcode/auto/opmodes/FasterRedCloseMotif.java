@@ -27,8 +27,8 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
     public static double SHOOT_X = 17;
     public static double SHOOT_Y = 40;
-    public static double SHOOT_HEADING_DEG = -130;
-    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 2;
+    public static double SHOOT_HEADING_DEG = -142.5;
+    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = -2;
 
     public static double INTAKE_START_X = 12;
     public static double INTAKE2_START_OFFSET_X = 3.0;
@@ -48,7 +48,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
     public static double PARK_X = 6;
     public static double PARK_Y = 68;
 
-    public static int SHOOT_RPM = 3340;
+    public static int SHOOT_RPM = 3240;
 
     public static double timeUntilStartOuttake = 1.65; // Time until you start the outtake action, which still includes the wait for actuator
 
@@ -80,7 +80,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(180));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 14, INTAKE2_Y - 4, Math.toRadians(140));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 16, INTAKE2_Y, Math.toRadians(140));
 
         Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(180));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(180));

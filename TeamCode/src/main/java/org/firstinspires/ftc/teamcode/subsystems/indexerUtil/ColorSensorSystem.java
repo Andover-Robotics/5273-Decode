@@ -14,7 +14,7 @@ public class ColorSensorSystem {
     public static float SENSOR_GAIN = 20.0f;
 
     // Minimum alpha (light) required to consider the slot full
-    public static float PRESENCE_ALPHA_THRESHOLD = 0.1f;
+    public static float PRESENCE_ALPHA_THRESHOLD = 0.2f;
 
     // HSV classification
     // Hue is in degrees

@@ -44,7 +44,7 @@ public class FasterBlueClose extends LinearOpMode {
     public static double PARK_X = -6;
     public static double PARK_Y = 68;
 
-    public static int SHOOT_RPM = 3340;
+    public static int SHOOT_RPM = 3240;
 
     public static double timeUntilStartOuttake = 1.65; // Time until you start the outtake action, which still includes the wait for actuator
 
