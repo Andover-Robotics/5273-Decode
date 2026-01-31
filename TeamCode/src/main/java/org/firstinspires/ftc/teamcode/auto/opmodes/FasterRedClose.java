@@ -27,7 +27,7 @@ public class FasterRedClose extends LinearOpMode {
     public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 2;
 
     public static double INTAKE_START_X = 12;
-    public static double INTAKE2_START_OFFSET_X = 3;
+    public static double INTAKE2_START_OFFSET_X = 3.0;
     public static double INTAKE3_START_OFFSET_X = 5.0;
     public static double INTAKE_END_X = -16;
     public static double intake_END_2And3_XOffset = 6.0;

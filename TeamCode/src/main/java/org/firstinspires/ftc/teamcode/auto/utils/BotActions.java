@@ -97,7 +97,7 @@ public class BotActions {
 
     // helpers at the end of the file
     public Action rotateToMotifColorBeforeOuttake(int row, IntSupplier id, int startingSlot) {
-        if (id.getAsInt() < 21) {
+        if (id.getAsInt() != 21 && id.getAsInt() != 22 && id.getAsInt() != 23) {
             return new InstantAction(() ->{});
         }
 
