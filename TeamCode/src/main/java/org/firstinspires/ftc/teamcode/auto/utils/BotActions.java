@@ -145,6 +145,17 @@ public class BotActions {
 
 
 
+    public Action initializeAuto(Indexer.IndexerState startingSlot) { // only temporary for testing, this is done in actionQuickOuttake
+        return new ParallelAction(
+            new SequentialAction(
+                new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
+                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.one))
+            ),
+            new InstantAction(actuator::down),
+            new InstantAction(intake::runSlow)
+        );
+    }
+
     //feedback based version of actionIntakeT
     public Action actionIntakeThreeFeedback(
             Pose2d startActionPose,
@@ -163,6 +174,7 @@ public class BotActions {
         Action manageIntakeAndIndexing = new Action() {
             private boolean lastAlignedNonEmpty = false;
             private int acquired = 0;
+            private double timeoutDuration = 5.0;
             private final ElapsedTime acquireCooldown = new ElapsedTime();
 
             @Override
@@ -170,11 +182,6 @@ public class BotActions {
                 // stop if opmode ends
                 if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
                     intake.runSlow(); // or intake.stop()
-                    return false;
-                }
-
-                if (acquireCooldown.seconds() > 3.0) {
-                    telemetry.addLine("Obelisk scan timed out");
                     return false;
                 }
 
@@ -224,17 +231,6 @@ public class BotActions {
                 ),
 
                 new InstantAction(intake::runSlow)
-        );
-    }
-
-    public Action initializeAuto(Indexer.IndexerState startingSlot) { // only temporary for testing, this is done in actionQuickOuttake
-        return new ParallelAction(
-            new SequentialAction(
-                new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
-                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.one))
-            ),
-            new InstantAction(actuator::down),
-            new InstantAction(intake::runSlow)
         );
     }
 
