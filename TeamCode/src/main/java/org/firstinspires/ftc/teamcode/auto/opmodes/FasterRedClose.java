@@ -19,21 +19,21 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Autonomous(name = "Faster Red Auto No Motif", group = "Autonomous")
 public class FasterRedClose extends LinearOpMode {
 
-    public static double maxIntakeDrivingVel = 30;
+    public static double maxIntakeDrivingVel = 17;
 
     public static double SHOOT_X = 17;
     public static double SHOOT_Y = 40;
     public static double SHOOT_HEADING_DEG = -130;
-    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 4;
+    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 2;
 
-    public static double INTAKE_START_X = 11;
-    public static double INTAKE2_START_OFFSET_X = 0.5;
-    public static double INTAKE3_START_OFFSET_X = 2.5;
-    public static double INTAKE_END_X = -6;
+    public static double INTAKE_START_X = 12;
+    public static double INTAKE2_START_OFFSET_X = 3;
+    public static double INTAKE3_START_OFFSET_X = 5.0;
+    public static double INTAKE_END_X = -16;
     public static double intake_END_2And3_XOffset = 6.0;
 
     public static double INTAKE1_Y = 50;
-    public static double INTAKE2_Y = 77;
+    public static double INTAKE2_Y = 76.5;
     public static double INTAKE3_Y = 96;
 
     public static double gate_X = -12;
@@ -69,7 +69,7 @@ public class FasterRedClose extends LinearOpMode {
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(180));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 12, INTAKE2_Y, Math.toRadians(140));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 20, INTAKE2_Y - 4, Math.toRadians(140));
 
         Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(180));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(180));
@@ -90,7 +90,7 @@ public class FasterRedClose extends LinearOpMode {
                 )
         );
 
-        Action intake1 = botActions.actionIntakeThree(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeDrivingVel);
+        Action intake1 = botActions.actionIntakeThreeFeedback(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeDrivingVel);
 
         Action goToGate = drive.actionBuilder(intake1PoseEnd)
                 .strafeToLinearHeading(gate.position, gate.heading)
@@ -110,7 +110,7 @@ public class FasterRedClose extends LinearOpMode {
                 )
         );
 
-        Action intake2 = botActions.actionIntakeThree(shootingPose, intake2PoseStart, intake2PoseEnd, drive, maxIntakeDrivingVel);
+        Action intake2 = botActions.actionIntakeThreeFeedback(shootingPose, intake2PoseStart, intake2PoseEnd, drive, maxIntakeDrivingVel);
 
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
@@ -126,7 +126,7 @@ public class FasterRedClose extends LinearOpMode {
                 )
         );
 
-        Action intake3 = botActions.actionIntakeThree(shootingPose, intake3PoseStart, intake3PoseEnd, drive, maxIntakeDrivingVel);
+        Action intake3 = botActions.actionIntakeThreeFeedback(shootingPose, intake3PoseStart, intake3PoseEnd, drive, maxIntakeDrivingVel);
 
         Action backToShoot3 = new ParallelAction(
                 drive.actionBuilder(intake3PoseEnd)

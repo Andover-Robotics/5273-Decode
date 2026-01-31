@@ -192,7 +192,7 @@ public class BotActions {
 
                 // keep running until we've acquired 3
                 if (acquired >= 3) {
-                    intake.stop(); // or intake.stop()
+                    intake.runSlow(); // or intake.stop()
                     return false;
                 }
 
