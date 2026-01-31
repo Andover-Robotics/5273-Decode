@@ -11,8 +11,8 @@ import java.util.List;
 // TODO IMPORTANT NOTES: For goalTagID, just have separate teleops one for red alliance one for blue where blue teleop can setGoalTagID(20) and red teleop can setGoalTagID(24)
 // TODO We will see whether we want separate auto for either alliance, probably yes its just easier that way and there may be some functionality requiring that.
 public class AprilTag {
-    private int id;
-    private int obeliskId;
+    private int id = -1;
+    public static int obeliskId = -1;
     private int goalTagID; // our current alliance goal
     private int cameraScannedId;
     private double bearing;
@@ -39,15 +39,16 @@ public class AprilTag {
     }
 
     public void scanObeliskTag() {
-        id = -1;
         setPipeline(2);
-        List<LLResultTypes.FiducialResult> scanned = limelight.getLatestResult().getFiducialResults();
 
-        for (LLResultTypes.FiducialResult detection: scanned) {
-            int id = detection.getFiducialId();
-            if (id >= 21 && id <= 23) {
-                obeliskId = id;
-            }
+        List<LLResultTypes.FiducialResult> scanned = limelight
+                .getLatestResult()
+                .getFiducialResults();
+
+        for (LLResultTypes.FiducialResult detection : scanned) {
+            int fid = detection.getFiducialId();
+            obeliskId = fid;
+            return;
         }
     }
 
@@ -79,7 +80,6 @@ public class AprilTag {
         // 0 blue, 1 red, 2 obelisk
         limelight.pipelineSwitch(pipeline);
     }
-
     public int getCurrentId() {
         return cameraScannedId;
     }

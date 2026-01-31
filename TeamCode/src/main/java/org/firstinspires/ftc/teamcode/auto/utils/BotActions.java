@@ -2,14 +2,23 @@ package org.firstinspires.ftc.teamcode.auto.utils;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Arclength;
 import com.acmerobotics.roadrunner.InstantAction;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Pose2dDual;
+import com.acmerobotics.roadrunner.PosePath;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
+import com.acmerobotics.roadrunner.VelConstraint;
+import com.arcrobotics.ftclib.trajectory.constraint.TrajectoryConstraint;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
@@ -19,10 +28,12 @@ import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
-import org.firstinspires.ftc.teamcode.teleop.Bot;
 
+import java.util.function.IntSupplier;
 
+@Config
 public class BotActions {
+    private final LinearOpMode opMode;
     private final Telemetry telemetry;
     private final Intake intake;
     private final Indexer indexer;
@@ -31,11 +42,15 @@ public class BotActions {
     public final AprilTag aprilTag;
     private final AprilTagAimer aprilAimer;
 
-    public static double NON_INDEX_SPIN_TIME = 3;//seconds of full-power indexer blast
-    public static double SHOOTER_SPINUP = 2.0;
+    public static double NON_INDEX_SPIN_TIME = 1.35; //seconds of full-power indexer blast
     public static double FULL_BLAST_POWER =0.25;
 
+    public static double ball1TimeDisp = 0.66;
+    public static double  ball2TimeDisp = 1.10;
+    public static double  timeToIntake = 2.50;
+
     public static boolean continuousAprilTagLock;
+    public static double cooldownFeedbackIntake = 150;
     private double lastTurnCorrection;
 
     public BotActions(
@@ -45,7 +60,8 @@ public class BotActions {
             Outtake outtake,
             Actuator actuator,
             AprilTag aprilTag,
-            AprilTagAimer aprilAimer
+            AprilTagAimer aprilAimer,
+            LinearOpMode opMode
     ) {
         this.intake = intake;
         this.indexer = indexer;
@@ -54,423 +70,202 @@ public class BotActions {
         this.aprilTag = aprilTag;
         this.aprilAimer = aprilAimer;
         this.telemetry = telemetry;
+        this.opMode = opMode;
     }
 
-    public void initializeColors(Indexer.ArtifactColor one, Indexer.ArtifactColor two, Indexer.ArtifactColor three) {
-        indexer.initializeColors(one, two, three);
-    }
-
-    public Action actionNonIndexedDump(int shootRPM) {
-        final double rpm = shootRPM * Bot.QUICKSPIN_OUTTAKE_RPM_SCALE;
-        return new SequentialAction(
-                new InstantAction(actuator::upQuick),
-                new InstantAction(() -> outtake.set(rpm)),
-                new Action() {
-                    @Override
-                    public boolean run(TelemetryPacket packet) {
-                        return !outtake.inRange(100.0);
-                    }
-                },
-                new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),
-                new SleepAction(NON_INDEX_SPIN_TIME),
-                new InstantAction(indexer::stopIndexerPower),
-                new InstantAction(outtake::stop),
-                new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.setIntaking(true)),
-                new InstantAction(indexer::initializeColors),
-                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.zero))
+    public Action actionStartOuttake(double rpm) {
+        return new ParallelAction(
+            new InstantAction(() -> indexer.setAutoOuttaking(true)),
+            new InstantAction(() -> outtake.set(rpm))
         );
     }
 
-
-
-    public Action actionQuickOuttake(int rpm) {
+    public Action actionQuickOuttake() {
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),// lower up position for quick dump
-                new InstantAction(() -> outtake.set(rpm)),
-                new SleepAction(SHOOTER_SPINUP),                      // spin up shooter
+                new SleepAction(.35),// for actuator
                 new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),// full blast
                 new SleepAction(NON_INDEX_SPIN_TIME),
                 new InstantAction(indexer::stopIndexerPower),
+                new InstantAction(() -> indexer.setAutoOuttaking(false)),
+                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two)), // This means, if you don't move the indexer, the next intaken will enter slot 0
                 new InstantAction(outtake::stop),
                 new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.setIntaking(true)),
-                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.zero))
+                new InstantAction(indexer::initializeColors)
         );
     }
 
-    // very slow ver
-    public Action actionOuttake(int rpm) {
+    // helpers at the end of the file
+    public Action rotateToMotifColorBeforeOuttake(int row, IntSupplier id, int startingSlot) {
+        if (id.getAsInt() != 21 && id.getAsInt() != 22 && id.getAsInt() != 23) {
+            return new InstantAction(() ->{});
+        }
+
+        return new InstantAction(() -> {
+            // set current color configuration
+            applyCurrentColorsFromRow(row, startingSlot);
+
+            // get desired firing order from obelisk id
+            Indexer.ArtifactColor[] desiredOrder = getDesiredShootOrder(id.getAsInt());
+
+            // values gets an array of the enums
+            for (Indexer.IndexerState state : Indexer.IndexerState.values()) {
+                telemetry.addData("Started search for index of proper", "color");
+                if (matchesOrder(state.index, desiredOrder)) {
+                    telemetry.addData("Rotated To Motif", "Color");
+                    // Indexer.IndexerState gotoState = Indexer.IndexerState.values()[(state.index - 1) % Indexer.IndexerState.values().length];
+                    Indexer.IndexerState gotoState = state;
+                    indexer.moveTo(gotoState);
+                    return;
+                }
+            }
+        });
+    }
+
+    public Action actionSetSomeShizzle() {
         return new SequentialAction(
-                new InstantAction(() -> indexer.setIntaking(false)),
-                new InstantAction(actuator::down),
+                new InstantAction(() -> indexer.setAutoOuttaking(false)),
+                new InstantAction(() -> indexer.setIntaking(true)),
+                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.two, true))
+                );
+    }
 
-                new Action() {
-                    private long startTime = -1;
-                    @Override
-                    public boolean run(@NonNull TelemetryPacket telemetry) {
-                        if (startTime < 0) startTime = System.currentTimeMillis();
-                        outtake.set(rpm);
-                        return System.currentTimeMillis() - startTime >= BotActions.SHOOTER_SPINUP * 1000;
+    public Action actionIntakeThree(Pose2d startActionPose, Pose2d startIntakePose, Pose2d endPose, MecanumDrive drive, double maxVel) {
+        TranslationalVelConstraint velConstraint = new TranslationalVelConstraint(maxVel);
+
+        return drive.actionBuilder(startActionPose)
+                .strafeToSplineHeading(startIntakePose.position, startIntakePose.heading)
+                .afterTime(0, intake::run)
+                .afterTime(ball1TimeDisp, () -> indexer.moveTo(indexer.getState().next()))
+                .afterTime(ball2TimeDisp, () -> indexer.moveTo(indexer.getState().next()))
+                .afterTime(timeToIntake, intake::runSlow)
+                .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint)
+                .build();
+    }
+
+
+
+    //feedback based version of actionIntakeT
+    public Action actionIntakeThreeFeedback(
+            Pose2d startActionPose,
+            Pose2d startIntakePose,
+            Pose2d endPose,
+            MecanumDrive drive,
+            double maxVel
+    ) {
+        VelConstraint velConstraint = new TranslationalVelConstraint(maxVel);
+
+        Action driveAction = drive.actionBuilder(startActionPose)
+                .strafeToSplineHeading(startIntakePose.position, startIntakePose.heading)
+                .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint)
+                .build();
+
+        Action manageIntakeAndIndexing = new Action() {
+            private boolean lastAlignedNonEmpty = false;
+            private int acquired = 0;
+            private final ElapsedTime acquireCooldown = new ElapsedTime();
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket p) {
+                // stop if opmode ends
+                if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
+                    intake.runSlow(); // or intake.stop()
+                    return false;
+                }
+
+                // keep  indexer logic alive
+                indexer.update();
+
+                boolean alignedNonEmpty = indexer.artifactPresentAndAligned();
+
+                //  intake mode continuously
+                if (alignedNonEmpty) intake.runSlow(); // Lowkey the play so that once one is intaken another doesn't get stuck until indexer moves
+                else intake.run();
+
+                if (!lastAlignedNonEmpty
+                        && alignedNonEmpty
+                        && acquireCooldown.milliseconds() > cooldownFeedbackIntake) {
+
+                    acquired++;
+                    acquireCooldown.reset();
+
+                    if (acquired < 3) {
+                        indexer.moveTo(indexer.getState().next());
                     }
-                },
+                }
 
-                // 1st
-                // This movestate is needed to make sure its outtake in the same order its intaken(unless changed elsewhere)
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(1.6),
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(0.2),
-                new InstantAction(actuator::down),
-                new SleepAction(0.6),
+                lastAlignedNonEmpty = alignedNonEmpty;
 
-                // 2nd
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(0.9),
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(0.2),
-                new InstantAction(actuator::down),
-                new SleepAction(0.6),
+                // keep running until we've acquired 3
+                if (acquired >= 3) {
+                    intake.runSlow(); // or intake.stop()
+                    return false;
+                }
 
-                // 3rd
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next(), true)),
-                new SleepAction(0.8),
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(0.15),
-                new InstantAction(actuator::down),
+                p.put("acquired", acquired);
+                p.put("alignedNonEmpty", alignedNonEmpty);
+                p.put("indexerState", indexer.getState());
 
-                // Finish
-                new InstantAction(() -> {
-                    actuator.down();
-                    outtake.stop();
-                    indexer.setIntaking(true);
-                })
+                return true;
+            }
+        };
+
+        return new SequentialAction(
+                new InstantAction(intake::run),
+
+                new ParallelAction(
+                        driveAction,
+                        manageIntakeAndIndexing
+                ),
+
+                new InstantAction(intake::runSlow)
         );
     }
-    public  Action indexerRotateForMotif(int tagId, int row) {
-        int rotations = 0;
 
-        if (row == 0 || row == 1) { // P P G
-            switch (tagId) {
-                case 21: rotations = 2; break;
-                case 22: rotations = 1; break;
-                case 23: rotations = 0; break;
-            }
-        } else if (row == 2) { // P G P
-            switch (tagId) {
-                case 21: rotations = 1; break;
-                case 22: rotations = 0; break;
-                case 23: rotations = 2; break;
-            }
-        }
-
-        switch (rotations) {
-            case 2:
-                return new SequentialAction(
-                        actionIndexerNext(),
-                        actionIndexerNext()
-                );
-            case 1:
-                return actionIndexerNext();
-            default:
-                return new Action() {
-                    @Override public boolean run(@NonNull com.acmerobotics.dashboard.telemetry.TelemetryPacket p) {
-                        return true;
-                    }
-                };
-        }
+    public Action initializeAuto(Indexer.IndexerState startingSlot) { // only temporary for testing, this is done in actionQuickOuttake
+        return new ParallelAction(
+            new SequentialAction(
+                new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
+                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two))
+            ),
+            new InstantAction(actuator::down),
+            new InstantAction(intake::runSlow)
+        );
     }
 
-    public Action indexerRotateForMotif() {
-        Indexer.ArtifactColor[] motifOrder = new Indexer.ArtifactColor[3];
-        switch (aprilTag.getObeliskId()) {
-            case 21: // G P P
-                motifOrder[0] = Indexer.ArtifactColor.GREEN;
-                motifOrder[1] = Indexer.ArtifactColor.PURPLE;
-                motifOrder[2] = Indexer.ArtifactColor.PURPLE;
-                break;
-            case 22: // P G P
-                motifOrder[0] = Indexer.ArtifactColor.PURPLE;
-                motifOrder[1] = Indexer.ArtifactColor.GREEN;
-                motifOrder[2] = Indexer.ArtifactColor.PURPLE;
-                break;
-            case 23: // P P G
-                motifOrder[0] = Indexer.ArtifactColor.PURPLE;
-                motifOrder[1] = Indexer.ArtifactColor.PURPLE;
-                motifOrder[2] = Indexer.ArtifactColor.GREEN;
-                break;
-        }
-        return new InstantAction(() -> indexer.prepareQuickspin(motifOrder));
-    }
-    // Separate to run while moving
-    public Action actionOuttakeOffsetForMotif(int tagID, int row) {
-
-        int offset = 0;
-
-        switch (row) {
-            // Row 0 & 1 intake: P P G
-            case 0:
-            case 1:
-                switch (tagID) {
-                    case 21: // G P P
-                        offset = 0;
-                        break;
-                    case 22: // P G P
-                        offset = 1;
-                        break;
-                    case 23: // P P G
-                        offset = 2;
-                        break;
-                    default:
-                        return new InstantAction(() -> {});
-                }
-                break;
-
-
-            // Row 2 intake: P G P
-            case 2:
-                switch (tagID) {
-                    case 21: // G P P
-                        offset = 1;
-                        break;
-                    case 22: // P G P
-                        offset = 2;
-                        break;
-                    case 23: // P P G
-                        offset = 0;
-                        break;
-                    default:
-                        return new InstantAction(() -> {});
-                }
-                break;
-
-            // Row 3 intake: G P P
-            case 3:
-                switch (tagID) {
-                    case 21: // G P P
-                        offset = 2;
-                        break;
-                    case 22: // P G P
-                        offset = 0;
-                        break;
-                    case 23: // P P G
-                        offset = 1;
-                        break;
-                    default:
-                        return new InstantAction(() -> {});
-                }
-                break;
-        }
-
-                return new SequentialAction(
-                        offset >= 1
-                                ? new InstantAction(() ->
-                                indexer.moveTo(indexer.getState().next(), true))
-                                : new InstantAction(() -> {
-                        }),
-
-                        // rotate second time if true
-                        offset >= 2
-                                ? new InstantAction(() ->
-                                indexer.moveTo(indexer.getState().next(), true))
-                                : new InstantAction(() -> {
-                        })
-                );
-    }
-
-
-    public Action actionOuttakeWithColor(int tagID, int rpm) {
-        switch (tagID) {
-            case 21:
-                return new SequentialAction(
-                        actionFireGreen(rpm),
-                        actionFirePurple(rpm),
-                        actionFirePurple(rpm)
-                );
-            case 22:
-                return new SequentialAction(
-                        actionFirePurple(rpm),
-                        actionFireGreen(rpm),
-                        actionFirePurple(rpm)
-                );
-            case 23:
-                return new SequentialAction(
-                        actionFirePurple(rpm),
-                        actionFirePurple(rpm),
-                        actionFireGreen(rpm)
-                );
-            default:
-                return new InstantAction(() -> {}); // do nothing if invalid
-        }
-    }
-
-    // locks in for 1 sec, then runs actionOuttake while locked in, when that finishes stops locking in
-    public Action actionShootWithLock(int tagID, double shootDuration, MecanumDrive mecanumDrive) {
+    // bad to do instant action and while loop
+    public Action actionScanObelisk() {
         return new Action() {
-            private long startTime = -1;
+            private final ElapsedTime timer = new ElapsedTime();
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                long now = System.currentTimeMillis();
-
-                if (startTime < 0) {
-                    startTime = now;
-                    continuousAprilTagLock = true; // turn on lock mode
+                if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
+                    return false;
                 }
 
-                // Update Limelight aiming continuously
-                aprilTag.scanGoalTag();
-                double bearing = aprilTag.getBearing();
-                lastTurnCorrection = !Double.isNaN(bearing)
-                        ? aprilAimer.calculateTurnPowerFromBearing(bearing)
-                        : 0;
-                double turnCorrection = 0.9 * lastTurnCorrection;
-
-                mecanumDrive.setDrivePowers(
-                        new PoseVelocity2d(new Vector2d(0, 0), turnCorrection)
-                );
-
-                // Set shooter RPM based on distance
-                int shooterRPM = 0;
-                if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
-                    shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+                if (timer.seconds() > 8.0) {
+                    telemetry.addLine("Obelisk scan timed out");
+                    return false;
                 }
 
-                actionOuttakeWithColor(tagID, shooterRPM).run(telemetryPacket);
+                aprilTag.scanObeliskTag();
+                int id = aprilTag.getObeliskId();
 
-                if (now - startTime >= shootDuration * 1000) {
-                    continuousAprilTagLock = false;
-                    return true;
-                }
-
-                return false;
+                return !(id == 21 || id == 22 || id == 23);
             }
         };
     }
 
-    // should probably not do instant action and while loop but it works, maybe change
-    public Action actionScanObelisk() {
-        return new InstantAction(() -> {
-            int scannedId = -1; // Keep scanning until we get a valid obelisk ID
-            while (scannedId < 21 || scannedId > 23) {
-                aprilTag.scanObeliskTag();
-                scannedId = aprilTag.getObeliskId();
-            }
-            aprilTag.setCurrentCameraScannedId(scannedId);
-        });
-    }
-
-    public Action actionFireGreen(int rpm) {
-        final Indexer.IndexerState slot =
-                indexer.findBestSlotForColor(Indexer.ArtifactColor.GREEN);
-
-        if (slot == null) {
-            return new InstantAction(() -> {});
-        }
-
-        return new SequentialAction(
-                new InstantAction(() -> indexer.setIntaking(false)),
-                new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.moveTo(slot, true)),
-                new InstantAction(() -> outtake.set(rpm)),
-                new SleepAction(SHOOTER_SPINUP),
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(1),
-
-                new InstantAction(() ->
-                        indexer.assignSlotColor(slot, Indexer.ArtifactColor.EMPTY)
-                ),
-
-                new InstantAction(outtake::stop),
-                new InstantAction(actuator::down)
-        );
-    }
-
-    public Action actionFirePurple(int rpm) {
-        final Indexer.IndexerState slot =
-                indexer.findBestSlotForColor(Indexer.ArtifactColor.PURPLE);
-
-        if (slot == null) {
-            return new InstantAction(() -> {});
-        }
-
-        return new SequentialAction(
-                new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.moveTo(slot, true)),
-
-                new InstantAction(() -> outtake.set(rpm)),
-                new SleepAction(SHOOTER_SPINUP),
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(1),
-
-                new InstantAction(() ->
-                        indexer.assignSlotColor(slot, Indexer.ArtifactColor.EMPTY)
-                ),
-
-                new InstantAction(outtake::stop),
-                new InstantAction(actuator::down)
-        );
-    }
-
-
-    public Action actionIntakeOneCycle(boolean moveIndexer, Indexer.ArtifactColor color) {
-        return new SequentialAction(
-                new InstantAction(() -> {
-                    indexer.assignSlotColor(indexer.getState(), color);
-                }),
-                new InstantAction(() -> {
-                    indexer.setIntaking(true);
-                    intake.run();
-                }),
-                new SleepAction(0.9),
-                // Only move the indexer if moveIndexer is true
-                new InstantAction(() -> {
-                    if (moveIndexer) {
-                        indexer.moveTo(indexer.getState().next());
-                    }
-                }),
-                new SleepAction(0.167),
-                new InstantAction(intake::stop)
-        );
-    }
-
-    public Action actionIntakeThreeFast() {
-        return new SequentialAction(
-                new InstantAction(() -> {
-                    indexer.setIntaking(true);
-                    intake.run();
-                }),
-
-                // slot 1
-                new SleepAction(0.45),
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
-
-                // slot 2
-                new SleepAction(0.45),
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
-
-                // slot 3
-                new SleepAction(0.45),
-                new InstantAction(() -> indexer.moveTo(indexer.getState().next())),
-
-                // stop intakeintake
-                new SleepAction(0.15),
-                new InstantAction(intake::stop)
-        );
-    }
-
-    // for now to fix issues
-    public Action actionIndexerNext() {
-        return new InstantAction(() -> {
-                indexer.moveTo(indexer.getState().next());
-        });
-    }
-
     // doesn't seem to work with parallel actions
+    // Oops return false tells it to stop true tells it to go which is why it prob didn't work before?
     public Action actionPeriodic() {
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
+                    return false;
+                }
 
                 outtake.periodic();
                 indexer.update();
@@ -487,16 +282,84 @@ public class BotActions {
 
                 }
 
-                return false;
+                return true;
             }
         };
     }
-
 
     public Action actionPark() {
     // vert slides
         return new ParallelAction(
                 new SleepAction(1)
         );
+    }
+
+    public int getObeliskId() {
+        return aprilTag.getObeliskId();
+    }
+
+
+    private boolean matchesOrder(int stateIndex, Indexer.ArtifactColor[] desired) {
+        return indexer.getColorAt(Indexer.IndexerState.values()[stateIndex % 3]) == desired[0]
+                && indexer.getColorAt(Indexer.IndexerState.values()[(stateIndex + 1) % 3]) == desired[1];
+    }
+
+
+    // HELPERS
+
+    // Sets the indexer's color configuration based on a given row,
+    // rotated so that the first intaken ball is placed in startingSlot
+    private void applyCurrentColorsFromRow(int row, int startingSlot /* basically (the last moved to slot + 1) % 3 [in intaking mode]*/) {
+        Indexer.ArtifactColor[] intakeOrder;
+
+        switch (row) {
+            case 1: // P P G
+                intakeOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN};
+                break;
+
+            case 2: // P G P
+                intakeOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE};
+                break;
+
+            case 0:
+            case 3: // G P P
+                intakeOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE};
+                break;
+
+            default:
+                return;
+        }
+
+        // Rotate array so the first intaken ball lands in startingSlot
+        Indexer.ArtifactColor[] rotated = new Indexer.ArtifactColor[3];
+        for (int i = 0; i < 3; i++) {
+            rotated[(startingSlot + i) % 3] = intakeOrder[i];
+        }
+
+        indexer.initializeColors(rotated[0], rotated[1], rotated[2]);
+    }
+
+    private Indexer.ArtifactColor[] getDesiredShootOrder(int id) {
+        // After the tag ID cases, you want to change the physical rows into shooting that motif
+        Indexer.ArtifactColor[] desiredShootOrder;
+        switch (id) {
+            case 21: // G -> P -> P - will shoot out in this order
+                desiredShootOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE};
+                break;
+
+            case 22: // P -> G -> P
+                desiredShootOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE};
+                break;
+
+            case 23: // P -> P -> G
+                desiredShootOrder = new Indexer.ArtifactColor[] {Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN};
+                break;
+
+            default:
+                desiredShootOrder = new Indexer.ArtifactColor[] {};
+                break;
+        }
+
+        return desiredShootOrder;
     }
 }
