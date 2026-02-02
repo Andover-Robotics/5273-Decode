@@ -86,11 +86,19 @@ public class BotPeriodics {
         double leftTrigger2 = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
         double rightTrigger2 = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-        if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
-        else if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || rightTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.runBackwards();
+
+        boolean leftDown = leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
+        boolean rightDown = rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || rightTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
+
+        boolean inRange = indexer.isWithinTargetDegrees(5);
+
+        if(leftDown){
+            if (inRange) intake.run();
+            else intake.runSlow();
+        }
+        else if(rightDown) intake.runBackwards();
         else if(continuousIntake) intake.runSlow();
         else intake.stop();
-
 
         // driver one (constant
         handleAprilTagLock();
