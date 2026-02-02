@@ -133,7 +133,7 @@ public class Bot extends BotPeriodics {
         if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
             indexer.prepareQuickspin(motif);
 
-        if(indexer.isLoaded() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){
+        if(indexer.isFull() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){
             g1.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
             g2.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
             rumbledAlready = true;
