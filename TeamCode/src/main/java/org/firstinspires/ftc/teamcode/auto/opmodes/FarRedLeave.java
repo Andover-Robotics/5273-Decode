@@ -21,8 +21,6 @@ public class FarRedLeave extends LinearOpMode {
     public static double PARK_X = 26;
     public static double PARK_Y = 0;
 
-    // has quick outtake and quick intake
-    // bunch of compensations for bad rr
     @Override
     public void runOpMode() {
         Hardware hardware = new Hardware(hardwareMap, telemetry, this);
