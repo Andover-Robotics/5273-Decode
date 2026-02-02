@@ -8,10 +8,16 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class Actuator {
     public static double DOWN = 0.45;      // flush with the floor of platform
     public static double UP_QUICK = 0.22; // used for quick (non-indexed) outtake
-    public static double UP_INDEXED = 0.13; // used for indexed outtake
+    public static double UP_INDEXED = 0.13; // used for indexed outtake\
 
-    private boolean activated;
+    public enum ActuatorState
+    {
+        DOWN,
+        UP_QUICK,
+        UP_INDEXED
+    }
 
+    private ActuatorState state;
     private final SimpleServo servo;
     private double waitTime = 0.5; // seconds
 
@@ -21,7 +27,7 @@ public class Actuator {
 
     public void down() {
         servo.setPosition(DOWN);
-        activated = false;
+        state = ActuatorState.DOWN;
     }
 
     //default up is indexed
@@ -32,16 +38,22 @@ public class Actuator {
     //highe rposition
     public void upIndexed() {
         servo.setPosition(UP_INDEXED);
-        activated = true;
+        state = ActuatorState.UP_INDEXED;
     }
 
     //lower position
     public void upQuick() {
         servo.setPosition(UP_QUICK);
-        activated = true;
+        state = ActuatorState.UP_QUICK;
     }
 
-    public boolean isActivated() { return activated; }
+    public boolean isActivated() {
+        return !(state == ActuatorState.DOWN);
+    }
+
+    public ActuatorState getState() {
+        return state;
+    }
 
     public void set(boolean activate) {
         if (activate) up();
