@@ -47,7 +47,7 @@ public class BotPeriodics {
     protected int goalTagID;
     protected String colorGoalSelected;
 
-    protected boolean continuousIntake = false;
+    protected boolean continuousIntake = true;
 
     public static double targetRPM = 3800;
     protected static final long AIM_UPDATE_INTERVAL_MS = 50;
