@@ -24,25 +24,21 @@ public class Indexer {
     // Dashboard control
     public static boolean dashAdvance = false;
     public static int dashTargetSlot = -1; // -1 = disabled; 0/1/2 = slot
+
+    //Things that should be toggled depending on use case (more robust version coming)
     public  boolean ENABLE_AUTO_ADVANCE = true;
-
     public boolean ALWAYS_SEEK_EMPTY_WHILE_INTAKING = true;
-
-    // Full+Unknown rescan toggle
     public boolean ENABLE_FULL_UNKNOWN_SCAN = true;
     public boolean SCAN_COLORS = true;
 
     // Auto-advance detection mode
     public enum AutoDetectMode { HARD, SOFT }
     public static AutoDetectMode AUTO_DETECT_MODE = AutoDetectMode.SOFT;
-
     public static int HARD_NONEMPTY_HITS_TO_ADVANCE = 8;
     public static int SOFT_NONEMPTY_HITS_TO_ADVANCE = 3;
 
-    // Cooldown to avoid spamming moves while full+unknown
-    public static long UNKNOWN_SCAN_COOLDOWN_MS = 250;
 
-    // Config
+    // Offsets
     public static double offsetAngle = 77.0; // 77 for normal, 105 is for auto
     public static double autoOuttakeOffsetAngle = 32.0;
     public static double outtakeOffsetAngle = 200.0;
@@ -55,6 +51,8 @@ public class Indexer {
     private static final double msPerDegree = 0.6;
     private static final double minWait = 100;
     private static final double maxWait = 300;
+    // Cooldown to avoid spamming moves while full+unknown
+    public static long UNKNOWN_SCAN_COOLDOWN_MS = 250;
 
     // Thresholds
     public static double GREEN_THRESHOLD = 0.2;
