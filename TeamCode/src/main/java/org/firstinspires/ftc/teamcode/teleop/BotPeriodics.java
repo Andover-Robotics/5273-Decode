@@ -52,7 +52,7 @@ public class BotPeriodics {
     public static double targetRPM = 3800;
     protected static final long AIM_UPDATE_INTERVAL_MS = 50;
 
-    protected boolean twoMovementMode = false;
+    protected boolean twoMovementMode;
 
     public static double rangeOffset = 6.67;
 
