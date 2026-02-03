@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
@@ -8,31 +9,23 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocaliz
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
 
 public class Turret {
-    private static double ticksToDegrees = 0;
-
-    private AprilTagAimer aprilTagAimer;
-    private DcMotor motor;
-    private double motorBearing = 0;
-    private int lastMotorTick = 0;
+    private static final double TICKS_TO_DEGREES = 0;
+    private static final double ZERO_OFFSET = 0;
+    private final DcMotor motor;
 
     public Turret(HardwareMap hardwareMap, IMU imu, TwoDeadWheelLocalizer deadWheelLocalizer) {
-        aprilTagAimer = new AprilTagAimer(hardwareMap,imu,deadWheelLocalizer);
         motor = hardwareMap.get(DcMotor.class, "TurretMotor");
-        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // May be needed?
+        // motor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public double[] calculateLocalizedTurretBearing(int tagID) {
-        return aprilTagAimer.calculateLocalizedBearing(tagID);
+    public double getCurrentAngle() {
+        double curAngle = motor.getCurrentPosition() * TICKS_TO_DEGREES + ZERO_OFFSET;
+        // In Java -2 % 5 = -2, not 3
+        return ((curAngle % 360) + 360) % 360;
     }
-
-    public double calculateTurnPowerFromBearing(double cameraBearing) {
-        return aprilTagAimer.calculateTurnPowerFromBearing(cameraBearing - motorBearing);
-    }
-
-    public void rotateTurret(double power) {
+    public void setPower(double power) {
         motor.setPower(power);
-        int currentTick = motor.getCurrentPosition();
-        motorBearing += (currentTick - lastMotorTick) * ticksToDegrees;
-        lastMotorTick = currentTick;
     }
 }
