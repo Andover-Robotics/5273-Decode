@@ -23,9 +23,10 @@ public class AprilTagAimer {
     private long lastTimestamp = 0;
     private final IMU imu;
     private final TwoDeadWheelLocalizer deadWheelLocalizer;
-    public static Pose2d TAG_POSE = new Pose2d(0, 132, Math.toRadians(0));
+    public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(0));
     public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
+    public static Pose2d robotPose;
 
     /* When and why to tune these
     P (Proportional) Changes core power of turns, its proportional
@@ -38,26 +39,24 @@ public class AprilTagAimer {
         this.deadWheelLocalizer = deadWheelLocalizer;
     }
 
-    public double[] calculateLocalizedTurnPower(int tagID) {
-        Pose2d robotPose = deadWheelLocalizer.getPose();
-        Pose2d tagPose = TAG_POSE;
+    public double[] calculateLocalizedTurnPower() {
+        robotPose = deadWheelLocalizer.getPose();
 
+        // Vector from robot -> tag in field coordinates
         double dx = tagPose.position.x - robotPose.position.x;
         double dy = tagPose.position.y - robotPose.position.y;
 
         double horizontalDistance = Math.hypot(dx, dy);
 
-        // height difference
         double dz = goalAprilTagHeight - cameraHeight;
 
-        // In 3d to get point-to-point distance
-        double range = Math.sqrt(horizontalDistance * horizontalDistance + dz * dz);
+        // point-to-point distance=
+        double range = Math.hypot(horizontalDistance, dz);
 
         double desiredHeading = Math.atan2(dy, dx);
-        double currentHeading = robotPose.heading.toDouble();
 
-        double bearingError = Math.toDegrees(desiredHeading - currentHeading);
-        bearingError = angleWrapDegrees(bearingError);
+        // apparantly toDouble is log but not clamped to -pi, pi, for more control
+        double currentHeading = robotPose.heading.toDouble(); // checked telem, the way log shows is heading=Rotation2d(real=[somenumber], imag=[somenumber]. Both numbers are diff .And for both of them, say the number is one, if you move it to the left it decreases and you move it to the right it also decrceases. And once it crosses that 180 degrees to the other side same behavior except negative. The way to differentiate tho is that for imaginary when its at one of the say, .77, real will be some positive, and for the imag's other reflected .77 real will be negative.
 
         double bearing = Math.toDegrees(desiredHeading - currentHeading);
         bearing = angleWrapDegrees(bearing);

@@ -62,7 +62,7 @@ public class AprilTagTester extends LinearOpMode {
                     if (!Double.isNaN(bearing)) {
                         lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
                     } else {
-                        lastTurnCorrection = aprilAimer.calculateLocalizedTurnPower(goalTagID)[0];
+                        lastTurnCorrection = aprilAimer.calculateLocalizedTurnPower()[0];
                     }
                 }
 
