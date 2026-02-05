@@ -65,6 +65,11 @@ public class AprilTagAimer {
         return new double[]{turnPower, range};
     }
 
+    //testing
+    public Pose2d getRobotPose() {
+        return robotPose;
+    }
+
     private double angleWrapDegrees(double angle) {
         return (angle + 180) % 360 - 180;
     }
