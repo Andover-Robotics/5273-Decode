@@ -258,8 +258,6 @@ public class BotActions {
         };
     }
 
-    // doesn't seem to work with parallel actions
-    // Oops return false tells it to stop true tells it to go which is why it prob didn't work before?
     public Action actionPeriodic() {
         return new Action() {
             @Override
@@ -268,6 +266,7 @@ public class BotActions {
                     return false;
                 }
 
+                drive.updatePoseEstimate();
                 outtake.periodic();
                 indexer.update();
 

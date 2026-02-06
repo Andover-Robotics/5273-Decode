@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 
 
@@ -21,12 +22,11 @@ public class AprilTagAimer {
     private double lastDerivative = 0.0;
     private double lastError = 0;
     private long lastTimestamp = 0;
-    private final IMU imu;
-    private final TwoDeadWheelLocalizer deadWheelLocalizer;
+    private final MecanumDrive drive;
+    public static Pose2d robotPose = new Pose2d(0, 0, Math.toRadians(0));
     public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(0));
     public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
-    public static Pose2d robotPose;
 
     /* When and why to tune these
     P (Proportional) Changes core power of turns, its proportional
@@ -34,13 +34,12 @@ public class AprilTagAimer {
     D (Derivative) Increase to dampen motion and reduce overshoot. Good for smoothing quick heading corrections.
     F (Feedforward)	Maybe, its a constant, increase to help overcome drivetrain static friction and give better response when error is small.
     */
-    public AprilTagAimer(HardwareMap hardwareMap, IMU imu, TwoDeadWheelLocalizer deadWheelLocalizer) {
-        this.imu = imu;
-        this.deadWheelLocalizer = deadWheelLocalizer;
+    public AprilTagAimer(HardwareMap hardwareMap, MecanumDrive mecanumDrive) {
+        this.drive = mecanumDrive;
     }
 
     public double[] calculateLocalizedTurnPower() {
-        robotPose = deadWheelLocalizer.getPose();
+        robotPose = drive.localizer.getPose();
 
         // Vector from robot -> tag in field coordinates
         double dx = tagPose.position.x - robotPose.position.x;

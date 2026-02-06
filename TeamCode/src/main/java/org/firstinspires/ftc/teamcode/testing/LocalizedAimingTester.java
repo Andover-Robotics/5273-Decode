@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.testing;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
@@ -27,6 +29,7 @@ public class LocalizedAimingTester extends LinearOpMode {
 
     private AprilTag aprilTag;
     private AprilTagAimer aprilAimer;
+    private MecanumDrive drive;
 
     private long lastAimUpdateTime = 0;
     private double lastTurnCorrection = 0;
@@ -37,6 +40,7 @@ public class LocalizedAimingTester extends LinearOpMode {
 
     private static final long aimUpdateInterval = 20; // ms
     private static String colorGoalSelected;
+    private static Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -44,11 +48,11 @@ public class LocalizedAimingTester extends LinearOpMode {
         indexer = new Indexer(hardwareMap);
         actuator = new Actuator(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
-        ConcreteLazyImu concreteImu = new ConcreteLazyImu(hardwareMap, "imu", new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.UP));
-        movement = new Movement(hardwareMap, concreteImu);
+        drive = new MecanumDrive(hardwareMap, startPose);
+        movement = new Movement(hardwareMap, drive);
 
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aprilAimer = new AprilTagAimer(hardwareMap, movement.getImu(), movement.getTwoDeadWheelLocalizer());
+        aprilAimer = new AprilTagAimer(hardwareMap, drive);
 
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);
@@ -74,6 +78,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     public void teleopTick(GamepadEx g1, GamepadEx g2, Telemetry telemetry) {
 
         outtake.periodic();
+        drive.updatePoseEstimate();
 
         double turnCorrection = 0;
         if (continuousGoalLock) {
@@ -85,6 +90,8 @@ public class LocalizedAimingTester extends LinearOpMode {
 
                 lastTurnCorrection = aprilAimer.calculateLocalizedTurnPower()[0];
             }
+
+            turnCorrection = lastTurnCorrection;
 
             // turnCorrection = 0.9 * lastTurnCorrection; - don't want this
         } else {
@@ -187,6 +194,9 @@ public class LocalizedAimingTester extends LinearOpMode {
         telemetry.addData("Outtake Power", outtake.getPower());
         telemetry.addData("Localized Lock", continuousGoalLock);
         telemetry.addData("Robot Pose2d", aprilAimer.getRobotPose());
+        telemetry.addData("x", aprilAimer.getRobotPose().position.x);
+        telemetry.addData("y", aprilAimer.getRobotPose().position.y);
+        telemetry.addData("heading (deg)", Math.toDegrees(aprilAimer.getRobotPose().heading.log()));
         telemetry.addData("Selected Goal Color:", colorGoalSelected);
         telemetry.addData("Selected Goal Color:", colorGoalSelected);
         telemetry.update();
