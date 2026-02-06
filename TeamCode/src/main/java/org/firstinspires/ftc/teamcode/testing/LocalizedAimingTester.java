@@ -193,10 +193,10 @@ public class LocalizedAimingTester extends LinearOpMode {
         telemetry.addData("measured RPM",outtake.getRPM());
         telemetry.addData("Outtake Power", outtake.getPower());
         telemetry.addData("Localized Lock", continuousGoalLock);
-        telemetry.addData("Robot Pose2d", aprilAimer.getRobotPose());
-        telemetry.addData("x", aprilAimer.getRobotPose().position.x);
-        telemetry.addData("y", aprilAimer.getRobotPose().position.y);
-        telemetry.addData("heading (deg)", Math.toDegrees(aprilAimer.getRobotPose().heading.log()));
+        telemetry.addData("Robot Pose2d", drive.localizer.getPose());
+        telemetry.addData("x", drive.localizer.getPose().position.x);
+        telemetry.addData("y", drive.localizer.getPose().position.y);
+        telemetry.addData("heading (deg)", Math.toDegrees(drive.localizer.getPose().heading.log()));
         telemetry.addData("Selected Goal Color:", colorGoalSelected);
         telemetry.addData("Selected Goal Color:", colorGoalSelected);
         telemetry.update();

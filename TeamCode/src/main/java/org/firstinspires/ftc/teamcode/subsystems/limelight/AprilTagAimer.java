@@ -23,7 +23,6 @@ public class AprilTagAimer {
     private double lastError = 0;
     private long lastTimestamp = 0;
     private final MecanumDrive drive;
-    public static Pose2d robotPose = new Pose2d(0, 0, Math.toRadians(0));
     public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(0));
     public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
@@ -39,7 +38,7 @@ public class AprilTagAimer {
     }
 
     public double[] calculateLocalizedTurnPower() {
-        robotPose = drive.localizer.getPose();
+        Pose2d robotPose = drive.localizer.getPose();
 
         // Vector from robot -> tag in field coordinates
         double dx = tagPose.position.x - robotPose.position.x;
@@ -62,11 +61,6 @@ public class AprilTagAimer {
 
         double turnPower = calculateTurnPowerFromBearing(bearing);
         return new double[]{turnPower, range};
-    }
-
-    //testing
-    public Pose2d getRobotPose() {
-        return robotPose;
     }
 
     private double angleWrapDegrees(double angle) {

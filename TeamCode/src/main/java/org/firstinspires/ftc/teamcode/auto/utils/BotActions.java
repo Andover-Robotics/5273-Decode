@@ -41,6 +41,7 @@ public class BotActions {
     private final Actuator actuator;
     public final AprilTag aprilTag;
     private final AprilTagAimer aprilAimer;
+    private final MecanumDrive drive;
 
     public static double NON_INDEX_SPIN_TIME = 1.35; //seconds of full-power indexer blast
     public static double FULL_BLAST_POWER =0.25;
@@ -54,21 +55,17 @@ public class BotActions {
     private double lastTurnCorrection;
 
     public BotActions(
+            Hardware hardware,
             Telemetry telemetry,
-            Intake intake,
-            Indexer indexer,
-            Outtake outtake,
-            Actuator actuator,
-            AprilTag aprilTag,
-            AprilTagAimer aprilAimer,
             LinearOpMode opMode
     ) {
-        this.intake = intake;
-        this.indexer = indexer;
-        this.outtake = outtake;
-        this.actuator = actuator;
-        this.aprilTag = aprilTag;
-        this.aprilAimer = aprilAimer;
+        this.intake = hardware.intake;
+        this.indexer = hardware.indexer;
+        this.outtake = hardware.outtake;
+        this.actuator = hardware.actuator;
+        this.aprilTag = hardware.aprilTag;
+        this.aprilAimer = hardware.aprilAimer;
+        this.drive = hardware.mecanumDrive;
         this.telemetry = telemetry;
         this.opMode = opMode;
     }

@@ -40,6 +40,6 @@ public class Hardware {
         aprilTag = new AprilTag(hardwareMap, telemetry);
         aprilAimer = new AprilTagAimer(hardwareMap, mecanumDrive);
 
-        actions = new BotActions(telemetry, intake, indexer, outtake, actuator, aprilTag, aprilAimer, opMode);
+        actions = new BotActions(this, telemetry, opMode);
     }
 }
