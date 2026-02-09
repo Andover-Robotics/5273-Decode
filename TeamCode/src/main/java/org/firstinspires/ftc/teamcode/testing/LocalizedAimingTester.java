@@ -33,7 +33,7 @@ public class LocalizedAimingTester extends LinearOpMode {
 
     private long lastAimUpdateTime = 0;
     private double lastTurnCorrection = 0;
-    public static int shooterRPM;
+    public static double shooterRPM;
 
     private boolean continuousGoalLock = false;
     private boolean fieldCentric = false;
@@ -89,6 +89,7 @@ public class LocalizedAimingTester extends LinearOpMode {
                 lastAimUpdateTime = currentTime;
 
                 lastTurnCorrection = aprilAimer.calculateLocalizedTurnPower()[0];
+                shooterRPM = aprilAimer.calculateLocalizedTurnPower()[1];
             }
 
             turnCorrection = lastTurnCorrection;
@@ -163,6 +164,10 @@ public class LocalizedAimingTester extends LinearOpMode {
             indexer.setIntaking(!indexer.isIntaking());
         }
 
+        if (g1.wasJustPressed(GamepadKeys.Button.B)) {
+            movement.resetPose(new Pose2d(0, 0, Math.toRadians(0)));
+        }
+
         indexer.update();
 
         // Begin continuous lock
@@ -188,6 +193,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         // ========== TELEMETRY ==========
+        telemetry.addLine("A: Set intaking, B: Reset Localized Pose, X/Y: lock in/unlock, Dpad left: Scan Obelisk Id, Dpad Up/Down: actuator, Dpad Right: index");
         telemetry.addData("Target RPM",outtake.getTargetRPM());
         telemetry.addData("Bot Range", aprilTag.getRange()); // moved limelight
         telemetry.addData("measured RPM",outtake.getRPM());
