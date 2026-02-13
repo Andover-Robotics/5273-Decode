@@ -27,7 +27,7 @@ public class Outtake {
     private final PIDController controller;
 
     // Dashboard-tunable gains
-    public static double p = 0.000267;
+    public static double p = 0.000567;
     public static double i = 0.0;
     public static double d = 0.0;
     public static double f = 0.0002;   // 1 / maxrpm and then tuned
@@ -35,10 +35,16 @@ public class Outtake {
     // Mode + state
     public Mode mode;
     private double motorPower = 0.0;
-    private double targetRPM = 0.0;
+    public static double targetRPM = 2800.0; // without seeing any tags
     private double currentRPM = 0.0;
 
     private final double TPR = 28.0;   // encoder ticks per rotation
+
+    public static double spinupInRangeMinTime = 600; // ms
+    public static double spinupMaxTime = 4000; // ms
+    private long inRangeStartTime = -1;
+    private long spinupStartTime = -1;
+    public static double INTAKE_MIN_RPM = 3500.0;
 
     public Outtake(HardwareMap hardwareMap, Mode mode) {
         shooter = new MotorEx(hardwareMap, "outtake");
@@ -62,10 +68,15 @@ public class Outtake {
     public void set(double x) {
         if (mode == Mode.POWER) {
             motorPower = clamp(x, 0.0, 1.0);
-        } else { // RPM MODE
+        } else {
+            if (Math.abs(x - targetRPM) > 25) {
+                spinupStartTime = -1;
+                inRangeStartTime = -1;
+            }
             targetRPM = x;
         }
     }
+
 
     public double getRPM() { return currentRPM; }
     public double getTargetRPM() { return targetRPM; }
@@ -103,6 +114,42 @@ public class Outtake {
 
     public double getRegressionRPM(double range)
     {
-        return 0.00211836 * Math.pow(range, 3) - 0.614769 * Math.pow(range, 2) + 65.69185 * range + 1508.69255;
+        if (Double.isNaN(range) || range <= 0) {
+            return INTAKE_MIN_RPM;
+        }
+        return 0.0107081 * Math.pow(range, 3) -2.16323 * Math.pow(range, 2) +147.59773 * range + 186.44772;
+    }
+
+    // Within the range and has been in range for spinupInRangeMinTime
+    public boolean inRange(double tolerance) {
+        long currentTime = System.currentTimeMillis();
+        if (spinupStartTime == -1)
+        {
+            spinupStartTime = currentTime;
+        }
+
+        boolean withinTolerance = Math.abs(currentRPM - targetRPM) <= tolerance;
+
+        if (withinTolerance)
+        {
+            if (inRangeStartTime == -1)
+                inRangeStartTime = currentTime;
+        }
+        else
+        {
+                inRangeStartTime = -1;
+        }
+
+        boolean inRangeLongEnough = inRangeStartTime >= 0 && (currentTime - inRangeStartTime) >= spinupInRangeMinTime;
+        boolean spunPastMaxTime = (currentTime - spinupStartTime) >= spinupMaxTime;
+
+        if (inRangeLongEnough || spunPastMaxTime)
+        {
+            spinupStartTime = -1;
+            inRangeStartTime = -1;
+            return true;
+        }
+
+        return false;
     }
 }

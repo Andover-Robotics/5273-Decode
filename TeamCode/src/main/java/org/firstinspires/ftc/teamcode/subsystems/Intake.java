@@ -7,33 +7,30 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Config
 public class Intake {
 
-    // ARC Thunder Vortex
-
+    public static double SLOW_MULTIPLIER = 0.5;
     public static double INTAKING_POWER = -1;
     private MotorEx intakeMotor;
-    private boolean running;
-
     public Intake(HardwareMap hardwareMap)
     {
         intakeMotor = new MotorEx(hardwareMap, "intake");
     }
-
     public void stop()
     {
         intakeMotor.stopMotor();
     }
-
     public void run()
     {
         intakeMotor.set(INTAKING_POWER);
+    }
+    public void runSlow() {
+        intakeMotor.set(INTAKING_POWER * SLOW_MULTIPLIER);
     }
     public void runBackwards()
     {
         intakeMotor.set(-INTAKING_POWER);
     }
-
     public void setPower(double newPower)
     {
-        intakeMotor.set(INTAKING_POWER);
+        intakeMotor.set(newPower);
     }
 }

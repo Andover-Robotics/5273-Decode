@@ -3,45 +3,35 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.roadrunner.Pose2d;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 /**
  * Represents the drivetrain.
  */
 public class Movement {
     private final DcMotor leftFront, leftBack, rightFront, rightBack;
-    private final IMU imu;
-    private final TwoDeadWheelLocalizer deadWheelLocalizer;
+    private final MecanumDrive drive;
+    //private final IMU imu;
     private final double STRAFE_MULTIPLIER = 1.0, ROTATION_MULTIPLIER = 0.8;
 
     /**
      * Initializes a Movement instance.
      * @param map {@link com.qualcomm.robotcore.hardware.HardwareMap}
      */
-    public Movement(@NonNull HardwareMap map, ConcreteLazyImu concreteImu){
+    public Movement(@NonNull HardwareMap map, MecanumDrive drive){
         leftFront = map.get(DcMotor.class, "leftFront");
         leftBack = map.get(DcMotor.class, "leftBack");
         rightFront = map.get(DcMotor.class, "rightFront");
         rightBack = map.get(DcMotor.class, "rightBack");
 
-        this.imu = concreteImu.get();
-
-        deadWheelLocalizer =
-                new TwoDeadWheelLocalizer(
-                        map,
-                        imu,
-                        0.00195844,
-                        new Pose2d(0, 0, 0)
-                );
+        this.drive = drive;
+        //this.imu = drive.lazyImu.get();
 
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -90,10 +80,10 @@ public class Movement {
         // it can be freely changed based on preference.
         // The equivalent button is start on Xbox-style controllers.
         if (start) {
-            imu.resetYaw();
+            drive.localizer.setPose(new Pose2d(0, 0, 0));
         }
 
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double botHeading = drive.localizer.getPose().heading.log();//imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         // Rotate the movement direction counter to the bot's rotation
         double rotX = lateral * Math.cos(-botHeading) - axial * Math.sin(-botHeading);
@@ -132,16 +122,9 @@ public class Movement {
         return rightBack;
     }
 
-    public IMU getImu() {
-        return imu;
-    }
-    public TwoDeadWheelLocalizer getTwoDeadWheelLocalizer() {return deadWheelLocalizer;}
-
-    public void resetIMU() {
-        imu.resetYaw();
-    }
-    public void resetOdometry(Pose2d newPose) {
-        deadWheelLocalizer.setPose(newPose);
+    public void setPose(Pose2d newPose) {
+        drive.localizer.setPose(newPose);
     }
 }
+
 

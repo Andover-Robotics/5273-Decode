@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
@@ -29,8 +30,7 @@ public class BotPeriodics {
     protected final Movement movement;
     protected final AprilTag aprilTag;
     protected final AprilTagAimer aprilAimer;
-    protected final IMU imu;
-    protected final TwoDeadWheelLocalizer deadWheelLocalizer;
+    protected final MecanumDrive drive;
 
     protected final GamepadEx g1;
     protected final GamepadEx g2;
@@ -47,37 +47,68 @@ public class BotPeriodics {
     protected int goalTagID;
     protected String colorGoalSelected;
 
-    public static double shooterRPM = 2900;
+    protected boolean continuousIntake = true;
+
+    public static double targetRPM = 3800;
     protected static final long AIM_UPDATE_INTERVAL_MS = 50;
 
-    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
+    protected boolean twoMovementMode;
+
+    public static double rangeOffset = 6.67;
+
+    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
         intake = new Intake(hardwareMap);
         indexer = new Indexer(hardwareMap);
         actuator = new Actuator(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
-        ConcreteLazyImu concreteImu = new ConcreteLazyImu(hardwareMap, "imu", new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.UP));
-        movement = new Movement(hardwareMap, concreteImu);
-        imu = movement.getImu();
-        deadWheelLocalizer = movement.getTwoDeadWheelLocalizer();
+        drive = mecanumDrive;
+        movement = new Movement(hardwareMap, drive);
         aprilTag = new AprilTag(hardwareMap, tele);
-        aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
+        aprilAimer = new AprilTagAimer(hardwareMap, drive);
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
+        actionHost = new ActionHost();
         telemetry = tele;
+        twoMovementMode = useMovement;
     }
     
     protected void handlePeriodics()
     {
         g1.readButtons();
         g2.readButtons();
+
+        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
+            continuousIntake = !continuousIntake;
+
+        double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        double leftTrigger2 = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        double rightTrigger2 = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+
+        boolean leftDown = leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
+        boolean rightDown = rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || rightTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
+
+        boolean inRange = indexer.isWithinTargetDegrees(5);
+
+        if(leftDown){
+            if (inRange) intake.run();
+            else intake.runSlow();
+        }
+        else if(rightDown) intake.runBackwards();
+        else if(continuousIntake) intake.runSlow();
+        else intake.stop();
+
+        // driver one (constant
         handleAprilTagLock();
         handleMovement();
         handleAllianceSelection();
+
         handleTelemetry();
+
         indexer.update();
         outtake.periodic();
         actionHost.update();
-
+        drive.updatePoseEstimate();
     }
 
     // Periodic Handlers
@@ -90,14 +121,15 @@ public class BotPeriodics {
         telemetry.addData("Indexer Voltages",
                 "Target: %.3f , Actual: %.3f",
                 indexer.getTargetVoltage(), indexer.getVoltage());
-        telemetry.addData("Outtake RPM",
-                "Target: %.1f, Actual: %.1f",
-                outtake.getTargetRPM(), outtake.getRPM());
+        telemetry.addData("Outtake RPM", outtake.getRPM());
+        telemetry.addData("Target RMP", outtake.getTargetRPM());
         telemetry.addData("Actuator up?", actuator.isActivated());
         telemetry.addData("Indexer Loaded?", indexer.isLoaded());
         telemetry.addData("April Lock", continuousAprilTagLock);
         telemetry.addData("Bot Range", aprilTag.getRange());
         telemetry.addData("Alliance selected", colorGoalSelected);
+        telemetry.addData("Turn Correction:", turnCorrection);
+        telemetry.addData("Last Turn Correction", lastTurnCorrection);
         for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
             telemetry.addData(
                     "Slot " + s.index,
@@ -111,22 +143,25 @@ public class BotPeriodics {
 
     protected void handleAllianceSelection() {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
-            goalTagID = 20;
-            aprilTag.setGoalTagID(goalTagID);
+            aprilTag.setPipeline(0);
             colorGoalSelected = "Blue";
         }
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
-            goalTagID = 24;
-            aprilTag.setGoalTagID(goalTagID);
+            aprilTag.setPipeline(1);
             colorGoalSelected = "Red";
         }
     }
 
     protected void handleMovement() {
+
         double lx = g1.getLeftX();
         double ly = g1.getLeftY();
         double rx = g1.getRightX();
-
+        if(twoMovementMode){
+             lx = g2.getLeftX();
+             ly = g2.getLeftY();
+             rx = g2.getRightX();
+        }
         if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
         else movement.teleopTick(lx, ly, rx, turnCorrection);
     }
@@ -143,51 +178,34 @@ public class BotPeriodics {
         }
 
         if (continuousAprilTagLock) {
-            lastTurnCorrection = 0;
-            turnCorrection = 0;
             long now = System.currentTimeMillis();
             if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
                 lastAimUpdate = now;
                 aprilTag.scanGoalTag();
                 double bearing = aprilTag.getBearing();
+
                 if (!Double.isNaN(bearing)) {
                     lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
+                    turnCorrection = lastTurnCorrection;
                 } else {
-                    lastTurnCorrection = 0;
-                    //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
+                    turnCorrection = 0;
                 }
             }
 
-            if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
-                shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
+            if (!Double.isNaN(aprilTag.getRange())) {
+                targetRPM = outtake.getRegressionRPM(aprilTag.getRange() + rangeOffset);
             }
-            turnCorrection = lastTurnCorrection;
+            /*else {
+                targetRPM = 3800;
+            }*/
+        } else {
+            turnCorrection = 0;
+            //targetRPM = 3800;
         }
     }
 
-    public class ActionHost {
-        protected Action current;
-
-        public void start(Action action) {
-            current = action;
-        }
-
-        public void abort() {
-            current = null;
-        }
-
-        public boolean isRunning() {
-            return current != null;
-        }
-
-        public void update() {
-            if (current == null) return;
-
-            boolean stillRunning = current.run(null);
-            if (!stillRunning) {
-                current = null;
-            }
-        }
+    protected double getTargetRPM() {
+        return targetRPM;
     }
 }
 

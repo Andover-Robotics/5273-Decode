@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SequentialAction;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
@@ -17,6 +19,7 @@ public class Bot extends BotPeriodics {
     // haptics & lights
     private boolean rumbledAlready = false;
     public enum FSM {
+        MotifSelection,
         Intake,
         QuickOuttake,
         SortOuttake,
@@ -28,26 +31,55 @@ public class Bot extends BotPeriodics {
     public static double NON_INDEX_SPIN_TIME = 3; //seconds of full-power indexer blast
     public static double SHOOTER_SPINUP = 2.0;
     public static double FULL_BLAST_POWER = 0.25;
-    public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 1.12;
+    public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.94; // 1.12
 
-    public Bot(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2) {
-        super(hardwareMap, tele, gamepad1, gamepad2);
-        state = FSM.Intake;
+    public Indexer.ArtifactColor[] motif;
+
+    private Indexer.ArtifactColor[] PPG = new Indexer.ArtifactColor[]{Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN};
+    private Indexer.ArtifactColor[] PGP = new Indexer.ArtifactColor[]{Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE};
+    private Indexer.ArtifactColor[] GPP = new Indexer.ArtifactColor[]{Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE};
+
+    // Press-and-hold pre-spin minimum RPM
+    public static double INTAKE_MIN_RPM = 3500.0;
+
+    public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
+        super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement);
+        state = FSM.MotifSelection;
     }
 
     public void teleopInit() {
-        actuator.down();
         indexer.initializeColors(Indexer.ArtifactColor.EMPTY);
-        indexer.moveTo(Indexer.IndexerState.zero);
         indexer.setIntaking(true);
-        state = FSM.Intake;
-        actionHost = new BotPeriodics.ActionHost();
+        state = FSM.MotifSelection;
+        outtake.stop();
+    }
+
+    public void teleopStart(){
+        actuator.down();
+        indexer.moveTo(Indexer.IndexerState.zero);
     }
 
     public void teleopTick()
     {
         handlePeriodics();
         switch (state) {
+            case MotifSelection:
+                if (g2.wasJustPressed(GamepadKeys.Button.X)){
+                    motif = PPG;
+                    indexer.prepareQuickspin(motif);
+                    state = FSM.Intake;
+                }
+                if (g2.wasJustPressed(GamepadKeys.Button.Y)){
+                    motif = PGP;
+                    indexer.prepareQuickspin(motif);
+                    state = FSM.Intake;
+                }
+                if (g2.wasJustPressed(GamepadKeys.Button.B)){
+                    motif = GPP;
+                    indexer.prepareQuickspin(motif);
+                    state = FSM.Intake;
+                }
+                break;
             case Intake:
                 handleIntakeState();
                 break;
@@ -62,10 +94,22 @@ public class Bot extends BotPeriodics {
                 break;
         }
     }
+
     // MAINLINE HANDLERS
     private void handleIntakeState() {
         double leftTrigger = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         //double rightTrigger = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+
+        // Press-and-hold right bumper to spin up shooter while in Intake
+        if (!actionHost.isRunning()) {
+            if (g2.gamepad.right_bumper) {
+                state = FSM.QuickOuttake;
+                applyPreSpinRPM();
+            } else {
+                outtake.stop();
+            }
+        }
+
 
         if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
         else intake.stop();
@@ -75,15 +119,22 @@ public class Bot extends BotPeriodics {
 
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) indexer.moveTo(indexer.getState().next());
 
-        if (g2.wasJustPressed(GamepadKeys.Button.A)) state = FSM.QuickOuttake;
+        if(g2.wasJustPressed(GamepadKeys.Button.X))
+            indexer.initializeColors(Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN);
+        if (g2.wasJustPressed(GamepadKeys.Button.A))
+            state = FSM.QuickOuttake;
         if (g2.wasJustPressed(GamepadKeys.Button.B)){
             state = FSM.SortOuttake;
             indexer.setIntaking(false);
             indexer.moveTo(indexer.getState());
         }
+        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
+            indexer.prepareQuickspin(new Indexer.ArtifactColor[]{Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE,Indexer.ArtifactColor.PURPLE});
         if (g2.wasJustPressed(GamepadKeys.Button.Y)) state = FSM.Endgame;
+        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
+            indexer.prepareQuickspin(motif);
 
-        if(indexer.isLoaded() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){ // works with my other code in the outtake functions to ensure warning rumbles don't happen more than once
+        if(indexer.isFull() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){
             g1.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
             g2.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
             rumbledAlready = true;
@@ -92,24 +143,34 @@ public class Bot extends BotPeriodics {
 
     protected void handleAllianceSelection() {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
-            goalTagID = 20;
-            aprilTag.setGoalTagID(goalTagID);
+            aprilTag.setPipeline(0);
             g1.gamepad.setLedColor(0, 0, 1, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Blue";
         }
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
-            goalTagID = 24;
-            aprilTag.setGoalTagID(goalTagID);
+            aprilTag.setPipeline(1);
             g1.gamepad.setLedColor(1, 0, 0, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Red";
         }
     }
 
     private void handleQuickOuttakeState() {
+        // Allow press-and-hold pre-spin while in QuickOuttake (before running actions)
+        if (!actionHost.isRunning()) {
+            if (g2.gamepad.right_bumper) {
+                applyPreSpinRPM();
+            } else {
+                outtake.stop();
+            }
+        }
+
         if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.X)) {
             actionHost.start(actionNonIndexedDump());
             rumbledAlready = false;
+            state = FSM.Intake;
         }
+        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
+            indexer.prepareQuickspin(motif);
         if (g2.wasJustPressed(GamepadKeys.Button.BACK)) {
             actionHost.abort();
         }
@@ -147,13 +208,22 @@ public class Bot extends BotPeriodics {
         }
     }
 
+    private void applyPreSpinRPM() {
+        outtake.set(getTargetRPM()); // RPM mode: set shooter target RPM
+    }
+
     private Action actionNonIndexedDump() {
-        final double rpm = getTargetRpm() * QUICKSPIN_OUTTAKE_RPM_SCALE;
+        final double rpm = getTargetRPM() * QUICKSPIN_OUTTAKE_RPM_SCALE;
         return new SequentialAction(
-                new InstantAction(actuator::upQuick),// lower up position for quick dump
+                new InstantAction(actuator::upQuick),
                 new InstantAction(() -> outtake.set(rpm)),
-                new SleepAction(SHOOTER_SPINUP),                      // spin up shooter
-                new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),// full blast
+                new Action() {
+                    @Override
+                    public boolean run(TelemetryPacket packet) {
+                        return !outtake.inRange(100.0);
+                    }
+                },
+                new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),
                 new SleepAction(NON_INDEX_SPIN_TIME),
                 new InstantAction(indexer::stopIndexerPower),
                 new InstantAction(outtake::stop),
@@ -172,14 +242,20 @@ public class Bot extends BotPeriodics {
             return new InstantAction(() -> {});
         }
 
-        final double rpm = getTargetRpm();
+        final double rpm = getTargetRPM();
 
         return new SequentialAction(
                 new InstantAction(() -> indexer.setIntaking(false)),
                 new InstantAction(actuator::down),
                 new InstantAction(() -> indexer.moveTo(slot, true)),
                 new InstantAction(() -> outtake.set(rpm)),
-                new SleepAction(SHOOTER_SPINUP),
+                // wait for shooter RPM to be within 100 instead of fixed spinup
+                new Action() {
+                    @Override
+                    public boolean run(TelemetryPacket p) {
+                        return !outtake.inRange(100.0);
+                    }
+                },
                 new InstantAction(actuator::upIndexed),
                 new SleepAction(1),
 
@@ -197,17 +273,24 @@ public class Bot extends BotPeriodics {
                 indexer.findBestSlotForColor(Indexer.ArtifactColor.PURPLE);
 
         if (slot == null) {
-            return new InstantAction(() -> {});
+            return new InstantAction(() -> {
+            });
         }
 
-        final double rpm = getTargetRpm();
+        final double rpm = getTargetRPM();
 
         return new SequentialAction(
                 new InstantAction(actuator::down),
                 new InstantAction(() -> indexer.moveTo(slot, true)),
 
                 new InstantAction(() -> outtake.set(rpm)),
-                new SleepAction(SHOOTER_SPINUP),
+                // wait for shooter RPM to be within 100 instead of fixed spinup
+                new Action() {
+                    @Override
+                    public boolean run(TelemetryPacket p) {
+                        return !outtake.inRange(100.0);
+                    }
+                },
                 new InstantAction(actuator::upIndexed),
                 new SleepAction(1),
 
@@ -219,12 +302,4 @@ public class Bot extends BotPeriodics {
                 new InstantAction(actuator::down)
         );
     }
-    private double getTargetRpm() {
-        double range = aprilTag.getRange();
-        if (Double.isNaN(range) || range <= 0) {
-            return shooterRPM;
-        }
-        return outtake.getRegressionRPM(range);
-    }
 }
-

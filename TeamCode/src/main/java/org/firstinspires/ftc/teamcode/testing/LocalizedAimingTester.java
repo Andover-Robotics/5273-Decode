@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
 
 @Config
-@TeleOp(name = "DistanceRegressionTeleOp", group = "AA_main")
-public class DistanceRegressionTeleOp extends LinearOpMode {
+@TeleOp(name = "Localized aiming tester", group = "AA_main")
+public class LocalizedAimingTester extends LinearOpMode {
 
     private Intake intake;
     private Indexer indexer;
@@ -31,17 +31,16 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
     private AprilTagAimer aprilAimer;
     private MecanumDrive drive;
 
-    private long lastAimUpdate = 0;
+    private long lastAimUpdateTime = 0;
     private double lastTurnCorrection = 0;
-    public static int shooterRPM;
+    public static double shooterRPM;
 
-    private boolean continuousAprilTagLock = false;
+    private boolean continuousGoalLock = false;
     private boolean fieldCentric = false;
-    private FtcDashboard dash = FtcDashboard.getInstance();
 
-    private static final long AIM_UPDATE_INTERVAL_MS = 0;
-    private static int goalTagID;
+    private static final long aimUpdateInterval = 20; // ms
     private static String colorGoalSelected;
+    private static Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -49,7 +48,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         indexer = new Indexer(hardwareMap);
         actuator = new Actuator(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
-        drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
+        drive = new MecanumDrive(hardwareMap, startPose);
         movement = new Movement(hardwareMap, drive);
 
         aprilTag = new AprilTag(hardwareMap, telemetry);
@@ -77,36 +76,27 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
     // teleop type shift
     public void teleopTick(GamepadEx g1, GamepadEx g2, Telemetry telemetry) {
+
         outtake.periodic();
-        //apriltag turn correction
+        drive.updatePoseEstimate();
+
         double turnCorrection = 0;
+        if (continuousGoalLock) {
+            long currentTime = System.currentTimeMillis();
 
-        if (continuousAprilTagLock) {
-            long now = System.currentTimeMillis();
+            // Run scan + PID only every AIM_UPDATE_INTERVAL_MS
+            if (currentTime - lastAimUpdateTime >= aimUpdateInterval) {
+                lastAimUpdateTime = currentTime;
 
-            if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
-                lastAimUpdate = now;
-
-                aprilTag.scanGoalTag();
-                double bearing = aprilTag.getBearing();
-
-                if (!Double.isNaN(bearing)) {
-                    lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
-                } else {
-                    lastTurnCorrection = 0;
-                    //lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
-                }
+                lastTurnCorrection = aprilAimer.calculateLocalizedTurnPower()[0];
+                shooterRPM = aprilAimer.calculateLocalizedTurnPower()[1];
             }
-            if (lastTurnCorrection != 0 && !Double.isNaN(lastTurnCorrection)) {
-                //shooterRPM = (int) outtake.getRegressionRPM(aprilTag.getRange());
-            }
-            else {
-                // localized handles
-            }
+
+            turnCorrection = lastTurnCorrection;
+
             // turnCorrection = 0.9 * lastTurnCorrection; - don't want this
-        }
-        else {
-            turnCorrection = 0; // repeated just for clarity across opmodes
+        } else {
+            turnCorrection = 0;
         }
 
         //drivetrain control
@@ -134,7 +124,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
 
         // intake control
-        if(g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)>0.01){
+        if(g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)>0.01){
             intake.run();
         }
         else {
@@ -142,7 +132,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         }
 
         //outtake control
-        if (g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01) {
+        if (g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01) {
             outtake.set(shooterRPM);
         } else {
             outtake.stop();
@@ -150,41 +140,45 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
         // spindexer control
         // Advance state
-        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
             indexer.moveTo(indexer.getState().next());
             telemetry.addLine("Indexer moving");
         }
 
         //actuator control
-        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
             actuator.up();
         }
-        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
             actuator.down();
         }
 
         // Scan obelisk
-        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
             aprilTag.scanObeliskTag();
             telemetry.addData("Obelisk ID", aprilTag.getObeliskId());
         }
 
         // Set intaking ON
-        if (g2.wasJustPressed(GamepadKeys.Button.A) && !actuator.isActivated()) {
+        if (g1.wasJustPressed(GamepadKeys.Button.A) && !actuator.isActivated()) {
             indexer.setIntaking(!indexer.isIntaking());
+        }
+
+        if (g1.wasJustPressed(GamepadKeys.Button.B)) {
+            movement.setPose(new Pose2d(0, 0, Math.toRadians(0)));
         }
 
         indexer.update();
 
         // Begin continuous lock
-        if (g2.wasJustPressed(GamepadKeys.Button.X)) {
-            continuousAprilTagLock = true;
+        if (g1.wasJustPressed(GamepadKeys.Button.X)) {
+            continuousGoalLock = true;
             aprilTag.setCurrentCameraScannedId(0);
         }
 
         // Stop continuous lock
-        if (g2.wasJustPressed(GamepadKeys.Button.Y)) {
-            continuousAprilTagLock = false;
+        if (g1.wasJustPressed(GamepadKeys.Button.Y)) {
+            continuousGoalLock = false;
         }
 
         // Alliance selection
@@ -199,12 +193,18 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         }
 
         // ========== TELEMETRY ==========
+        telemetry.addData("A: Set intaking, B: Reset Localized Pose, X/Y: lock in/unlock, Dpad left: Scan Obelisk Id, Dpad Up/Down: actuator, Dpad Right:", "index");
         telemetry.addData("Target RPM",outtake.getTargetRPM());
         telemetry.addData("Bot Range", aprilTag.getRange()); // moved limelight
         telemetry.addData("measured RPM",outtake.getRPM());
         telemetry.addData("Outtake Power", outtake.getPower());
-        telemetry.addData("April Lock", continuousAprilTagLock);
+        telemetry.addData("Localized Lock", continuousGoalLock);
+        telemetry.addData("x", drive.localizer.getPose().position.x);
+        telemetry.addData("y", drive.localizer.getPose().position.y);
+        telemetry.addData("heading (deg)", Math.toDegrees(drive.localizer.getPose().heading.log()));
+        telemetry.addData("Selected Goal Color:", colorGoalSelected);
         telemetry.addData("Selected Goal Color:", colorGoalSelected);
         telemetry.update();
     }
 }
+

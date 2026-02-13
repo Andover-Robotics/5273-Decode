@@ -5,15 +5,16 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 
 
 @Config
 public class AprilTagAimer {
-    public static double kP = 0.06;
+    public static double kP = 0.00015;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.12;
+    public static double kF = 0.067;
     public static double filter = 0.867;  // smoothing factor (1 = no filtering, 0 = very heavy smoothing)
     public static double maxIntegral = 1.0;
     public static double deadband = 1;
@@ -21,10 +22,9 @@ public class AprilTagAimer {
     private double lastDerivative = 0.0;
     private double lastError = 0;
     private long lastTimestamp = 0;
-    private final IMU imu;
-    private final TwoDeadWheelLocalizer deadWheelLocalizer;
-    public static Pose2d TAG_POSE = new Pose2d(0, 132, Math.toRadians(0));
-    public static double cameraHeight = 11.815; // inches, from ground to center of lens
+    private final MecanumDrive drive;
+    public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(0));
+    public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
 
     /* When and why to tune these
@@ -33,14 +33,12 @@ public class AprilTagAimer {
     D (Derivative) Increase to dampen motion and reduce overshoot. Good for smoothing quick heading corrections.
     F (Feedforward)	Maybe, its a constant, increase to help overcome drivetrain static friction and give better response when error is small.
     */
-    public AprilTagAimer(HardwareMap hardwareMap, IMU imu, TwoDeadWheelLocalizer deadWheelLocalizer) {
-        this.imu = imu;
-        this.deadWheelLocalizer = deadWheelLocalizer;
+    public AprilTagAimer(HardwareMap hardwareMap, MecanumDrive mecanumDrive) {
+        this.drive = mecanumDrive;
     }
 
-    public double[] calculateLocalizedTurnPower(int tagID) {
-        Pose2d robotPose = deadWheelLocalizer.getPose();
-        Pose2d tagPose = TAG_POSE;
+    public double[] calculateLocalizedTurnPower() {
+        Pose2d robotPose = drive.localizer.getPose();
 
         // Vector from robot -> tag in field coordinates
         double dx = tagPose.position.x - robotPose.position.x;
@@ -50,14 +48,13 @@ public class AprilTagAimer {
 
         double dz = goalAprilTagHeight - cameraHeight;
 
-        // point-to-point distance
+        // point-to-point distance=
         double range = Math.hypot(horizontalDistance, dz);
 
         double desiredHeading = Math.atan2(dy, dx);
 
-        double currentHeading = imu
-                .getRobotYawPitchRollAngles()
-                .getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
+        // apparantly toDouble is log but not clamped to -pi, pi, for more control
+        double currentHeading = robotPose.heading.toDouble(); // checked telem, the way log shows is heading=Rotation2d(real=[somenumber], imag=[somenumber]. Both numbers are diff .And for both of them, say the number is one, if you move it to the left it decreases and you move it to the right it also decrceases. And once it crosses that 180 degrees to the other side same behavior except negative. The way to differentiate tho is that for imaginary when its at one of the say, .77, real will be some positive, and for the imag's other reflected .77 real will be negative.
 
         double bearing = Math.toDegrees(desiredHeading - currentHeading);
         bearing = angleWrapDegrees(bearing);
@@ -67,10 +64,7 @@ public class AprilTagAimer {
     }
 
     private double angleWrapDegrees(double angle) {
-        angle %= 360.0;
-        if (angle > 180.0) angle -= 360.0;
-        if (angle < -180.0) angle += 360.0;
-        return angle;
+        return (angle + 180) % 360 - 180;
     }
 
     public double calculateTurnPowerFromBearing(double bearing) {

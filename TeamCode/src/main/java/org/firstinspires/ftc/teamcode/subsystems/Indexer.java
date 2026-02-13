@@ -24,10 +24,23 @@ public class Indexer {
     // Dashboard control
     public static boolean dashAdvance = false;
     public static int dashTargetSlot = -1; // -1 = disabled; 0/1/2 = slot
-    public static boolean ENABLE_AUTO_ADVANCE = false;
 
-    // Config
-    public static double offsetAngle = 17.0;
+    //Things that should be toggled depending on use case (more robust version coming)
+    public  boolean ENABLE_AUTO_ADVANCE = true;
+    public boolean ALWAYS_SEEK_EMPTY_WHILE_INTAKING = true;
+    public boolean ENABLE_FULL_UNKNOWN_SCAN = true;
+    public boolean SCAN_COLORS = true;
+
+    // Auto-advance detection mode
+    public enum AutoDetectMode { HARD, SOFT }
+    public static AutoDetectMode AUTO_DETECT_MODE = AutoDetectMode.SOFT;
+    public static int HARD_NONEMPTY_HITS_TO_ADVANCE = 8;
+    public static int SOFT_NONEMPTY_HITS_TO_ADVANCE = 3;
+
+
+    // Offsets
+    public static double offsetAngle = 77.0; // 77 for normal, 105 is for auto
+    public static double autoOuttakeOffsetAngle = 32.0;
     public static double outtakeOffsetAngle = 200.0;
 
     // Slot spacing for color sensing
@@ -38,6 +51,8 @@ public class Indexer {
     private static final double msPerDegree = 0.6;
     private static final double minWait = 100;
     private static final double maxWait = 300;
+    // Cooldown to avoid spamming moves while full+unknown
+    public static long UNKNOWN_SCAN_COOLDOWN_MS = 250;
 
     // Thresholds
     public static double GREEN_THRESHOLD = 0.2;
@@ -50,7 +65,6 @@ public class Indexer {
     // Cap samples to keep responsiveness
     public static int MAX_HITS_TO_KEEP = 20;
 
-    public static int NON_EMPTY_HITS_TO_ADVANCE = 5;
     public static double ADVANCE_ANGLE_TOLERANCE = 5.0;
 
     // Telemetry object
@@ -64,7 +78,11 @@ public class Indexer {
     // Internal state
     private IndexerState state = IndexerState.zero;
     private boolean intaking = true;
-    private boolean loaded = false; // true when all 3 slots are full (indiscriminate of color)
+    private boolean autoOuttaking = false;
+    private boolean loaded = false;   // "anything present" (sensor OR stored memory)
+    private boolean noEmpty = false;  // FULL: true when there are NO stored EMPTY slots
+
+    public boolean isFull() { return noEmpty; }
 
     // Per-slot state
     private final SlotState[] slots = {
@@ -77,6 +95,9 @@ public class Indexer {
     private final ElapsedTime scanTimer = new ElapsedTime();
     private double scanDelayMs;
 
+    // Full+unknown scan cooldown
+    private final ElapsedTime unknownScanTimer = new ElapsedTime();
+
     // Dashboard edge detection
     private boolean lastDashAdvance = false;
     private int lastDashTargetSlot = -1;
@@ -87,6 +108,8 @@ public class Indexer {
 
         servoControl = new CRServoPositionControl(servo, analog);
         colorSensor = new ColorSensorSystem(hardwareMap);
+
+        unknownScanTimer.reset();
     }
 
     // getters
@@ -104,7 +127,10 @@ public class Indexer {
             slot.obs.reset();
             slot.wasEmpty = true;
             slot.fillingHits = 0;
+            slot.autoAdvanceArmed = false;
+            slot.fillCycleActive = false;
         }
+        recomputeNoEmpty();
     }
 
     public void initializeColors(ArtifactColor one, ArtifactColor two, ArtifactColor three) {
@@ -115,7 +141,10 @@ public class Indexer {
             slot.obs.reset();
             slot.wasEmpty = true;
             slot.fillingHits = 0;
+            slot.autoAdvanceArmed = false;
+            slot.fillCycleActive = false;
         }
+        recomputeNoEmpty();
     }
 
     public double getMeasuredAngle() {
@@ -128,6 +157,16 @@ public class Indexer {
             this.intaking = isIntaking;
             moveTo(state, true);
         }
+    }
+
+    public void setIntaking(boolean isIntaking, IndexerState moveToState) {
+        this.intaking = isIntaking;
+        moveTo(moveToState, true);
+    }
+
+    public void setAutoOuttaking(boolean isAutoOuttaking) {
+        this.autoOuttaking = isAutoOuttaking;
+        moveTo(state);
     }
 
     public boolean moveToColor(ArtifactColor desired) {
@@ -183,16 +222,54 @@ public class Indexer {
         return false;
     }
 
-
     /** Open-loop blast: full power until caller stops it (or sets another power). */
     public void setIndexerPower(double power) { servoControl.setOpenLoopPower(power); }
     public void stopIndexerPower() { servoControl.setOpenLoopPower(0); servoControl.clearOpenLoop(); }
 
-    //update loop 1) Handle dashboard overrides  2) Update loaded state and servo control 3) Classify the slot under the sensor and optionally auto-advance
+    // update loop:
+    // 1) Handle dashboard overrides
+    // 2) Update loaded state and servo control
+    // 3) Classify the slot under the sensor and optionally auto-advance
+    // 4) Recompute FULL flag
+    // 5) If intaking and any EMPTY exists, always seek an EMPTY slot (skip UNKNOWN too)
+    // 6) If full and still have UNKNOWN slots, optionally move to unknown slots for rescan
     public void update() {
         handleDashboardCommands();
         refreshLoadedAndServo();
-        updateSlotClassification(debugClosestSlot());
+
+        if (intaking && SCAN_COLORS) {
+            updateSlotClassification(debugClosestSlot());
+        }
+
+        // Update full flag every loop based on stored memory
+        recomputeNoEmpty();
+
+        // This skips UNKNOWN too when an EMPTY exists.
+        if (ALWAYS_SEEK_EMPTY_WHILE_INTAKING && intaking && !noEmpty &&
+                isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
+
+            if (slot(state).color != ArtifactColor.EMPTY) {
+                IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.EMPTY);
+                if (target != null) {
+                    moveTo(target);
+                }
+            }
+        }
+
+        // If full and still have UNKNOWN slots, go look at them (intaking only)
+        if (ENABLE_FULL_UNKNOWN_SCAN && intaking && noEmpty && anyUnknownStored()) {
+            // Don’t spam move commands
+            if (unknownScanTimer.milliseconds() >= UNKNOWN_SCAN_COOLDOWN_MS) {
+                // If we're already on an UNKNOWN slot, let it keep observing
+                if (slot(state).color != ArtifactColor.UNKNOWN) {
+                    IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.UNKNOWN);
+                    if (target != null) {
+                        moveTo(target);
+                        unknownScanTimer.reset();
+                    }
+                }
+            }
+        }
     }
 
     private void handleDashboardCommands() {
@@ -228,7 +305,10 @@ public class Indexer {
         double angle = s.index * SLOT_SPACING_DEG;
         angle += offsetAngle;
 
-        if (!intaking) {
+        if (autoOuttaking) {
+            angle += autoOuttakeOffsetAngle; // NOT 180 unless confirmed mechanically
+        }
+        else if (!intaking) {
             angle += outtakeOffsetAngle; // NOT 180 unless confirmed mechanically
         }
 
@@ -248,6 +328,10 @@ public class Indexer {
         boolean isEmpty = (color == ArtifactColor.EMPTY || color == ArtifactColor.UNKNOWN);
         slot.wasEmpty = isEmpty;
         slot.fillingHits = 0;
+        slot.autoAdvanceArmed = false;
+        slot.fillCycleActive = false;
+
+        recomputeNoEmpty();
     }
 
     private double angleError(double a, double b) {
@@ -269,10 +353,9 @@ public class Indexer {
                     ? colorSensor.classifyColorOnly()
                     : ArtifactColor.EMPTY;
 
-            // start a fresh count when an artifact newly appears
+            // If transitioning from empty->nonempty (sensor), reset observation window for faster settle
             if (slot.wasEmpty && hasArtifact) {
                 slot.obs.reset();
-                slot.fillingHits = 0;
             }
 
             slot.obs.record(instantColor);
@@ -280,7 +363,6 @@ public class Indexer {
 
             int total = slot.obs.totalHits();
 
-            // Resolve only after enough evidence
             if (total >= MIN_HITS_FOR_DECISION) {
                 ArtifactColor candidate = slot.obs.resolveWithThreshold(
                         GREEN_THRESHOLD,
@@ -291,50 +373,72 @@ public class Indexer {
 
                 ArtifactColor currentColor = slot.color;
 
-                // Prevent UNKNOWN/EMPTY from overwriting a known color
-                boolean protectKnown = (candidate == ArtifactColor.UNKNOWN || candidate == ArtifactColor.EMPTY) &&
-                        (currentColor == ArtifactColor.GREEN || currentColor == ArtifactColor.PURPLE);
+                boolean protectKnown =
+                        (candidate == ArtifactColor.UNKNOWN || candidate == ArtifactColor.EMPTY) &&
+                                (currentColor == ArtifactColor.GREEN || currentColor == ArtifactColor.PURPLE);
 
                 if (!protectKnown && candidate != currentColor) {
                     slot.color = candidate;
                 }
             }
 
-            // Auto-advance (guarded by toggle)
-            if (ENABLE_AUTO_ADVANCE && s == state && intaking && isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
-                if (hasArtifact) {
-                    // Count non-empty hits once somethings been detected
-                    if (slot.wasEmpty) {
-                        slot.fillingHits = 1;
-                    } else {
+            // Auto-advance: latch empty->nonempty fill cycle and count raw presence hits
+            if (ENABLE_AUTO_ADVANCE && intaking && s == state &&
+                    isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
+
+                boolean sensorNonEmpty = hasArtifact;
+
+                // Start fill cycle only on a physical empty->nonempty transition (rising edge)
+                if (!slot.fillCycleActive) {
+                    if (slot.wasEmpty && sensorNonEmpty) {
+                        slot.fillCycleActive = true;
+                        slot.fillingHits = 0;
+                    }
+                }
+
+                if (slot.fillCycleActive) {
+                    if (sensorNonEmpty) {
                         slot.fillingHits++;
+                    } else {
+                        // If it went empty again, abort the cycle
+                        slot.fillCycleActive = false;
+                        slot.fillingHits = 0;
                     }
 
-                    boolean colorSet = slot.color != ArtifactColor.EMPTY;
-                    if (colorSet && slot.fillingHits >= NON_EMPTY_HITS_TO_ADVANCE) {
-                        moveTo(state.next());
-                        slot.fillingHits = 0; // reset for the next slot
+                    if (slot.fillCycleActive &&
+                            slot.fillingHits >= requiredNonEmptyHitsToAdvance()) {
+
+                        // Try to go to another EMPTY slot (cyclic search to stay efficient)
+                        IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.EMPTY);
+
+                        if (target != null) {
+                            moveTo(target);
+                        } else {
+                            // No EMPTY slots exist => full
+                            noEmpty = true;
+                        }
+
+                        // End cycle regardless
+                        slot.fillCycleActive = false;
+                        slot.fillingHits = 0;
                     }
                 }
             }
 
-            // Update empty memory / reset fill counter
+            // Update memory ONLY
             slot.wasEmpty = !hasArtifact;
-            if (slot.wasEmpty) {
-                slot.fillingHits = 0;
-            }
 
-            // telemetry for current slot
             if (telemetry != null && s == currentSlot) {
-                int totalHits = slot.obs.totalHits();
+                int totalHitsTelemetry = slot.obs.totalHits();
                 telemetry.addData("Loaded", loaded);
+                telemetry.addData("Full(noEmpty)", noEmpty);
                 telemetry.addData("Slot " + s + " hit %",
                         String.format(
                                 "G: %.0f%%, P: %.0f%%, E: %.0f%%, U: %.0f%%",
-                                totalHits > 0 ? slot.obs.greenHits * 100.0 / totalHits : 0,
-                                totalHits > 0 ? slot.obs.purpleHits * 100.0 / totalHits : 0,
-                                totalHits > 0 ? slot.obs.emptyHits * 100.0 / totalHits : 0,
-                                totalHits > 0 ? slot.obs.unknownHits * 100.0 / totalHits : 0
+                                totalHitsTelemetry > 0 ? slot.obs.greenHits * 100.0 / totalHitsTelemetry : 0,
+                                totalHitsTelemetry > 0 ? slot.obs.purpleHits * 100.0 / totalHitsTelemetry : 0,
+                                totalHitsTelemetry > 0 ? slot.obs.emptyHits * 100.0 / totalHitsTelemetry : 0,
+                                totalHitsTelemetry > 0 ? slot.obs.unknownHits * 100.0 / totalHitsTelemetry : 0
                         ));
                 colorSensor.addTelemetry(telemetry);
             }
@@ -405,6 +509,39 @@ public class Indexer {
        UTIL
        ========================= */
 
+    private int requiredNonEmptyHitsToAdvance() {
+        return (AUTO_DETECT_MODE == AutoDetectMode.HARD)
+                ? HARD_NONEMPTY_HITS_TO_ADVANCE
+                : SOFT_NONEMPTY_HITS_TO_ADVANCE;
+    }
+
+    private void recomputeNoEmpty() {
+        boolean anyEmpty = false;
+        for (SlotState slot : slots) {
+            if (slot.color == ArtifactColor.EMPTY) {
+                anyEmpty = true;
+                break;
+            }
+        }
+        noEmpty = !anyEmpty;
+    }
+
+    private boolean anyUnknownStored() {
+        for (SlotState slot : slots) {
+            if (slot.color == ArtifactColor.UNKNOWN) return true;
+        }
+        return false;
+    }
+
+    private IndexerState findNextSlotWithStoredColor(IndexerState start, ArtifactColor color) {
+        IndexerState s = start;
+        for (int i = 0; i < 3; i++) {
+            s = s.next();
+            if (slot(s).color == color) return s;
+        }
+        return null;
+    }
+
     public IndexerState findBestSlotForColor(ArtifactColor desired) {
         IndexerState best = null;
         int bestScore = -1;
@@ -465,7 +602,10 @@ public class Indexer {
         ArtifactColor color = ArtifactColor.UNKNOWN;
         SlotObservation obs = new SlotObservation();
         boolean wasEmpty = true;
-        int fillingHits = 0; // counts non empty observations after an empty to filled transition
+
+        int fillingHits = 0;          // counts sensorNonEmpty hits during a fill cycle
+        boolean autoAdvanceArmed = false; // kept for compatibility; no longer required
+        boolean fillCycleActive = false;  // latched after stored EMPTY + sensor nonempty
     }
 
     private static class SlotObservation {
@@ -548,5 +688,11 @@ public class Indexer {
         return slots[(x + 2) % 3].color == desired[0]
                 && slots[x].color == desired[1]
                 && slots[(x + 1) % 3].color == desired[2];
+    }
+
+    public boolean artifactPresentAndAligned() {
+        boolean hasArtifact = colorSensor.hasArtifact();
+        boolean aligned = isWithinTargetDegrees(15.0);
+        return hasArtifact && aligned;
     }
 }

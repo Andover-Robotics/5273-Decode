@@ -96,7 +96,7 @@ public final class TuningOpModes {
                         rightEncs,
                         parEncs,
                         perpEncs,
-                        md.lazyImu,
+                        null,
                         md.voltageSensor,
                         () -> new MotorFeedforward(MecanumDrive.PARAMS.kS,
                                 MecanumDrive.PARAMS.kV / MecanumDrive.PARAMS.inPerTick,

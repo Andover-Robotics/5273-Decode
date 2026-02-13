@@ -11,8 +11,8 @@ import java.util.List;
 // TODO IMPORTANT NOTES: For goalTagID, just have separate teleops one for red alliance one for blue where blue teleop can setGoalTagID(20) and red teleop can setGoalTagID(24)
 // TODO We will see whether we want separate auto for either alliance, probably yes its just easier that way and there may be some functionality requiring that.
 public class AprilTag {
-    private int id;
-    private int obeliskId;
+    private int id = -1;
+    public static int obeliskId = -1;
     private int goalTagID; // our current alliance goal
     private int cameraScannedId;
     private double bearing;
@@ -39,14 +39,16 @@ public class AprilTag {
     }
 
     public void scanObeliskTag() {
-        id = -1;
-        List<LLResultTypes.FiducialResult> scanned = limelight.getLatestResult().getFiducialResults();
+        setPipeline(2);
 
-        for (LLResultTypes.FiducialResult detection: scanned) {
-            int id = detection.getFiducialId();
-            if (id >= 21 && id <= 23) {
-                obeliskId = id;
-            }
+        List<LLResultTypes.FiducialResult> scanned = limelight
+                .getLatestResult()
+                .getFiducialResults();
+
+        for (LLResultTypes.FiducialResult detection : scanned) {
+            int fid = detection.getFiducialId();
+            obeliskId = fid;
+            return;
         }
     }
 
@@ -56,6 +58,7 @@ public class AprilTag {
 
     public void scanGoalTag() {
         id = -1;
+        /* So that if you scan and theres no tag range stays, (bearing should be reset in the loops)*/
         bearing = Double.NaN;
         elevation = Double.NaN;
         range = Double.NaN;
@@ -65,19 +68,17 @@ public class AprilTag {
         for (LLResultTypes.FiducialResult detection: scanned) {
             cameraScannedId = detection.getFiducialId();
             // goalTagID should be gotten before round/during auto
-            if (cameraScannedId == goalTagID) {
-                id = cameraScannedId;
-                elevation = detection.getTargetYDegrees();
-                range = calculateDistance(elevation);
-                bearing = detection.getTargetXDegrees();
-                tagSize = detection.getTargetArea();
-                break;
-            }
+            id = cameraScannedId;
+            elevation = detection.getTargetYDegrees();
+            range = calculateDistance(elevation);
+            bearing = detection.getTargetXDegrees();
+            tagSize = detection.getTargetArea();
         }
     }
 
-    public void setGoalTagID(int allianceTagID) {
-        goalTagID = allianceTagID;
+    public void setPipeline(int pipeline) {
+        // 0 blue, 1 red, 2 obelisk
+        limelight.pipelineSwitch(pipeline);
     }
     public int getCurrentId() {
         return cameraScannedId;

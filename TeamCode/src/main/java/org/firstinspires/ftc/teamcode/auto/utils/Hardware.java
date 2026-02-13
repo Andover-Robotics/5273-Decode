@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.auto.utils;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
@@ -20,24 +21,25 @@ public class Hardware {
     public final AprilTagAimer aprilAimer;
     public final BotActions actions;
     public final MecanumDrive mecanumDrive;
-    public final IMU imu;
-    public final TwoDeadWheelLocalizer deadWheelLocalizer;
-    public Hardware(HardwareMap hardwareMap, Telemetry telemetry) {
+
+    public Hardware(HardwareMap hardwareMap, Telemetry telemetry, LinearOpMode opMode, Pose2d startPose) {
         mecanumDrive = new MecanumDrive(
                 hardwareMap,
-                new Pose2d(0, 0, 0)
+                startPose
         );
-
-        imu = mecanumDrive.lazyImu.get();
-        deadWheelLocalizer = (TwoDeadWheelLocalizer) mecanumDrive.localizer;
 
         intake   = new Intake(hardwareMap);
         indexer  = new Indexer(hardwareMap);
+        indexer.ENABLE_AUTO_ADVANCE = false;
+        indexer.ALWAYS_SEEK_EMPTY_WHILE_INTAKING = false;
+        indexer.ENABLE_FULL_UNKNOWN_SCAN = false;
+        indexer.SCAN_COLORS = false;
+
         outtake  = new Outtake(hardwareMap, Outtake.Mode.RPM);
         actuator = new Actuator(hardwareMap);
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
+        aprilAimer = new AprilTagAimer(hardwareMap, mecanumDrive);
 
-        actions = new BotActions(telemetry, intake, indexer, outtake, actuator, aprilTag, aprilAimer);
+        actions = new BotActions(this, telemetry, opMode);
     }
 }

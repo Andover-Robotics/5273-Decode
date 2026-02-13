@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
-@TeleOp(name = "MainTeleOp", group = "AA_main")
-public class MainTeleop extends LinearOpMode {
+@TeleOp(name = "OneDriver", group = "AA_main")
+public class OneDriverTeleop extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
