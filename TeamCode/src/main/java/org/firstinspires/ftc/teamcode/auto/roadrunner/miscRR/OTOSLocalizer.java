@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.autoPinpoint;
+package org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;

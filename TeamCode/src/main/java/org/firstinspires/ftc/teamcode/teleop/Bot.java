@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
@@ -41,8 +42,8 @@ public class Bot extends BotPeriodics {
     // Press-and-hold pre-spin minimum RPM
     public static double INTAKE_MIN_RPM = 3500.0;
 
-    public Bot(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
-        super(hardwareMap, tele, gamepad1, gamepad2, twoMovement);
+    public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
+        super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement);
         state = FSM.MotifSelection;
     }
 

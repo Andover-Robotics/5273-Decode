@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
+import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
@@ -29,8 +30,7 @@ public class BotPeriodics {
     protected final Movement movement;
     protected final AprilTag aprilTag;
     protected final AprilTagAimer aprilAimer;
-    protected final IMU imu;
-    protected final TwoDeadWheelLocalizer deadWheelLocalizer;
+    protected final MecanumDrive drive;
 
     protected final GamepadEx g1;
     protected final GamepadEx g2;
@@ -56,17 +56,15 @@ public class BotPeriodics {
 
     public static double rangeOffset = 6.67;
 
-    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
+    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
         intake = new Intake(hardwareMap);
         indexer = new Indexer(hardwareMap);
         actuator = new Actuator(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
-        ConcreteLazyImu concreteImu = new ConcreteLazyImu(hardwareMap, "imu", new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT, RevHubOrientationOnRobot.UsbFacingDirection.UP));
-        movement = new Movement(hardwareMap, concreteImu);
-        imu = movement.getImu();
-        deadWheelLocalizer = movement.getTwoDeadWheelLocalizer();
+        drive = mecanumDrive;
+        movement = new Movement(hardwareMap, drive);
         aprilTag = new AprilTag(hardwareMap, tele);
-        aprilAimer = new AprilTagAimer(hardwareMap, imu, deadWheelLocalizer);
+        aprilAimer = new AprilTagAimer(hardwareMap, drive);
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
         actionHost = new ActionHost();
@@ -110,6 +108,7 @@ public class BotPeriodics {
         indexer.update();
         outtake.periodic();
         actionHost.update();
+        drive.updatePoseEstimate();
     }
 
     // Periodic Handlers

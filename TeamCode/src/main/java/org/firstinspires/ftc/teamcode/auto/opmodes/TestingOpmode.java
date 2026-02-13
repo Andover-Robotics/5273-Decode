@@ -39,8 +39,11 @@ import java.util.Arrays;
 
             @Override
             public void runOpMode() {
-                Hardware hardware = new Hardware(hardwareMap, telemetry, this);
+                Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
+
+                Hardware hardware = new Hardware(hardwareMap, telemetry, this, startPose);
                 BotActions botActions = hardware.actions;
+
                 MecanumDrive drive = hardware.mecanumDrive;
 
                 //TranslationalVelConstraint velConstraint1 = new TranslationalVelConstraint(maxVel1);
