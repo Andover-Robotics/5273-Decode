@@ -23,7 +23,7 @@ public class AprilTagTester extends LinearOpMode {
     private long lastAimUpdateTime = 0;
     private double lastTurnCorrection = 0;
     private boolean fieldCentric = false;
-    private static final long AIM_UPDATE_INTERVAL_MS = 50;  // update every 50 ms (~20 Hz)
+    private static final long AIM_UPDATE_INTERVAL_MS = 20;  // update every 20 ms (~50 Hz)
     private static int goalTagID;
 
     @Override

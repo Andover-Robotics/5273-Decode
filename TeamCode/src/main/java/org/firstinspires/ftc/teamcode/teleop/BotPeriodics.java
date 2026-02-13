@@ -50,7 +50,7 @@ public class BotPeriodics {
     protected boolean continuousIntake = true;
 
     public static double targetRPM = 3800;
-    protected static final long AIM_UPDATE_INTERVAL_MS = 50;
+    protected static final long AIM_UPDATE_INTERVAL_MS = 20;
 
     protected boolean twoMovementMode;
 
