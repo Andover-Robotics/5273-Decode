@@ -117,7 +117,7 @@ public final class MecanumDrive {
 
     public final VoltageSensor voltageSensor;
 
-    public final ConcreteLazyImu lazyImu;
+    //public final ConcreteLazyImu lazyImu;
 
     public final Localizer localizer;
     private final LinkedList<Pose2d> poseHistory = new LinkedList<>();
@@ -129,7 +129,7 @@ public final class MecanumDrive {
 
     public class DriveLocalizer implements Localizer {
         public final Encoder leftFront, leftBack, rightBack, rightFront;
-        public final IMU imu;
+        //public final IMU imu;
 
         private int lastLeftFrontPos, lastLeftBackPos, lastRightBackPos, lastRightFrontPos;
         private Rotation2d lastHeading;
@@ -142,7 +142,7 @@ public final class MecanumDrive {
             rightBack = new OverflowEncoder(new RawEncoder(MecanumDrive.this.rightBack));
             rightFront = new OverflowEncoder(new RawEncoder(MecanumDrive.this.rightFront));
 
-            imu = lazyImu.get();
+            //imu = lazyImu.get();
 
             // TODO: reverse encoders if needed
 
@@ -166,12 +166,12 @@ public final class MecanumDrive {
             PositionVelocityPair rightBackPosVel = rightBack.getPositionAndVelocity();
             PositionVelocityPair rightFrontPosVel = rightFront.getPositionAndVelocity();
 
-            YawPitchRollAngles angles = imu.getRobotYawPitchRollAngles();
+            double botHeading = localizer.getPose().heading.log();//imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
             FlightRecorder.write("MECANUM_LOCALIZER_INPUTS", new MecanumLocalizerInputsMessage(
-                    leftFrontPosVel, leftBackPosVel, rightBackPosVel, rightFrontPosVel, angles));
+                    leftFrontPosVel, leftBackPosVel, rightBackPosVel, rightFrontPosVel, null));
 
-            Rotation2d heading = Rotation2d.exp(angles.getYaw(AngleUnit.RADIANS));
+            Rotation2d heading = Rotation2d.exp(botHeading);
 
             if (!initialized) {
                 initialized = true;
@@ -249,8 +249,8 @@ public final class MecanumDrive {
 
         // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
-        lazyImu = new ConcreteLazyImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
-                PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
+        /*lazyImu = new ConcreteLazyImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
+                PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));*/
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
 

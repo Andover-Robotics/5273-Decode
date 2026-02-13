@@ -165,7 +165,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.B)) {
-            movement.resetPose(new Pose2d(0, 0, Math.toRadians(0)));
+            movement.setPose(new Pose2d(0, 0, Math.toRadians(0)));
         }
 
         indexer.update();

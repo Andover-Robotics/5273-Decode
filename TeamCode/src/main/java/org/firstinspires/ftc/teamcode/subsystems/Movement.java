@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 public class Movement {
     private final DcMotor leftFront, leftBack, rightFront, rightBack;
     private final MecanumDrive drive;
-    private final IMU imu;
+    //private final IMU imu;
     private final double STRAFE_MULTIPLIER = 1.0, ROTATION_MULTIPLIER = 0.8;
 
     /**
@@ -31,7 +31,7 @@ public class Movement {
         rightBack = map.get(DcMotor.class, "rightBack");
 
         this.drive = drive;
-        this.imu = drive.lazyImu.get();
+        //this.imu = drive.lazyImu.get();
 
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -80,10 +80,10 @@ public class Movement {
         // it can be freely changed based on preference.
         // The equivalent button is start on Xbox-style controllers.
         if (start) {
-            imu.resetYaw();
+            drive.localizer.setPose(new Pose2d(0, 0, 0));
         }
 
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double botHeading = drive.localizer.getPose().heading.log();//imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         // Rotate the movement direction counter to the bot's rotation
         double rotX = lateral * Math.cos(-botHeading) - axial * Math.sin(-botHeading);
@@ -122,7 +122,7 @@ public class Movement {
         return rightBack;
     }
 
-    public void resetPose(Pose2d newPose) {
+    public void setPose(Pose2d newPose) {
         drive.localizer.setPose(newPose);
     }
 }
