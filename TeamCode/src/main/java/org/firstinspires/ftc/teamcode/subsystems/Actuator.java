@@ -35,7 +35,7 @@ public class Actuator {
         upIndexed();
     }
 
-    //highe rposition
+    //higher position
     public void upIndexed() {
         servo.setPosition(UP_INDEXED);
         state = ActuatorState.UP_INDEXED;
