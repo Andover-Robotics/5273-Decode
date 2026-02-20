@@ -129,6 +129,7 @@ public class BotPeriodics {
         telemetry.addData("Bot Range", aprilTag.getRange());
         telemetry.addData("Alliance selected", colorGoalSelected);
         telemetry.addData("Turn Correction:", turnCorrection);
+        telemetry.addData("Intake power: ", intake.getIntakingPower());
         telemetry.addData("Last Turn Correction", lastTurnCorrection);
         for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
             telemetry.addData(
