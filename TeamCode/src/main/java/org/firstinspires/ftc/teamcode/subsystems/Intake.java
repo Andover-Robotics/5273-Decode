@@ -33,4 +33,5 @@ public class Intake {
     {
         intakeMotor.set(newPower);
     }
+    public double getIntakingPower(){return intakeMotor.get();}
 }
