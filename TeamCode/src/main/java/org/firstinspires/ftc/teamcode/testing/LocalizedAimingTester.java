@@ -31,6 +31,8 @@ public class LocalizedAimingTester extends LinearOpMode {
     private AprilTagAimer aprilAimer;
     private MecanumDrive drive;
 
+    private long currentTime = 0;
+    private long lastTick = 0;
     private long lastAimUpdateTime = 0;
     private double lastTurnCorrection = 0;
     public static double shooterRPM;
@@ -38,7 +40,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     private boolean continuousGoalLock = false;
     private boolean fieldCentric = false;
 
-    private static final long aimUpdateInterval = 20; // ms
+    public static long aimUpdateInterval = 20; // ms
     private static String colorGoalSelected;
     private static Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
 
@@ -76,20 +78,19 @@ public class LocalizedAimingTester extends LinearOpMode {
 
     // teleop type shift
     public void teleopTick(GamepadEx g1, GamepadEx g2, Telemetry telemetry) {
-
         outtake.periodic();
-        drive.updatePoseEstimate();
+        //drive.updatePoseEstimate();
 
         double turnCorrection = 0;
         if (continuousGoalLock) {
-            long currentTime = System.currentTimeMillis();
+            currentTime = System.currentTimeMillis();
 
             // Run scan + PID only every AIM_UPDATE_INTERVAL_MS
             if (currentTime - lastAimUpdateTime >= aimUpdateInterval) {
                 lastAimUpdateTime = currentTime;
-
-                lastTurnCorrection = aprilAimer.calculateLocalizedTurnPower()[0];
-                shooterRPM = aprilAimer.calculateLocalizedTurnPower()[1];
+                double[] data = aprilAimer.calculateLocalizedTurnPower();
+                lastTurnCorrection = data[0];
+                shooterRPM = data[1];
             }
 
             turnCorrection = lastTurnCorrection;
@@ -142,7 +143,6 @@ public class LocalizedAimingTester extends LinearOpMode {
         // Advance state
         if (g1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
             indexer.moveTo(indexer.getState().next());
-            telemetry.addLine("Indexer moving");
         }
 
         //actuator control
@@ -156,7 +156,6 @@ public class LocalizedAimingTester extends LinearOpMode {
         // Scan obelisk
         if (g1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
             aprilTag.scanObeliskTag();
-            telemetry.addData("Obelisk ID", aprilTag.getObeliskId());
         }
 
         // Set intaking ON
@@ -193,18 +192,21 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         // ========== TELEMETRY ==========
-        telemetry.addData("A: Set intaking, B: Reset Localized Pose, X/Y: lock in/unlock, Dpad left: Scan Obelisk Id, Dpad Up/Down: actuator, Dpad Right:", "index");
+        /*telemetry.addData("A: Set intaking, B: Reset Localized Pose, X/Y: lock in/unlock, Dpad left: Scan Obelisk Id, Dpad Up/Down: actuator, Dpad Right:", "index");
         telemetry.addData("Target RPM",outtake.getTargetRPM());
         telemetry.addData("Bot Range", aprilTag.getRange()); // moved limelight
         telemetry.addData("measured RPM",outtake.getRPM());
         telemetry.addData("Outtake Power", outtake.getPower());
         telemetry.addData("Localized Lock", continuousGoalLock);
-        telemetry.addData("x", drive.localizer.getPose().position.x);
-        telemetry.addData("y", drive.localizer.getPose().position.y);
-        telemetry.addData("heading (deg)", Math.toDegrees(drive.localizer.getPose().heading.log()));
+        //telemetry.addData("x", drive.localizer.getPose().position.x);
+        //telemetry.addData("y", drive.localizer.getPose().position.y);
+        //telemetry.addData("heading (deg)", Math.toDegrees(drive.localizer.getPose().heading.log()));
         telemetry.addData("Selected Goal Color:", colorGoalSelected);
         telemetry.addData("Selected Goal Color:", colorGoalSelected);
+        telemetry.addData("Obelisk ID", aprilTag.getObeliskId());*/
+        telemetry.addData("Loop time: ", currentTime - lastTick);
         telemetry.update();
+        lastTick = currentTime;
     }
 }
 
