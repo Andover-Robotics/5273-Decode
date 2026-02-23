@@ -38,7 +38,6 @@ public class Indexer {
 
     public AutoAdvancement AUTO_ADVANCEMENT_MODE = AutoAdvancement.QUICK_SEEK;
 
-    public boolean ALWAYS_SEEK_EMPTY_WHILE_INTAKING = true;
     public boolean ENABLE_FULL_UNKNOWN_SCAN = true;
     public boolean SCAN_COLORS = true;
 

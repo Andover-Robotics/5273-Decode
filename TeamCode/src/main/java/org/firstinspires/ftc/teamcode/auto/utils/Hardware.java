@@ -30,8 +30,7 @@ public class Hardware {
 
         intake   = new Intake(hardwareMap);
         indexer  = new Indexer(hardwareMap);
-        //indexer.ENABLE_AUTO_ADVANCE = false;
-        indexer.ALWAYS_SEEK_EMPTY_WHILE_INTAKING = false;
+        indexer.AUTO_ADVANCEMENT_MODE = Indexer.AutoAdvancement.DISABLED;
         indexer.ENABLE_FULL_UNKNOWN_SCAN = false;
         indexer.SCAN_COLORS = false;
 
