@@ -28,6 +28,14 @@ public class Indexer {
 
     //Things that should be toggled depending on use case (more robust version coming)
    // public  boolean ENABLE_AUTO_ADVANCE = true;
+
+    public enum AutoAdvancement
+    {
+        DISABLED,
+        SEEK_EMPTY,
+        QUICK_SEEK
+    }
+
     public boolean ALWAYS_SEEK_EMPTY_WHILE_INTAKING = true;
     public boolean ENABLE_FULL_UNKNOWN_SCAN = true;
     public boolean SCAN_COLORS = true;
