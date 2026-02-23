@@ -19,6 +19,7 @@ public class Indexer {
         public final int index;
         IndexerState(int index) { this.index = index; }
         public IndexerState next() { return values()[(index + 1) % values().length]; }
+        public IndexerState last() { return values()[(index + values().length - 1) % values().length]; }
     }
 
     // Dashboard control
