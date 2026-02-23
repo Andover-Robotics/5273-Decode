@@ -1,18 +1,13 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Action;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
@@ -129,7 +124,7 @@ public class BotPeriodics {
         telemetry.addData("Bot Range", aprilTag.getRange());
         telemetry.addData("Alliance selected", colorGoalSelected);
         telemetry.addData("Turn Correction:", turnCorrection);
-        telemetry.addData("Intake power: ", intake.getIntakingPower());
+        telemetry.addData("Intake power: ", intake.getPower());
         telemetry.addData("Last Turn Correction", lastTurnCorrection);
         for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
             telemetry.addData(
