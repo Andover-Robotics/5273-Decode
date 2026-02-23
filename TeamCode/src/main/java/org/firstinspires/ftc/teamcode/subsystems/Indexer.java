@@ -254,8 +254,18 @@ public class Indexer {
         recomputeNoEmpty();
 
         // This skips UNKNOWN too when an EMPTY exists.
-        if (ALWAYS_SEEK_EMPTY_WHILE_INTAKING && intaking && !noEmpty && isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
+        if (ALWAYS_SEEK_EMPTY_WHILE_INTAKING &&
+                intaking &&
+                !noEmpty &&
+                isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
             moveTo(findEmptySlot());
+        }
+        if(true) //we'll get to this you gotta beliee
+        {
+            if(colorSensor.hasArtifact() && !noEmpty && isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE))
+            {
+                moveTo(findEmptySlot());
+            }
         }
 
 
