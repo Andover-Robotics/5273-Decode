@@ -563,6 +563,20 @@ public class Indexer {
         return best;
     }
 
+    public IndexerState findEmptySlot()
+    {
+        IndexerState potentialEmpty = state;
+        for(int i=0; i<3; i++)
+        {
+            if(getColorAt(potentialEmpty) == ArtifactColor.EMPTY)
+            {
+                return potentialEmpty;
+            }
+            potentialEmpty = potentialEmpty.next();
+        }
+        return null;
+    }
+
     // gives preferences
     private int scoreSlotForTarget(ArtifactColor desired, ArtifactColor slotColor) {
         if (slotColor == desired) return 100;
