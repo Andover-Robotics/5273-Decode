@@ -23,6 +23,7 @@ public class AprilTagAimer {
     private double lastError = 0;
     private long lastTimestamp = 0;
     private final MecanumDrive drive;
+    private final InertiaAutoAim inertiaAutoAim;
     public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(0));
     public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
@@ -35,6 +36,7 @@ public class AprilTagAimer {
     */
     public AprilTagAimer(HardwareMap hardwareMap, MecanumDrive mecanumDrive) {
         this.drive = mecanumDrive;
+        inertiaAutoAim = new InertiaAutoAim();
     }
 
     public double[] calculateLocalizedTurnPower() {
