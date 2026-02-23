@@ -36,6 +36,8 @@ public class Indexer {
         QUICK_SEEK
     }
 
+    public AutoAdvancement AUTO_ADVANCEMENT_MODE = AutoAdvancement.QUICK_SEEK;
+
     public boolean ALWAYS_SEEK_EMPTY_WHILE_INTAKING = true;
     public boolean ENABLE_FULL_UNKNOWN_SCAN = true;
     public boolean SCAN_COLORS = true;
@@ -253,22 +255,19 @@ public class Indexer {
         // Update full flag every loop based on stored memory
         recomputeNoEmpty();
 
-        // This skips UNKNOWN too when an EMPTY exists.
-        if (ALWAYS_SEEK_EMPTY_WHILE_INTAKING &&
+        if (AUTO_ADVANCEMENT_MODE == AutoAdvancement.SEEK_EMPTY &&
                 intaking &&
                 !noEmpty &&
                 isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
             moveTo(findEmptySlot());
         }
-        if(true) //we'll get to this you gotta beliee
+        if(AUTO_ADVANCEMENT_MODE == AutoAdvancement.QUICK_SEEK)
         {
             if(colorSensor.hasArtifact() && !noEmpty && isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE))
             {
                 moveTo(findEmptySlot());
             }
         }
-
-
         // If full and still have UNKNOWN slots, go look at them (intaking only)
         if (ENABLE_FULL_UNKNOWN_SCAN && intaking && noEmpty && anyUnknownStored()) {
             // Don’t spam move commands
