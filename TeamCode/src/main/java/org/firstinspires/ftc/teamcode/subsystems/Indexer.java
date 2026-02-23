@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.CRServoPositionControl;
 import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.ColorSensorSystem;
+import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.SlotState;
 
 @Config
 public class Indexer {
@@ -137,7 +138,6 @@ public class Indexer {
             slot.obs.reset();
             slot.wasEmpty = true;
             slot.fillingHits = 0;
-            slot.autoAdvanceArmed = false;
             slot.fillCycleActive = false;
         }
         recomputeNoEmpty();
@@ -151,7 +151,6 @@ public class Indexer {
             slot.obs.reset();
             slot.wasEmpty = true;
             slot.fillingHits = 0;
-            slot.autoAdvanceArmed = false;
             slot.fillCycleActive = false;
         }
         recomputeNoEmpty();
@@ -336,7 +335,6 @@ public class Indexer {
         boolean isEmpty = (color == ArtifactColor.EMPTY || color == ArtifactColor.UNKNOWN);
         slot.wasEmpty = isEmpty;
         slot.fillingHits = 0;
-        slot.autoAdvanceArmed = false;
         slot.fillCycleActive = false;
 
         recomputeNoEmpty();
@@ -575,66 +573,6 @@ public class Indexer {
     }
 
     private SlotState slot(IndexerState s) { return slots[s.index]; }
-
-    private static class SlotState {
-        ArtifactColor color = ArtifactColor.UNKNOWN;
-        SlotObservation obs = new SlotObservation();
-        boolean wasEmpty = true;
-
-        int fillingHits = 0;          // counts sensorNonEmpty hits during a fill cycle
-        boolean autoAdvanceArmed = false; // kept for compatibility; no longer required
-        boolean fillCycleActive = false;  // latched after stored EMPTY + sensor nonempty
-    }
-
-    private static class SlotObservation {
-        int greenHits = 0;
-        int purpleHits = 0;
-        int emptyHits = 0;
-        int unknownHits = 0;
-
-        void reset() { greenHits = purpleHits = emptyHits = unknownHits = 0; }
-
-        void record(ArtifactColor c) {
-            switch (c) {
-                case GREEN:
-                    greenHits++;
-                    break;
-                case PURPLE:
-                    purpleHits++;
-                    break;
-                case EMPTY:
-                    emptyHits++;
-                    break;
-                case UNKNOWN:
-                    unknownHits++;
-                    break;
-            }
-        }
-
-        int totalHits() { return greenHits + purpleHits + emptyHits + unknownHits; }
-
-        void trimToMax(int maxTotal) {
-            int total = totalHits();
-            if (total <= maxTotal) return;
-            double scale = maxTotal / (double) total;
-            greenHits = (int) Math.round(greenHits * scale);
-            purpleHits = (int) Math.round(purpleHits * scale);
-            emptyHits = (int) Math.round(emptyHits * scale);
-            unknownHits = (int) Math.round(unknownHits * scale);
-        }
-
-        ArtifactColor resolveWithThreshold(double greenThresh, double purpleThresh, double emptyThresh, double unknownThresh) {
-            int total = totalHits();
-            if (total == 0) return ArtifactColor.EMPTY;
-
-            if (greenHits / (double) total >= greenThresh) return ArtifactColor.GREEN;
-            if (purpleHits / (double) total >= purpleThresh) return ArtifactColor.PURPLE;
-            if (emptyHits / (double) total >= emptyThresh) return ArtifactColor.EMPTY;
-            if (unknownHits / (double) total >= unknownThresh) return ArtifactColor.UNKNOWN;
-
-            return ArtifactColor.UNKNOWN; // fallback if nothing crosses threshold
-        }
-    }
 
     //quickspin helper
     private boolean isTwoPurpleOneGreen(ArtifactColor[] arr) {
