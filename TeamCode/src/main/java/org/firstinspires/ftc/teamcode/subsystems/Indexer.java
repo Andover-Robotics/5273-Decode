@@ -269,17 +269,14 @@ public class Indexer {
             }
         }
         // If full and still have UNKNOWN slots, go look at them (intaking only)
-        if (ENABLE_FULL_UNKNOWN_SCAN && intaking && noEmpty && anyUnknownStored()) {
-            // Don’t spam move commands
-            if (unknownScanTimer.milliseconds() >= UNKNOWN_SCAN_COOLDOWN_MS) {
-                // If we're already on an UNKNOWN slot, let it keep observing
-                if (slot(state).color != ArtifactColor.UNKNOWN) {
-                    IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.UNKNOWN);
-                    if (target != null) {
-                        moveTo(target);
-                        unknownScanTimer.reset();
-                    }
-                }
+        if (ENABLE_FULL_UNKNOWN_SCAN &&
+                intaking &&
+                noEmpty &&
+                unknownScanTimer.milliseconds() >= UNKNOWN_SCAN_COOLDOWN_MS) {
+            IndexerState target = findNextSlotWithStoredColor(state.last(), ArtifactColor.UNKNOWN);
+            if (target != null) {
+                moveTo(target);
+                unknownScanTimer.reset();
             }
         }
     }
