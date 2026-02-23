@@ -565,16 +565,15 @@ public class Indexer {
 
     public IndexerState findEmptySlot()
     {
-        IndexerState potentialEmpty = state;
-        for(int i=0; i<3; i++)
-        {
-            if(getColorAt(potentialEmpty) == ArtifactColor.EMPTY)
-            {
-                return potentialEmpty;
-            }
-            potentialEmpty = potentialEmpty.next();
-        }
-        return null;
+        return findNextSlotWithStoredColor(state.last(), ArtifactColor.EMPTY);
+    }
+
+    public IndexerState findEmptySlot(boolean includeCurrent)
+    {
+        if(includeCurrent)
+            return findEmptySlot();
+        else
+            return findNextSlotWithStoredColor(state.next(), ArtifactColor.EMPTY);
     }
 
     // gives preferences
