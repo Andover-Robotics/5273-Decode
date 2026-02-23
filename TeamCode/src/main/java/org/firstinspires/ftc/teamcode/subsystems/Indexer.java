@@ -246,16 +246,10 @@ public class Indexer {
         recomputeNoEmpty();
 
         // This skips UNKNOWN too when an EMPTY exists.
-        if (ALWAYS_SEEK_EMPTY_WHILE_INTAKING && intaking && !noEmpty &&
-                isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
-
-            if (slot(state).color != ArtifactColor.EMPTY) {
-                IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.EMPTY);
-                if (target != null) {
-                    moveTo(target);
-                }
-            }
+        if (ALWAYS_SEEK_EMPTY_WHILE_INTAKING && intaking && !noEmpty && isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
+            moveTo(findEmptySlot());
         }
+
 
         // If full and still have UNKNOWN slots, go look at them (intaking only)
         if (ENABLE_FULL_UNKNOWN_SCAN && intaking && noEmpty && anyUnknownStored()) {
