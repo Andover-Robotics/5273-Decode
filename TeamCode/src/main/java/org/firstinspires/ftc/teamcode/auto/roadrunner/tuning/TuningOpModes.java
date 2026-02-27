@@ -123,7 +123,7 @@ public final class TuningOpModes {
         };
     }
 
-    /*
+
     @OpModeRegistrar
     public static void register(OpModeManager manager) {
         if (DISABLED) return;
@@ -318,5 +318,5 @@ public final class TuningOpModes {
                 configRoot.putVariable(c.getSimpleName(), ReflectionConfig.createVariableFromClass(c));
             }
         });
-    }*/
+    }
 }

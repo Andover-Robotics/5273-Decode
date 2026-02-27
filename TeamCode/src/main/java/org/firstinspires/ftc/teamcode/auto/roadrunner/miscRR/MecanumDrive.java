@@ -63,13 +63,13 @@ public final class MecanumDrive {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP;
 
         // drive model parameters
-        public double inPerTick = 0.00198216055;
-        public double lateralInPerTick = 0.0014844503556411136;
-        public double trackWidthTicks = 6944.951969827173;
+        public double inPerTick = 0.00205629096517;
+        public double lateralInPerTick = 0.0015769551037875073;
+        public double trackWidthTicks = 6648.046468952196;
 
         // feedforward parameters (in tick units)
-        public double kS = 1.85;
-        public double kV = 0.00027;
+        public double kS = 0.9120244874861001;
+        public double kV = 0.0003596361937465448;
         public double kA = 0.00007;
 
         // path profile parameters (in inches)
@@ -110,7 +110,7 @@ public final class MecanumDrive {
 
     public final VoltageSensor voltageSensor;
 
-    //public final LazyImu lazyImu;
+    public final LazyImu lazyImu;
 
     public final Localizer localizer;
     private final LinkedList<Pose2d> poseHistory = new LinkedList<>();
@@ -243,8 +243,8 @@ public final class MecanumDrive {
 
         // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
-        /* lazyImu = new LazyHardwareMapImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
-                PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));*/
+        lazyImu = new LazyHardwareMapImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
+                PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
