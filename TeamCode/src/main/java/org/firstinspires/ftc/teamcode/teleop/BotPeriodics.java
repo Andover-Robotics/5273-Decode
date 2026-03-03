@@ -24,7 +24,7 @@ public class BotPeriodics {
     protected final Outtake outtake;
     protected final Movement movement;
     protected final AprilTag aprilTag;
-    protected final Aimer aprilAimer;
+    protected final Aimer aimer;
     protected final MecanumDrive drive;
 
     protected final GamepadEx g1;
@@ -40,7 +40,6 @@ public class BotPeriodics {
     protected long lastAimUpdate = 0;
     protected double lastTurnCorrection = 0.0;
     protected double turnCorrection = 0.0;
-    protected int goalTagID;
     protected String colorGoalSelected;
 
     protected boolean continuousIntake = true;
@@ -50,8 +49,6 @@ public class BotPeriodics {
 
     protected boolean twoMovementMode;
 
-    public static double rangeOffset = 6.67;
-
     public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
         intake = new Intake(hardwareMap);
         indexer = new Indexer(hardwareMap);
@@ -60,7 +57,7 @@ public class BotPeriodics {
         drive = mecanumDrive;
         movement = new Movement(hardwareMap, drive);
         aprilTag = new AprilTag(hardwareMap, tele);
-        aprilAimer = new Aimer(hardwareMap, drive);
+        aimer = new Aimer(hardwareMap, drive);
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
         actionHost = new ActionHost();
@@ -182,7 +179,7 @@ public class BotPeriodics {
             if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
                 lastAimUpdate = now;
 
-                double[] data = aprilAimer.calculateLocalizedTurnPower();
+                double[] data = aimer.calculateLocalizedTurnPower();
 
                 lastTurnCorrection = data[0];
                 targetRPM = data[1];
