@@ -21,20 +21,14 @@ public class Aimer {
     private double lastError = 0;
     private long lastTimestamp = 0;
     private final MecanumDrive drive;
-    private final InertiaAutoAim inertiaAutoAim;
+    //private final InertiaAutoAim inertiaAutoAim;
     public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(90));
     public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
 
-    /* When and why to tune these
-    P (Proportional) Changes core power of turns, its proportional
-    I (Integral) Maybe rarely if robot consistently falls short of the target (steady-state error).
-    D (Derivative) Increase to dampen motion and reduce overshoot. Good for smoothing quick heading corrections.
-    F (Feedforward)	Maybe, its a constant, increase to help overcome drivetrain static friction and give better response when error is small.
-    */
     public Aimer(HardwareMap hardwareMap, MecanumDrive mecanumDrive) {
         this.drive = mecanumDrive;
-        inertiaAutoAim = new InertiaAutoAim();
+        //inertiaAutoAim = new InertiaAutoAim();
     }
 
     public double[] calculateLocalizedTurnPower() {
