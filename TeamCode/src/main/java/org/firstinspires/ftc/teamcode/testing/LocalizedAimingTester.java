@@ -205,7 +205,6 @@ public class LocalizedAimingTester extends LinearOpMode {
         telemetry.addData("tagPose x", aprilAimer.tagPose.position.x);
         telemetry.addData("tagPose y", aprilAimer.tagPose.position.y);
         telemetry.addData("Selected Goal Color:", colorGoalSelected);
-        telemetry.addData("Selected Goal Color:", colorGoalSelected);
         telemetry.addData("Obelisk ID", aprilTag.getObeliskId());
         telemetry.addData("Loop time: ", currentTime - lastTick);
         telemetry.update();
