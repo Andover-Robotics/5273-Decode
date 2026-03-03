@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.CRServoPositionControl;
 import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.ColorSensorSystem;
+import org.firstinspires.ftc.teamcode.subsystems.indexerUtil.SlotState;
 
 @Config
 public class Indexer {
@@ -19,6 +20,7 @@ public class Indexer {
         public final int index;
         IndexerState(int index) { this.index = index; }
         public IndexerState next() { return values()[(index + 1) % values().length]; }
+        public IndexerState last() { return values()[(index + values().length - 1) % values().length]; }
     }
 
     // Dashboard control
@@ -26,8 +28,17 @@ public class Indexer {
     public static int dashTargetSlot = -1; // -1 = disabled; 0/1/2 = slot
 
     //Things that should be toggled depending on use case (more robust version coming)
-    public  boolean ENABLE_AUTO_ADVANCE = true;
-    public boolean ALWAYS_SEEK_EMPTY_WHILE_INTAKING = true;
+   // public  boolean ENABLE_AUTO_ADVANCE = true;
+
+    public enum AutoAdvancement
+    {
+        DISABLED,
+        SEEK_EMPTY,
+        QUICK_SEEK
+    }
+
+    public AutoAdvancement AUTO_ADVANCEMENT_MODE = AutoAdvancement.QUICK_SEEK;
+
     public boolean ENABLE_FULL_UNKNOWN_SCAN = true;
     public boolean SCAN_COLORS = true;
 
@@ -127,7 +138,6 @@ public class Indexer {
             slot.obs.reset();
             slot.wasEmpty = true;
             slot.fillingHits = 0;
-            slot.autoAdvanceArmed = false;
             slot.fillCycleActive = false;
         }
         recomputeNoEmpty();
@@ -141,7 +151,6 @@ public class Indexer {
             slot.obs.reset();
             slot.wasEmpty = true;
             slot.fillingHits = 0;
-            slot.autoAdvanceArmed = false;
             slot.fillCycleActive = false;
         }
         recomputeNoEmpty();
@@ -244,30 +253,28 @@ public class Indexer {
         // Update full flag every loop based on stored memory
         recomputeNoEmpty();
 
-        // This skips UNKNOWN too when an EMPTY exists.
-        if (ALWAYS_SEEK_EMPTY_WHILE_INTAKING && intaking && !noEmpty &&
+        if (AUTO_ADVANCEMENT_MODE == AutoAdvancement.SEEK_EMPTY &&
+                intaking &&
+                !noEmpty &&
                 isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
-
-            if (slot(state).color != ArtifactColor.EMPTY) {
-                IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.EMPTY);
-                if (target != null) {
-                    moveTo(target);
-                }
+            moveTo(findEmptySlot());
+        }
+        if(AUTO_ADVANCEMENT_MODE == AutoAdvancement.QUICK_SEEK)
+        {
+            if(colorSensor.hasArtifact() && !noEmpty && isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE))
+            {
+                moveTo(findEmptySlot());
             }
         }
-
         // If full and still have UNKNOWN slots, go look at them (intaking only)
-        if (ENABLE_FULL_UNKNOWN_SCAN && intaking && noEmpty && anyUnknownStored()) {
-            // Don’t spam move commands
-            if (unknownScanTimer.milliseconds() >= UNKNOWN_SCAN_COOLDOWN_MS) {
-                // If we're already on an UNKNOWN slot, let it keep observing
-                if (slot(state).color != ArtifactColor.UNKNOWN) {
-                    IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.UNKNOWN);
-                    if (target != null) {
-                        moveTo(target);
-                        unknownScanTimer.reset();
-                    }
-                }
+        if (ENABLE_FULL_UNKNOWN_SCAN &&
+                intaking &&
+                noEmpty &&
+                unknownScanTimer.milliseconds() >= UNKNOWN_SCAN_COOLDOWN_MS) {
+            IndexerState target = findNextSlotWithStoredColor(state.last(), ArtifactColor.UNKNOWN);
+            if (target != null) {
+                moveTo(target);
+                unknownScanTimer.reset();
             }
         }
     }
@@ -328,7 +335,6 @@ public class Indexer {
         boolean isEmpty = (color == ArtifactColor.EMPTY || color == ArtifactColor.UNKNOWN);
         slot.wasEmpty = isEmpty;
         slot.fillingHits = 0;
-        slot.autoAdvanceArmed = false;
         slot.fillCycleActive = false;
 
         recomputeNoEmpty();
@@ -379,49 +385,6 @@ public class Indexer {
 
                 if (!protectKnown && candidate != currentColor) {
                     slot.color = candidate;
-                }
-            }
-
-            // Auto-advance: latch empty->nonempty fill cycle and count raw presence hits
-            if (ENABLE_AUTO_ADVANCE && intaking && s == state &&
-                    isWithinTargetDegrees(ADVANCE_ANGLE_TOLERANCE)) {
-
-                boolean sensorNonEmpty = hasArtifact;
-
-                // Start fill cycle only on a physical empty->nonempty transition (rising edge)
-                if (!slot.fillCycleActive) {
-                    if (slot.wasEmpty && sensorNonEmpty) {
-                        slot.fillCycleActive = true;
-                        slot.fillingHits = 0;
-                    }
-                }
-
-                if (slot.fillCycleActive) {
-                    if (sensorNonEmpty) {
-                        slot.fillingHits++;
-                    } else {
-                        // If it went empty again, abort the cycle
-                        slot.fillCycleActive = false;
-                        slot.fillingHits = 0;
-                    }
-
-                    if (slot.fillCycleActive &&
-                            slot.fillingHits >= requiredNonEmptyHitsToAdvance()) {
-
-                        // Try to go to another EMPTY slot (cyclic search to stay efficient)
-                        IndexerState target = findNextSlotWithStoredColor(state, ArtifactColor.EMPTY);
-
-                        if (target != null) {
-                            moveTo(target);
-                        } else {
-                            // No EMPTY slots exist => full
-                            noEmpty = true;
-                        }
-
-                        // End cycle regardless
-                        slot.fillCycleActive = false;
-                        slot.fillingHits = 0;
-                    }
                 }
             }
 
@@ -562,6 +525,19 @@ public class Indexer {
         return best;
     }
 
+    public IndexerState findEmptySlot()
+    {
+        return findNextSlotWithStoredColor(state.last(), ArtifactColor.EMPTY);
+    }
+
+    public IndexerState findEmptySlot(boolean includeCurrent)
+    {
+        if(includeCurrent)
+            return findEmptySlot();
+        else
+            return findNextSlotWithStoredColor(state.next(), ArtifactColor.EMPTY);
+    }
+
     // gives preferences
     private int scoreSlotForTarget(ArtifactColor desired, ArtifactColor slotColor) {
         if (slotColor == desired) return 100;
@@ -597,66 +573,6 @@ public class Indexer {
     }
 
     private SlotState slot(IndexerState s) { return slots[s.index]; }
-
-    private static class SlotState {
-        ArtifactColor color = ArtifactColor.UNKNOWN;
-        SlotObservation obs = new SlotObservation();
-        boolean wasEmpty = true;
-
-        int fillingHits = 0;          // counts sensorNonEmpty hits during a fill cycle
-        boolean autoAdvanceArmed = false; // kept for compatibility; no longer required
-        boolean fillCycleActive = false;  // latched after stored EMPTY + sensor nonempty
-    }
-
-    private static class SlotObservation {
-        int greenHits = 0;
-        int purpleHits = 0;
-        int emptyHits = 0;
-        int unknownHits = 0;
-
-        void reset() { greenHits = purpleHits = emptyHits = unknownHits = 0; }
-
-        void record(ArtifactColor c) {
-            switch (c) {
-                case GREEN:
-                    greenHits++;
-                    break;
-                case PURPLE:
-                    purpleHits++;
-                    break;
-                case EMPTY:
-                    emptyHits++;
-                    break;
-                case UNKNOWN:
-                    unknownHits++;
-                    break;
-            }
-        }
-
-        int totalHits() { return greenHits + purpleHits + emptyHits + unknownHits; }
-
-        void trimToMax(int maxTotal) {
-            int total = totalHits();
-            if (total <= maxTotal) return;
-            double scale = maxTotal / (double) total;
-            greenHits = (int) Math.round(greenHits * scale);
-            purpleHits = (int) Math.round(purpleHits * scale);
-            emptyHits = (int) Math.round(emptyHits * scale);
-            unknownHits = (int) Math.round(unknownHits * scale);
-        }
-
-        ArtifactColor resolveWithThreshold(double greenThresh, double purpleThresh, double emptyThresh, double unknownThresh) {
-            int total = totalHits();
-            if (total == 0) return ArtifactColor.EMPTY;
-
-            if (greenHits / (double) total >= greenThresh) return ArtifactColor.GREEN;
-            if (purpleHits / (double) total >= purpleThresh) return ArtifactColor.PURPLE;
-            if (emptyHits / (double) total >= emptyThresh) return ArtifactColor.EMPTY;
-            if (unknownHits / (double) total >= unknownThresh) return ArtifactColor.UNKNOWN;
-
-            return ArtifactColor.UNKNOWN; // fallback if nothing crosses threshold
-        }
-    }
 
     //quickspin helper
     private boolean isTwoPurpleOneGreen(ArtifactColor[] arr) {

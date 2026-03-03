@@ -15,11 +15,10 @@ public class CRServoPositionControl {
     public static double kP = 0.004;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kS = 0.07; //voerriden later
+    public static double kS = 0.07;
 
     public static double maxPower = 1.0;
     public static double stiffnessGain = 1.0; //1.0 is normal behavior
-    public static double brakeZoneDeg = 20.0;
 
     // deadbands
     public static double deadbandDeg = 6.0;

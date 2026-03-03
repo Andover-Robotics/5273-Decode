@@ -6,10 +6,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Config
 public class Intake {
-
     public static double SLOW_MULTIPLIER = 0.5;
     public static double INTAKING_POWER = -1;
     private MotorEx intakeMotor;
+
     public Intake(HardwareMap hardwareMap)
     {
         intakeMotor = new MotorEx(hardwareMap, "intake");
@@ -29,8 +29,15 @@ public class Intake {
     {
         intakeMotor.set(-INTAKING_POWER);
     }
+    public void runBackwardsSlow() {
+        intakeMotor.set(-INTAKING_POWER * SLOW_MULTIPLIER);
+    }
     public void setPower(double newPower)
     {
         intakeMotor.set(newPower);
+    }
+    public double getPower()
+    {
+        return intakeMotor.get();
     }
 }

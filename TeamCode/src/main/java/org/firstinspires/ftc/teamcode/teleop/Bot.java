@@ -39,9 +39,6 @@ public class Bot extends BotPeriodics {
     private Indexer.ArtifactColor[] PGP = new Indexer.ArtifactColor[]{Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE};
     private Indexer.ArtifactColor[] GPP = new Indexer.ArtifactColor[]{Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE};
 
-    // Press-and-hold pre-spin minimum RPM
-    public static double INTAKE_MIN_RPM = 3500.0;
-
     public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
         super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement);
         state = FSM.MotifSelection;

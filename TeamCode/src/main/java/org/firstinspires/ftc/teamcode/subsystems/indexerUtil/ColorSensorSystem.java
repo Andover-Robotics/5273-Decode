@@ -45,11 +45,9 @@ public class ColorSensorSystem {
 
     public Indexer.ArtifactColor classify() {
         NormalizedRGBA rgba = color.getNormalizedColors();
-
         if (rgba.alpha < PRESENCE_ALPHA_THRESHOLD) {
             return Indexer.ArtifactColor.EMPTY;
         }
-
         return classifyColorOnlyFromRGBA(rgba);
     }
 
