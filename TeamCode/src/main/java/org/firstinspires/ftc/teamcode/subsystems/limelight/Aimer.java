@@ -106,7 +106,7 @@ public class Aimer {
         // Gets proper direction
         double feedforward = Math.signum(error) * kF;
 
-        // PIDF output
+        // output
         double power = kP * error + kI * integral + kD * derivative + feedforward;
 
         return Math.max(-1, Math.min(1, power));
