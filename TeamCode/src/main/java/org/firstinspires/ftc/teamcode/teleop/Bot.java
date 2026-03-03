@@ -29,7 +29,6 @@ public class Bot extends BotPeriodics {
     public FSM state;
 
     public static double NON_INDEX_SPIN_TIME = 3; //seconds of full-power indexer blast
-    public static double SHOOTER_SPINUP = 2.0;
     public static double FULL_BLAST_POWER = 0.25;
     public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.94; // 1.12
 
