@@ -31,6 +31,7 @@ public class BotPeriodics {
     protected final GamepadEx g2;
     protected final Telemetry telemetry;
 
+    protected double bearingTurnCorrection = 0;
     protected ActionHost actionHost;
 
     // camera vision
@@ -163,11 +164,13 @@ public class BotPeriodics {
     }
 
     protected void handleAprilTagLock() {
-        // Toggle continuous lock with gamepad1 A
+
+        // Toggle continuous lock
         if (g1.wasJustPressed(GamepadKeys.Button.A)) {
             continuousAprilTagLock = true;
             g1.gamepad.rumbleBlips(2);
         }
+
         if (g1.wasJustPressed(GamepadKeys.Button.B)) {
             continuousAprilTagLock = false;
             g1.gamepad.rumbleBlips(1);
@@ -175,28 +178,21 @@ public class BotPeriodics {
 
         if (continuousAprilTagLock) {
             long now = System.currentTimeMillis();
+
             if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
                 lastAimUpdate = now;
-                aprilTag.scanGoalTag();
-                double bearing = aprilTag.getBearing();
 
-                if (!Double.isNaN(bearing)) {
-                    lastTurnCorrection = aprilAimer.calculateTurnPowerFromBearing(bearing);
-                    turnCorrection = lastTurnCorrection;
-                } else {
-                    turnCorrection = 0;
-                }
+                double[] data = aprilAimer.calculateLocalizedTurnPower();
+
+                lastTurnCorrection = data[0];
+                targetRPM = data[1];
+                bearingTurnCorrection = data[2];
             }
 
-            if (!Double.isNaN(aprilTag.getRange())) {
-                targetRPM = outtake.getRegressionRPM(aprilTag.getRange() + rangeOffset);
-            }
-            /*else {
-                targetRPM = 3800;
-            }*/
+            turnCorrection = lastTurnCorrection;
+
         } else {
             turnCorrection = 0;
-            //targetRPM = 3800;
         }
     }
 
