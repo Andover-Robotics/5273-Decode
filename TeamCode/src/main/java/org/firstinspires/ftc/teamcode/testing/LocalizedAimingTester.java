@@ -202,8 +202,8 @@ public class LocalizedAimingTester extends LinearOpMode {
         telemetry.addData("y", drive.localizer.getPose().position.y);
         telemetry.addData("heading (deg)", Math.toDegrees(drive.localizer.getPose().heading.log()));
         telemetry.addData("heading error (deg)", bearingTurnCorrection);
-        telemetry.addData("tagPose x", aprilAimer.tagPose.position.x);
-        telemetry.addData("tagPose y", aprilAimer.tagPose.position.y);
+        telemetry.addData("tagPose x", Aimer.tagPose.position.x);
+        telemetry.addData("tagPose y", Aimer.tagPose.position.y);
         telemetry.addData("Selected Goal Color:", colorGoalSelected);
         telemetry.addData("Obelisk ID", aprilTag.getObeliskId());
         telemetry.addData("Loop time: ", currentTime - lastTick);
