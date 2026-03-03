@@ -6,16 +6,14 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
-import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.Aimer;
 
 @Config
 @TeleOp(name = "DistanceRegressionTeleOp", group = "AA_main")
@@ -28,7 +26,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
     private Movement movement;
 
     private AprilTag aprilTag;
-    private AprilTagAimer aprilAimer;
+    private Aimer aprilAimer;
     private MecanumDrive drive;
 
     private long lastAimUpdate = 0;
@@ -53,7 +51,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         movement = new Movement(hardwareMap, drive);
 
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aprilAimer = new AprilTagAimer(hardwareMap, drive);
+        aprilAimer = new Aimer(hardwareMap, drive);
 
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);

@@ -3,14 +3,12 @@ package org.firstinspires.ftc.teamcode.subsystems.limelight;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 
 
 @Config
-public class AprilTagAimer {
+public class Aimer {
     public static double kP = 0.06;
     public static double kI = 0.0;
     public static double kD = 0.0;
@@ -34,7 +32,7 @@ public class AprilTagAimer {
     D (Derivative) Increase to dampen motion and reduce overshoot. Good for smoothing quick heading corrections.
     F (Feedforward)	Maybe, its a constant, increase to help overcome drivetrain static friction and give better response when error is small.
     */
-    public AprilTagAimer(HardwareMap hardwareMap, MecanumDrive mecanumDrive) {
+    public Aimer(HardwareMap hardwareMap, MecanumDrive mecanumDrive) {
         this.drive = mecanumDrive;
         inertiaAutoAim = new InertiaAutoAim();
     }

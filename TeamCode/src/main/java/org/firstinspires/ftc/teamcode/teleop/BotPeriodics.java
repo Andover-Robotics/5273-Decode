@@ -1,21 +1,16 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Action;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
-import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.Aimer;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Movement;
@@ -29,7 +24,7 @@ public class BotPeriodics {
     protected final Outtake outtake;
     protected final Movement movement;
     protected final AprilTag aprilTag;
-    protected final AprilTagAimer aprilAimer;
+    protected final Aimer aprilAimer;
     protected final MecanumDrive drive;
 
     protected final GamepadEx g1;
@@ -64,7 +59,7 @@ public class BotPeriodics {
         drive = mecanumDrive;
         movement = new Movement(hardwareMap, drive);
         aprilTag = new AprilTag(hardwareMap, tele);
-        aprilAimer = new AprilTagAimer(hardwareMap, drive);
+        aprilAimer = new Aimer(hardwareMap, drive);
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
         actionHost = new ActionHost();
