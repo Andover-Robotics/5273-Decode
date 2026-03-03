@@ -3,18 +3,16 @@ package org.firstinspires.ftc.teamcode.subsystems.limelight;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 
 
 @Config
-public class AprilTagAimer {
-    public static double kP = 0.00015;
+public class Aimer {
+    public static double kP = 0.06;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.067;
+    public static double kF = 0.09;
     public static double filter = 0.867;  // smoothing factor (1 = no filtering, 0 = very heavy smoothing)
     public static double maxIntegral = 1.0;
     public static double deadband = 1;
@@ -24,7 +22,7 @@ public class AprilTagAimer {
     private long lastTimestamp = 0;
     private final MecanumDrive drive;
     private final InertiaAutoAim inertiaAutoAim;
-    public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(0));
+    public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(90));
     public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
 
@@ -34,7 +32,7 @@ public class AprilTagAimer {
     D (Derivative) Increase to dampen motion and reduce overshoot. Good for smoothing quick heading corrections.
     F (Feedforward)	Maybe, its a constant, increase to help overcome drivetrain static friction and give better response when error is small.
     */
-    public AprilTagAimer(HardwareMap hardwareMap, MecanumDrive mecanumDrive) {
+    public Aimer(HardwareMap hardwareMap, MecanumDrive mecanumDrive) {
         this.drive = mecanumDrive;
         inertiaAutoAim = new InertiaAutoAim();
     }
@@ -61,8 +59,8 @@ public class AprilTagAimer {
         double bearing = Math.toDegrees(desiredHeading - currentHeading);
         bearing = angleWrapDegrees(bearing);
 
-        double turnPower = calculateTurnPowerFromBearing(bearing);
-        return new double[]{turnPower, range};
+        double turnPower = -calculateTurnPowerFromBearing(bearing);
+        return new double[]{turnPower, range, bearing};
     }
 
     private double angleWrapDegrees(double angle) {

@@ -6,16 +6,14 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.ConcreteLazyImu;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
-import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.Aimer;
 
 @Config
 @TeleOp(name = "Localized aiming tester", group = "AA_main")
@@ -28,13 +26,14 @@ public class LocalizedAimingTester extends LinearOpMode {
     private Movement movement;
 
     private AprilTag aprilTag;
-    private AprilTagAimer aprilAimer;
+    private Aimer aimer;
     private MecanumDrive drive;
 
     private long currentTime = 0;
     private long lastTick = 0;
     private long lastAimUpdateTime = 0;
     private double lastTurnCorrection = 0;
+    private double bearingTurnCorrection = 0;
     public static double shooterRPM;
 
     private boolean continuousGoalLock = false;
@@ -54,7 +53,8 @@ public class LocalizedAimingTester extends LinearOpMode {
         movement = new Movement(hardwareMap, drive);
 
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aprilAimer = new AprilTagAimer(hardwareMap, drive);
+        aimer = new Aimer(hardwareMap, drive);
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);
@@ -63,7 +63,6 @@ public class LocalizedAimingTester extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
             gp1.readButtons();
             gp2.readButtons();
             teleopTick(gp1, gp2, telemetry);
@@ -79,18 +78,20 @@ public class LocalizedAimingTester extends LinearOpMode {
     // teleop type shift
     public void teleopTick(GamepadEx g1, GamepadEx g2, Telemetry telemetry) {
         outtake.periodic();
-        //drive.updatePoseEstimate();
+        drive.updatePoseEstimate();
 
         double turnCorrection = 0;
+        double[] data = null;
         if (continuousGoalLock) {
             currentTime = System.currentTimeMillis();
 
             // Run scan + PID only every AIM_UPDATE_INTERVAL_MS
             if (currentTime - lastAimUpdateTime >= aimUpdateInterval) {
                 lastAimUpdateTime = currentTime;
-                double[] data = aprilAimer.calculateLocalizedTurnPower();
+                data = aimer.calculateLocalizedTurnPower();
                 lastTurnCorrection = data[0];
                 shooterRPM = data[1];
+                bearingTurnCorrection = data[2];
             }
 
             turnCorrection = lastTurnCorrection;
@@ -123,12 +124,10 @@ public class LocalizedAimingTester extends LinearOpMode {
         if (g1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) fieldCentric = false;
 
 
-
         // intake control
-        if(g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)>0.01){
+        if (g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.01) {
             intake.run();
-        }
-        else {
+        } else {
             intake.stop();
         }
 
@@ -192,21 +191,25 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         // ========== TELEMETRY ==========
-        /*telemetry.addData("A: Set intaking, B: Reset Localized Pose, X/Y: lock in/unlock, Dpad left: Scan Obelisk Id, Dpad Up/Down: actuator, Dpad Right:", "index");
-        telemetry.addData("Target RPM",outtake.getTargetRPM());
-        telemetry.addData("Bot Range", aprilTag.getRange()); // moved limelight
-        telemetry.addData("measured RPM",outtake.getRPM());
+        telemetry.addData("A: Set intaking, B: Reset Localized Pose, X/Y: lock in/unlock, Dpad left: Scan Obelisk Id, Dpad Up/Down: actuator, Dpad Right:", "index");
+        telemetry.addData("Target RPM", outtake.getTargetRPM());
+        telemetry.addData("Bot Range", data[1]); // moved limelight
+        telemetry.addData("measured RPM", outtake.getRPM());
         telemetry.addData("Outtake Power", outtake.getPower());
         telemetry.addData("Localized Lock", continuousGoalLock);
-        //telemetry.addData("x", drive.localizer.getPose().position.x);
-        //telemetry.addData("y", drive.localizer.getPose().position.y);
-        //telemetry.addData("heading (deg)", Math.toDegrees(drive.localizer.getPose().heading.log()));
+        telemetry.addData("x", drive.localizer.getPose().position.x);
+        telemetry.addData("y", drive.localizer.getPose().position.y);
+        telemetry.addData("heading (deg)", Math.toDegrees(drive.localizer.getPose().heading.log()));
+        telemetry.addData("heading error (deg)", bearingTurnCorrection);
+        telemetry.addData("tagPose x", Aimer.tagPose.position.x);
+        telemetry.addData("tagPose y", Aimer.tagPose.position.y);
         telemetry.addData("Selected Goal Color:", colorGoalSelected);
-        telemetry.addData("Selected Goal Color:", colorGoalSelected);
-        telemetry.addData("Obelisk ID", aprilTag.getObeliskId());*/
-        telemetry.addData("Loop time: ", currentTime - lastTick);
+        telemetry.addData("Obelisk ID", aprilTag.getObeliskId());
+        long now = System.currentTimeMillis();
+        telemetry.addData("Loop time: ", now - lastTick);
         telemetry.update();
-        lastTick = currentTime;
+        lastTick = now;
+        currentTime = now;
     }
 }
 

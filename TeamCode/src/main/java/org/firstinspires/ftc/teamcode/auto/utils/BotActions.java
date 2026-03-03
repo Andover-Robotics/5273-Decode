@@ -5,26 +5,21 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Arclength;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Pose2dDual;
-import com.acmerobotics.roadrunner.PosePath;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.VelConstraint;
-import com.arcrobotics.ftclib.trajectory.constraint.TrajectoryConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Actuator;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
-import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.Aimer;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
@@ -40,7 +35,7 @@ public class BotActions {
     private final Outtake outtake;
     private final Actuator actuator;
     public final AprilTag aprilTag;
-    private final AprilTagAimer aprilAimer;
+    private final Aimer aprilAimer;
     private final MecanumDrive drive;
 
     public static double NON_INDEX_SPIN_TIME = 1.35; //seconds of full-power indexer blast

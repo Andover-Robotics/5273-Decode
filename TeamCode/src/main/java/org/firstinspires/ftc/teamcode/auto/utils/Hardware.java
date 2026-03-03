@@ -3,14 +3,12 @@ package org.firstinspires.ftc.teamcode.auto.utils;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
-import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.TwoDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
-import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTagAimer;
+import org.firstinspires.ftc.teamcode.subsystems.limelight.Aimer;
 
 public class Hardware {
     public final Intake intake;
@@ -18,7 +16,7 @@ public class Hardware {
     public final Outtake outtake;
     public final Actuator actuator;
     public final AprilTag aprilTag;
-    public final AprilTagAimer aprilAimer;
+    public final Aimer aprilAimer;
     public final BotActions actions;
     public final MecanumDrive mecanumDrive;
 
@@ -37,7 +35,7 @@ public class Hardware {
         outtake  = new Outtake(hardwareMap, Outtake.Mode.RPM);
         actuator = new Actuator(hardwareMap);
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aprilAimer = new AprilTagAimer(hardwareMap, mecanumDrive);
+        aprilAimer = new Aimer(hardwareMap, mecanumDrive);
 
         actions = new BotActions(this, telemetry, opMode);
     }
