@@ -64,6 +64,18 @@ public class Aimer {
         }
     }
 
+    public Goal getGoal() {
+        return selectedGoal;
+    }
+
+    public void toggleGoal() {
+        if (selectedGoal == Goal.RED) {
+            setGoal(Goal.BLUE);
+        } else {
+            setGoal(Goal.RED);
+        }
+    }
+
     public void relocalize(){
         int botThick = 9;
         //RED Human player zone

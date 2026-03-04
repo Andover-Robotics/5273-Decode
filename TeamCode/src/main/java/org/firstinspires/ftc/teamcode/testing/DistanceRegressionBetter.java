@@ -3,21 +3,28 @@ package org.firstinspires.ftc.teamcode.testing;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantAction;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Pose2d;
+
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.Aimer;
+import org.firstinspires.ftc.teamcode.teleop.ActionHost;
 
 @Config
-@TeleOp(name = "DistanceRegressionTeleOp", group = "AA_main")
-public class DistanceRegressionTeleOp extends LinearOpMode {
+@TeleOp(name = "DistanceRegressionBetter", group = "AA_main")
+public class DistanceRegressionBetter extends LinearOpMode {
 
     private Intake intake;
     private Indexer indexer;
@@ -29,19 +36,31 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
     private Aimer aprilAimer;
     private MecanumDrive drive;
 
+    private ActionHost actionHost;
+
     private long lastAimUpdate = 0;
     private double lastTurnCorrection = 0;
     private double bearingTurnCorrection = 0;
 
-    public static double shooterRPM = 0;
+    public static double shooterRPM = 3800;
 
     private boolean continuousAprilTagLock = false;
-    private boolean fieldCentric = false;
+
+    public static double NON_INDEX_SPIN_TIME = 3;
+    public static double FULL_BLAST_POWER = 0.25;
+    public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.94;
+
     private static final long AIM_UPDATE_INTERVAL_MS = 20;
     private static String colorGoalSelected;
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        telemetry = new MultipleTelemetry(
+                telemetry,
+                FtcDashboard.getInstance().getTelemetry()
+        );
+
         intake = new Intake(hardwareMap);
         indexer = new Indexer(hardwareMap);
         actuator = new Actuator(hardwareMap);
@@ -52,19 +71,22 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         aprilTag = new AprilTag(hardwareMap, telemetry);
         aprilAimer = new Aimer(hardwareMap, drive);
 
+        actionHost = new ActionHost();
+
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);
 
         startServos();
+
+        telemetry.addLine("Initialized");
+        telemetry.update();
+
         waitForStart();
 
         while (opModeIsActive()) {
-            telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
             gp1.readButtons();
             gp2.readButtons();
-
-            teleopTick(gp1, gp2, telemetry);
+            teleopTick(gp1, gp2);
         }
     }
 
@@ -74,12 +96,16 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         indexer.setIntaking(true);
     }
 
-    public void teleopTick(GamepadEx g1, GamepadEx g2, Telemetry telemetry) {
+    public void teleopTick(GamepadEx g1, GamepadEx g2) {
+
         drive.updatePoseEstimate();
         outtake.periodic();
+        actionHost.update();
+
         double turnCorrection = 0;
 
         if (continuousAprilTagLock) {
+
             long now = System.currentTimeMillis();
 
             if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
@@ -93,39 +119,27 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
             }
 
             turnCorrection = lastTurnCorrection;
-        } else {
-            turnCorrection = 0;
         }
 
-        if (fieldCentric) {
-            movement.teleopTickFieldCentric(
-                    g1.getLeftX(),
-                    g1.getLeftY(),
-                    g1.getRightX(),
-                    turnCorrection,
-                    true
-            );
-        } else {
-            movement.teleopTick(
-                    g1.getLeftX(),
-                    g1.getLeftY(),
-                    g1.getRightX(),
-                    turnCorrection
-            );
+        movement.teleopTick(
+                g1.getLeftX(),
+                g1.getLeftY(),
+                g1.getRightX(),
+                turnCorrection
+        );
+
+        if (!actionHost.isRunning() && g1.wasJustPressed(GamepadKeys.Button.Y)) {
+            actionHost.start(new InstantAction(() -> aprilAimer.relocalize()));
         }
 
-        if (g1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) fieldCentric = true;
-        if (g1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) fieldCentric = false;
+        if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.B)) {
+            actionHost.start(actionNonIndexedDump());
+        }
 
         if (g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.01)
             intake.run();
         else
             intake.stop();
-
-        if (g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01)
-            outtake.set(shooterRPM);
-        else
-            outtake.stop();
 
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT))
             indexer.moveTo(indexer.getState().next());
@@ -145,20 +159,15 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         indexer.update();
 
         if (g2.wasJustPressed(GamepadKeys.Button.X)) {
-            continuousAprilTagLock = true;
-            aprilTag.setCurrentCameraScannedId(0);
+            continuousAprilTagLock = !continuousAprilTagLock;
         }
 
-        if (g2.wasJustPressed(GamepadKeys.Button.Y)) {
-            continuousAprilTagLock = false;
-        }
-
-        if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
+        if (g2.wasJustPressed(GamepadKeys.Button.BACK)) {
             aprilTag.setPipeline(0);
             colorGoalSelected = "Blue";
         }
 
-        if (g1.wasJustPressed(GamepadKeys.Button.START)) {
+        if (g2.wasJustPressed(GamepadKeys.Button.START)) {
             aprilTag.setPipeline(1);
             colorGoalSelected = "Red";
         }
@@ -168,7 +177,35 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         telemetry.addData("Turn Correction", turnCorrection);
         telemetry.addData("Heading Error (deg)", bearingTurnCorrection);
         telemetry.addData("April Lock", continuousAprilTagLock);
+        telemetry.addData("Action Running", actionHost.isRunning());
         telemetry.addData("Alliance", colorGoalSelected);
+
         telemetry.update();
+    }
+
+    private Action actionNonIndexedDump() {
+
+        final double rpm = shooterRPM * QUICKSPIN_OUTTAKE_RPM_SCALE;
+
+        return new SequentialAction(
+
+                new InstantAction(actuator::upQuick),
+
+                new InstantAction(() -> outtake.set(rpm)),
+
+                packet -> !outtake.inRange(100.0),
+
+                new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),
+
+                new SleepAction(NON_INDEX_SPIN_TIME),
+
+                new InstantAction(indexer::stopIndexerPower),
+                new InstantAction(outtake::stop),
+                new InstantAction(actuator::down),
+
+                new InstantAction(() -> indexer.setIntaking(true)),
+                new InstantAction(indexer::initializeColors),
+                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.zero))
+        );
     }
 }
