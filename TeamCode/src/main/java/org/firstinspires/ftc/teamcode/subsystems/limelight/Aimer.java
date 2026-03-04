@@ -9,6 +9,10 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
 @Config
 public class Aimer {
+    //bottom left of field is (0,0) (red human player), top right (near red goal) is (144,144)
+    //bottom right of field is (144,0) (blue human player), top left (near blue goal) is (0,144)
+    //the bot is relocalized at the respective human player zone
+
     public static double kP = 0.06;
     public static double kI = 0.0;
     public static double kD = 0.0;
@@ -26,9 +30,48 @@ public class Aimer {
     public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
 
+    public static double goalBack = 0; //how far from the back of the field the aiming point is
+    public static double goalOut = 0; //how far from the side border of the field (where drivers stand) the aiming point is
+
+    public enum Goal {
+        RED,
+        BLUE
+    }
+
+    public static Goal selectedGoal = Goal.RED;
+
     public Aimer(HardwareMap hardwareMap, MecanumDrive mecanumDrive) {
         this.drive = mecanumDrive;
+        //defaults to red goal
+        setRedTarget();
         //inertiaAutoAim = new InertiaAutoAim();
+    }
+
+    public void setRedTarget(){
+        tagPose = new Pose2d(144-goalOut,144-goalBack, Math.toRadians(90));
+    }
+
+    public void setBlueTarget(){
+        tagPose = new Pose2d(goalOut,144-goalBack, Math.toRadians(90));
+    }
+
+    public void setGoal(Goal goal) {
+        selectedGoal = goal;
+        if (goal == Goal.RED) {
+            setRedTarget();
+        } else {
+            setBlueTarget();
+        }
+    }
+
+    public void relocalize(){
+        int botThick = 9;
+        //RED Human player zone
+        if(selectedGoal == Goal.RED){
+            drive.localizer.setPose(new Pose2d(0+botThick, 0+botThick, Math.toRadians(270)));
+        } else {
+            drive.localizer.setPose(new Pose2d(144-botThick, 0+botThick, Math.toRadians(270)));
+        }
     }
 
     public double[] calculateLocalizedTurnPower() {
