@@ -90,8 +90,7 @@ public class Aimer {
 
         double desiredHeading = Math.atan2(dy, dx);
 
-        // apparantly toDouble is log but not clamped to -pi, pi, for more control
-        double currentHeading = robotPose.heading.toDouble(); // checked telem, the way log shows is heading=Rotation2d(real=[somenumber], imag=[somenumber]. Both numbers are diff .And for both of them, say the number is one, if you move it to the left it decreases and you move it to the right it also decrceases. And once it crosses that 180 degrees to the other side same behavior except negative. The way to differentiate tho is that for imaginary when its at one of the say, .77, real will be some positive, and for the imag's other reflected .77 real will be negative.
+        double currentHeading = robotPose.heading.toDouble();
 
         double bearing = Math.toDegrees(desiredHeading - currentHeading);
         bearing = angleWrapDegrees(bearing);

@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Loop Time Tester", group = "testing")
-class LoopTimeTester extends LinearOpMode {
+public class LoopTimeTester extends LinearOpMode {
     @Override
     public void runOpMode() {
         long lastTime;
