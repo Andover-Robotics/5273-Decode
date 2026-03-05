@@ -24,6 +24,10 @@ public class MeepMeepTesting {
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .setColorScheme(new ColorSchemeRedDark())
                 .followTrajectorySequence(FasterRedCloseSimpleMotif::createPath);
+        RoadRunnerBotEntity testingOpmode = new DefaultBotBuilder(meepMeep)
+                .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
+                .setColorScheme(new ColorSchemeRedDark())
+                .followTrajectorySequence(TestingOpmode::createPath);
 
         // See https://github.com/rh-robotics/MeepMeep/pull/23
         Image background = ImageIO.read(
@@ -32,8 +36,9 @@ public class MeepMeepTesting {
         meepMeep.setBackground(background)
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
-                .addEntity(fasterBlueCloseSimpleMotif)
-                .addEntity(fasterRedCloseSimpleMotif)
+                /*.addEntity(fasterBlueCloseSimpleMotif)
+                .addEntity(fasterRedCloseSimpleMotif)*/
+                .addEntity(testingOpmode)
                 .start();
 
     }
