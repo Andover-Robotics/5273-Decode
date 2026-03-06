@@ -35,7 +35,7 @@ public class Hardware {
         outtake  = new Outtake(hardwareMap, Outtake.Mode.RPM);
         actuator = new Actuator(hardwareMap);
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aprilAimer = new Aimer(hardwareMap, mecanumDrive);
+        aprilAimer = new Aimer(mecanumDrive);
 
         actions = new BotActions(this, telemetry, opMode);
     }

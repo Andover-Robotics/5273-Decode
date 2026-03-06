@@ -53,7 +53,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         movement = new Movement(hardwareMap, drive);
 
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aimer = new Aimer(hardwareMap, drive);
+        aimer = new Aimer(drive);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         GamepadEx gp1 = new GamepadEx(gamepad1);
@@ -81,7 +81,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         drive.updatePoseEstimate();
 
         double turnCorrection = 0;
-        double[] data = null;
+        double[] data = {0, 0, 0};
         if (continuousGoalLock) {
             currentTime = System.currentTimeMillis();
 

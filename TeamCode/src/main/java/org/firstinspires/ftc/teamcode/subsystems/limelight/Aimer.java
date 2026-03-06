@@ -40,7 +40,7 @@ public class Aimer {
 
     public static Goal selectedGoal = Goal.RED;
 
-    public Aimer(HardwareMap hardwareMap, MecanumDrive mecanumDrive) {
+    public Aimer(MecanumDrive mecanumDrive) {
         this.drive = mecanumDrive;
         //defaults to red goal
         setRedTarget();

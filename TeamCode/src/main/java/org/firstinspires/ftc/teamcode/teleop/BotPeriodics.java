@@ -57,7 +57,7 @@ public class BotPeriodics {
         drive = mecanumDrive;
         movement = new Movement(hardwareMap, drive);
         aprilTag = new AprilTag(hardwareMap, tele);
-        aimer = new Aimer(hardwareMap, drive);
+        aimer = new Aimer(drive);
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
         actionHost = new ActionHost();
