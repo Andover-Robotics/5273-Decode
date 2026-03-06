@@ -30,8 +30,8 @@ public class Aimer {
     public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
 
-    public static double goalBack = 0; //how far from the back of the field the aiming point is
-    public static double goalOut = 0; //how far from the side border of the field (where drivers stand) the aiming point is
+    public static double goalBack = 4; //how far from the back of the field the aiming point is
+    public static double goalOut = 6; //how far from the side border of the field (where drivers stand) the aiming point is
 
     public enum Goal {
         RED,
@@ -44,45 +44,31 @@ public class Aimer {
         this.drive = mecanumDrive;
         //defaults to red goal
         setRedTarget();
+        relocalize();
         //inertiaAutoAim = new InertiaAutoAim();
     }
 
     public void setRedTarget(){
+        selectedGoal = Goal.RED;
         tagPose = new Pose2d(144-goalOut,144-goalBack, Math.toRadians(90));
     }
 
     public void setBlueTarget(){
+        selectedGoal = Goal.BLUE;
         tagPose = new Pose2d(goalOut,144-goalBack, Math.toRadians(90));
-    }
-
-    public void setGoal(Goal goal) {
-        selectedGoal = goal;
-        if (goal == Goal.RED) {
-            setRedTarget();
-        } else {
-            setBlueTarget();
-        }
     }
 
     public Goal getGoal() {
         return selectedGoal;
     }
 
-    public void toggleGoal() {
-        if (selectedGoal == Goal.RED) {
-            setGoal(Goal.BLUE);
-        } else {
-            setGoal(Goal.RED);
-        }
-    }
-
     public void relocalize(){
         int botThick = 9;
         //RED Human player zone
         if(selectedGoal == Goal.RED){
-            drive.localizer.setPose(new Pose2d(0+botThick, 0+botThick, Math.toRadians(270)));
-        } else {
-            drive.localizer.setPose(new Pose2d(144-botThick, 0+botThick, Math.toRadians(270)));
+            drive.localizer.setPose(new Pose2d(0+botThick, 0+botThick, Math.toRadians(90)));
+        } else if (selectedGoal == Goal.BLUE){
+            drive.localizer.setPose(new Pose2d(144-botThick, 0+botThick, Math.toRadians(90)));
         }
     }
 

@@ -88,7 +88,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
                 double[] data = aprilAimer.calculateLocalizedTurnPower();
 
                 lastTurnCorrection = data[0];
-                shooterRPM = data[1];
+                shooterRPM = outtake.getRegressionRPM(data[1]);
                 bearingTurnCorrection = data[2];
             }
 

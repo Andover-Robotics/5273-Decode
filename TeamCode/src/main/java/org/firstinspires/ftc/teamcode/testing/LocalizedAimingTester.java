@@ -40,7 +40,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     private boolean fieldCentric = false;
 
     public static long aimUpdateInterval = 20; // ms
-    private static String colorGoalSelected;
+    private static String colorGoalSelected = "";
     private static Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
 
     @Override
@@ -90,7 +90,7 @@ public class LocalizedAimingTester extends LinearOpMode {
                 lastAimUpdateTime = currentTime;
                 data = aimer.calculateLocalizedTurnPower();
                 lastTurnCorrection = data[0];
-                shooterRPM = data[1];
+                shooterRPM = outtake.getRegressionRPM(data[1]);
                 bearingTurnCorrection = data[2];
             }
 
@@ -163,7 +163,13 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.B)) {
-            movement.setPose(new Pose2d(0, 0, Math.toRadians(0)));
+            if (colorGoalSelected.equals("Blue"))
+                aimer.relocalize();
+            else if (colorGoalSelected.equals("Red"))
+                aimer.relocalize();
+            else {
+                aimer.relocalize();
+            }
         }
 
         indexer.update();
@@ -182,11 +188,13 @@ public class LocalizedAimingTester extends LinearOpMode {
         // Alliance selection
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
             aprilTag.setPipeline(0);
+            aimer.setBlueTarget();
             colorGoalSelected = "Blue";
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
             aprilTag.setPipeline(1);
+            aimer.setRedTarget();
             colorGoalSelected = "Red";
         }
 

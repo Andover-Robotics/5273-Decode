@@ -40,7 +40,7 @@ public class BotPeriodics {
     protected long lastAimUpdate = 0;
     protected double lastTurnCorrection = 0.0;
     protected double turnCorrection = 0.0;
-    protected String colorGoalSelected;
+    protected String colorGoalSelected = "";
 
     protected boolean continuousIntake = true;
 
@@ -138,10 +138,12 @@ public class BotPeriodics {
     protected void handleAllianceSelection() {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
             aprilTag.setPipeline(0);
+            aimer.setBlueTarget();
             colorGoalSelected = "Blue";
         }
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
             aprilTag.setPipeline(1);
+            aimer.setRedTarget();
             colorGoalSelected = "Red";
         }
     }
@@ -173,6 +175,16 @@ public class BotPeriodics {
             g1.gamepad.rumbleBlips(1);
         }
 
+        if (g1.wasJustPressed(GamepadKeys.Button.X)) {
+            if (colorGoalSelected.equals("Blue"))
+                aimer.relocalize();
+            else if (colorGoalSelected.equals("Red"))
+                aimer.relocalize();
+            else {
+                aimer.relocalize();
+            }
+        }
+
         if (continuousAprilTagLock) {
             long now = System.currentTimeMillis();
 
@@ -182,7 +194,7 @@ public class BotPeriodics {
                 double[] data = aimer.calculateLocalizedTurnPower();
 
                 lastTurnCorrection = data[0];
-                targetRPM = data[1];
+                targetRPM = outtake.getRegressionRPM(data[1]);
                 bearingTurnCorrection = data[2];
             }
 

@@ -69,7 +69,7 @@ public class DistanceRegressionBetter extends LinearOpMode {
         movement = new Movement(hardwareMap, drive);
 
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aprilAimer = new Aimer(hardwareMap, drive);
+        aprilAimer = new Aimer(drive);
 
         actionHost = new ActionHost();
 
@@ -114,7 +114,7 @@ public class DistanceRegressionBetter extends LinearOpMode {
                 double[] data = aprilAimer.calculateLocalizedTurnPower();
 
                 lastTurnCorrection = data[0];
-                shooterRPM = data[1];
+                shooterRPM = outtake.getRegressionRPM(data[1]);
                 bearingTurnCorrection = data[2];
             }
 

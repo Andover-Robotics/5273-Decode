@@ -140,11 +140,13 @@ public class Bot extends BotPeriodics {
     protected void handleAllianceSelection() {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
             aprilTag.setPipeline(0);
+            aimer.setBlueTarget();
             g1.gamepad.setLedColor(0, 0, 1, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Blue";
         }
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
             aprilTag.setPipeline(1);
+            aimer.setRedTarget();
             g1.gamepad.setLedColor(1, 0, 0, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Red";
         }
