@@ -16,7 +16,7 @@ public class Aimer {
     public static double kP = 0.06;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.09;
+    public static double kF = 0.0;
     public static double filter = 0.867;  // smoothing factor (1 = no filtering, 0 = very heavy smoothing)
     public static double maxIntegral = 1.0;
     public static double deadband = 1;
