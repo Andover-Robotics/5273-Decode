@@ -32,9 +32,8 @@ public class FarLeave extends LinearOpMode {
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
 
         Action toPark = drive.actionBuilder(startPose)
-                .strafeToSplineHeading(
-                        parkPose.position,
-                        parkPose.heading
+                .strafeTo(
+                        parkPose.position
                 )
                 .build();
 
@@ -43,7 +42,6 @@ public class FarLeave extends LinearOpMode {
 
         Actions.runBlocking(
                 new ParallelAction(
-                        botActions.actionPeriodic(),
                         new SequentialAction(
                                 toPark
                         )

@@ -41,6 +41,8 @@ public class BotPeriodics {
     protected double lastTurnCorrection = 0.0;
     protected double turnCorrection = 0.0;
     protected String colorGoalSelected = "";
+    protected boolean rangeRequested = false;
+    protected double[] targetData;
 
     protected boolean continuousIntake = true;
 
@@ -102,6 +104,19 @@ public class BotPeriodics {
         outtake.periodic();
         actionHost.update();
         drive.updatePoseEstimate();
+
+        if(rangeRequested || continuousAprilTagLock){
+            long now = System.currentTimeMillis();
+
+            if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
+                lastAimUpdate = now;
+                double[] data = aimer.calculateLocalizedTurnPower();
+                lastTurnCorrection = data[0];
+                targetRPM = outtake.getRegressionRPM(data[1]);
+                bearingTurnCorrection = data[2];
+            }
+            turnCorrection = lastTurnCorrection;
+        }
     }
 
     // Periodic Handlers
@@ -185,22 +200,7 @@ public class BotPeriodics {
             }
         }
 
-        if (continuousAprilTagLock) {
-            long now = System.currentTimeMillis();
-
-            if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
-                lastAimUpdate = now;
-
-                double[] data = aimer.calculateLocalizedTurnPower();
-
-                lastTurnCorrection = data[0];
-                targetRPM = outtake.getRegressionRPM(data[1]);
-                bearingTurnCorrection = data[2];
-            }
-
-            turnCorrection = lastTurnCorrection;
-
-        } else {
+        if (!continuousAprilTagLock){
             turnCorrection = 0;
         }
     }

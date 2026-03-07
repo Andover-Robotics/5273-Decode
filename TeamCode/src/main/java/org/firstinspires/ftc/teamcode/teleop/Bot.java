@@ -30,7 +30,7 @@ public class Bot extends BotPeriodics {
 
     public static double NON_INDEX_SPIN_TIME = 3; //seconds of full-power indexer blast
     public static double FULL_BLAST_POWER = 0.25;
-    public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.97; // 1.12
+    public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.93; // 1.12
 
     public Indexer.ArtifactColor[] motif;
 
@@ -99,10 +99,12 @@ public class Bot extends BotPeriodics {
         // Press-and-hold right bumper to spin up shooter while in Intake
         if (!actionHost.isRunning()) {
             if (g2.gamepad.right_bumper) {
+                rangeRequested = true;
                 state = FSM.QuickOuttake;
                 applyPreSpinRPM();
             } else {
                 outtake.stop();
+                rangeRequested = false;
             }
         }
 
@@ -157,7 +159,9 @@ public class Bot extends BotPeriodics {
         if (!actionHost.isRunning()) {
             if (g2.gamepad.right_bumper) {
                 applyPreSpinRPM();
+                rangeRequested = true;
             } else {
+                rangeRequested = false;
                 outtake.stop();
             }
         }
@@ -218,7 +222,7 @@ public class Bot extends BotPeriodics {
                 new Action() {
                     @Override
                     public boolean run(TelemetryPacket packet) {
-                        return !outtake.inRange(100.0);
+                        return !outtake.inRange(50);
                     }
                 },
                 new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),

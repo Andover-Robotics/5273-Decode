@@ -40,7 +40,7 @@ public class Outtake {
 
     private final double TPR = 28.0;   // encoder ticks per rotation
 
-    public static double spinupInRangeMinTime = 600; // ms
+    public static double spinupInRangeMinTime = 200; // ms
     public static double spinupMaxTime = 4000; // ms
     private long inRangeStartTime = -1;
     private long spinupStartTime = -1;
