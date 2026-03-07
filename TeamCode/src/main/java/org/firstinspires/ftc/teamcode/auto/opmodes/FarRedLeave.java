@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
-@Autonomous(name = "Blue Leave Far Auto", group = "Autonomous")
-public class FarRedLeave extends LinearOpMode {
+@Autonomous(name = "Far Leave Auto", group = "Autonomous")
+public class FarLeave extends LinearOpMode {
     public static double PARK_X = 26;
     public static double PARK_Y = 0;
 
