@@ -246,7 +246,7 @@ public class Indexer {
         handleDashboardCommands();
         refreshLoadedAndServo();
 
-        if (intaking && SCAN_COLORS) {
+        if (intaking && SCAN_COLORS && isWithinTargetDegrees(15)) {
             updateSlotClassification(debugClosestSlot());
         }
 
