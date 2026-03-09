@@ -86,8 +86,7 @@ public class BotPeriodics {
         boolean inRange = indexer.isWithinTargetDegrees(5);
 
         if(leftDown){
-            if (inRange) intake.run();
-            else intake.runSlow();
+            intake.run();
         }
         else if(rightDown) intake.runBackwards();
         else if(continuousIntake) intake.runSlow();
@@ -112,7 +111,7 @@ public class BotPeriodics {
                 lastAimUpdate = now;
                 double[] data = aimer.calculateLocalizedTurnPower();
                 lastTurnCorrection = data[0];
-                targetRPM = outtake.getRegressionRPM(data[1]);
+                //targetRPM = outtake.getRegressionRPM(data[1]);
                 bearingTurnCorrection = data[2];
             }
             turnCorrection = lastTurnCorrection;
