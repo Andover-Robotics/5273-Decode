@@ -26,14 +26,11 @@ public class BotPeriodics {
     protected final AprilTag aprilTag;
     protected final Aimer aimer;
     protected final MecanumDrive drive;
-
     protected final GamepadEx g1;
     protected final GamepadEx g2;
     protected final Telemetry telemetry;
-
     protected double bearingTurnCorrection = 0;
     protected ActionHost actionHost;
-
     // camera vision
     protected boolean fieldCentric = false;
     protected boolean continuousAprilTagLock = false;
@@ -42,7 +39,7 @@ public class BotPeriodics {
     protected double turnCorrection = 0.0;
     protected String colorGoalSelected = "";
     protected boolean rangeRequested = false;
-    protected double[] targetData;
+    protected double[] targetData = {0,0,0};
 
     protected boolean continuousIntake = true;
 
@@ -109,10 +106,10 @@ public class BotPeriodics {
 
             if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
                 lastAimUpdate = now;
-                double[] data = aimer.calculateLocalizedTurnPower();
-                lastTurnCorrection = data[0];
+                targetData = aimer.calculateLocalizedTurnPower();
+                lastTurnCorrection = targetData[0];
                 //targetRPM = outtake.getRegressionRPM(data[1]);
-                bearingTurnCorrection = data[2];
+                bearingTurnCorrection = targetData[2];
             }
             turnCorrection = lastTurnCorrection;
         }
@@ -133,7 +130,7 @@ public class BotPeriodics {
         telemetry.addData("Actuator up?", actuator.isActivated());
         telemetry.addData("Indexer Loaded?", indexer.isLoaded());
         telemetry.addData("April Lock", continuousAprilTagLock);
-        telemetry.addData("Bot Range", aprilTag.getRange());
+        telemetry.addData("Bot Range", targetData[1]);
         telemetry.addData("Alliance selected", colorGoalSelected);
         telemetry.addData("Turn Correction:", turnCorrection);
         telemetry.addData("Intake power: ", intake.getPower());
