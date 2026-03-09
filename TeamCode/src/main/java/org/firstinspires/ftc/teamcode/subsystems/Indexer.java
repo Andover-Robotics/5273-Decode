@@ -246,7 +246,7 @@ public class Indexer {
         handleDashboardCommands();
         refreshLoadedAndServo();
 
-        if (intaking && SCAN_COLORS && isWithinTargetDegrees(15)) {
+        if (intaking && SCAN_COLORS && !allClassified()) {
             updateSlotClassification(debugClosestSlot());
         }
 
@@ -489,11 +489,14 @@ public class Indexer {
         noEmpty = !anyEmpty;
     }
 
-    private boolean anyUnknownStored() {
+    private boolean allClassified() {
+        //checks if all are assigned a color (no unknown or empty)
         for (SlotState slot : slots) {
-            if (slot.color == ArtifactColor.UNKNOWN) return true;
+            if (slot.color == ArtifactColor.UNKNOWN || slot.color == ArtifactColor.EMPTY) {
+                return false;
+            }
         }
-        return false;
+        return true;
     }
 
     private IndexerState findNextSlotWithStoredColor(IndexerState start, ArtifactColor color) {
