@@ -50,16 +50,16 @@ public class ColorTester extends OpMode {
         // Read sensor ONCE per loop so values are consistent within this telemetry frame
         float alpha = colorSensor.getAlpha();
         float[] rgb = colorSensor.getRGB();
-        float[] hsv = colorSensor.getHSV();
+        //float[] hsv = colorSensor.getHSV();
 
         telemetry.addLine("===== RAW COLOR SENSOR (ALWAYS UPDATING) =====");
         telemetry.addData("Alpha", "%.4f", alpha);
         telemetry.addData("R", "%.4f", rgb[0]);
         telemetry.addData("G", "%.4f", rgb[1]);
         telemetry.addData("B", "%.4f", rgb[2]);
-        telemetry.addData("H", "%.1f°", hsv[0]);
-        telemetry.addData("S", "%.4f", hsv[1]);
-        telemetry.addData("V", "%.4f", hsv[2]);
+        //telemetry.addData("H", "%.1f°", hsv[0]);
+        //telemetry.addData("S", "%.4f", hsv[1]);
+        //telemetry.addData("V", "%.4f", hsv[2]);
         telemetry.addData("Has Artifact", colorSensor.hasArtifact());
         telemetry.addData("Classify()", colorSensor.classify());
         telemetry.addData("ClassifyColorOnly()", colorSensor.classifyColorOnly());
