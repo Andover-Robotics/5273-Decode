@@ -10,34 +10,58 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Config
 public class ColorSensorSystem {
 
-    // Sensor gain to be tuned
+    //Constants
+
+    //evertyhign has to be a float?
+    //Sensor gain to be tuned
     public static float SENSOR_GAIN = 20.0f;
 
     // Minimum alpha (light) required to consider the slot full
-    public static float PRESENCE_ALPHA_THRESHOLD = 0.8f;
+    public static float PRESENCE_ALPHA_THRESHOLD = 0.1f;
 
-    // HSV classification
-    // Hue is in degrees
-    public static float GREEN_H_MIN = 90f;
-    public static float GREEN_H_MAX = 165f;
+    // green range
+    public static float GREEN_R_MIN = 0.00f;
+    public static float GREEN_G_MIN = 0.4f;
+    public static float GREEN_B_MIN = 0.3f;
 
-    public static float PURPLE_H_MIN = 200f;
-    public static float PURPLE_H_MAX = 250f;
+    public static float GREEN_R_MAX = 0.35f;
+    public static float GREEN_G_MAX = 1.00f;
+    public static float GREEN_B_MAX = 1.0f;
 
-    // Gate out low quality color (gray/too dark)
-    public static float MIN_SATURATION = 0.25f;
-    public static float MIN_VALUE = 0.10f;
+    // purple range
+    public static float PURPLE_R_MIN = 0.30f;
+    public static float PURPLE_G_MIN = 0.40f;
+    public static float PURPLE_B_MIN = 0.30f;
 
-    // hardware
+    public static float PURPLE_R_MAX = 0.7f;
+    public static float PURPLE_G_MAX = 0.80f;
+    public static float PURPLE_B_MAX = 1.00f;
+
+    //hardware
+
     private final NormalizedColorSensor color;
 
-    // constructor
+    //constructor
     public ColorSensorSystem(HardwareMap hardwareMap) {
         color = hardwareMap.get(NormalizedColorSensor.class, "color");
         color.setGain(SENSOR_GAIN);
     }
 
-    // api
+    //internal helper funciotns
+    private boolean inRange(float v, float min, float max) {
+        return v >= min && v <= max;
+    }
+
+    private boolean matches(float r, float g, float b,
+                            float rMin, float gMin, float bMin,
+                            float rMax, float gMax, float bMax) {
+        return inRange(r, rMin, rMax) &&
+                inRange(g, gMin, gMax) &&
+                inRange(b, bMin, bMax);
+    }
+
+    //api
+    //insert that commetn about bruno mars from that other commit
     public boolean hasArtifact() {
         NormalizedRGBA rgba = color.getNormalizedColors();
         return rgba.alpha >= PRESENCE_ALPHA_THRESHOLD;
@@ -45,33 +69,55 @@ public class ColorSensorSystem {
 
     public Indexer.ArtifactColor classify() {
         NormalizedRGBA rgba = color.getNormalizedColors();
+
         if (rgba.alpha < PRESENCE_ALPHA_THRESHOLD) {
             return Indexer.ArtifactColor.EMPTY;
         }
-        return classifyColorOnlyFromRGBA(rgba);
+
+        if (matches(rgba.red, rgba.green, rgba.blue,
+                GREEN_R_MIN, GREEN_G_MIN, GREEN_B_MIN,
+                GREEN_R_MAX, GREEN_G_MAX, GREEN_B_MAX)) {
+            return Indexer.ArtifactColor.GREEN;
+        }
+
+        if (matches(rgba.red, rgba.green, rgba.blue,
+                PURPLE_R_MIN, PURPLE_G_MIN, PURPLE_B_MIN,
+                PURPLE_R_MAX, PURPLE_G_MAX, PURPLE_B_MAX)) {
+            return Indexer.ArtifactColor.PURPLE;
+        }
+
+        return Indexer.ArtifactColor.UNKNOWN;
     }
 
     public Indexer.ArtifactColor classifyColorOnly() {
         NormalizedRGBA rgba = color.getNormalizedColors();
-        return classifyColorOnlyFromRGBA(rgba);
+
+        if (matches(rgba.red, rgba.green, rgba.blue,
+                GREEN_R_MIN, GREEN_G_MIN, GREEN_B_MIN,
+                GREEN_R_MAX, GREEN_G_MAX, GREEN_B_MAX)) {
+            return Indexer.ArtifactColor.GREEN;
+        }
+
+        if (matches(rgba.red, rgba.green, rgba.blue,
+                PURPLE_R_MIN, PURPLE_G_MIN, PURPLE_B_MIN,
+                PURPLE_R_MAX, PURPLE_G_MAX, PURPLE_B_MAX)) {
+            return Indexer.ArtifactColor.PURPLE;
+        }
+
+        return Indexer.ArtifactColor.UNKNOWN;
     }
+
+    //telem(tuff)
 
     public void addTelemetry(Telemetry telemetry) {
         NormalizedRGBA rgba = color.getNormalizedColors();
-        float[] hsv = rgbToHsv(rgba.red, rgba.green, rgba.blue);
 
-        telemetry.addLine("===== COLOR SENSOR (HSV) =====");
+        telemetry.addLine("===== COLOR SENSOR =====");
         telemetry.addData("Detected Artifact", classify());
-        telemetry.addData("Has Artifact", hasArtifact());
-
-        telemetry.addData("R", "%.4f", rgba.red);
-        telemetry.addData("G", "%.4f", rgba.green);
-        telemetry.addData("B", "%.4f", rgba.blue);
-        telemetry.addData("Alpha", "%.4f", rgba.alpha);
-
-        telemetry.addData("H", "%.1f°", hsv[0]);
-        telemetry.addData("S", "%.4f", hsv[1]);
-        telemetry.addData("V", "%.4f", hsv[2]);
+        telemetry.addData("R", "%.3f", rgba.red);
+        telemetry.addData("G", "%.3f", rgba.green);
+        telemetry.addData("B", "%.3f", rgba.blue);
+        telemetry.addData("Alpha", "%.3f", rgba.alpha);
     }
 
     public float getAlpha() {
@@ -81,78 +127,5 @@ public class ColorSensorSystem {
     public float[] getRGB() {
         NormalizedRGBA rgba = color.getNormalizedColors();
         return new float[]{ rgba.red, rgba.green, rgba.blue };
-    }
-
-    //its so peak
-    public float[] getHSV() {
-        NormalizedRGBA rgba = color.getNormalizedColors();
-        return rgbToHsv(rgba.red, rgba.green, rgba.blue);
-    }
-
-    //helprs
-
-    private Indexer.ArtifactColor classifyColorOnlyFromRGBA(NormalizedRGBA rgba) {
-        float[] hsv = rgbToHsv(rgba.red, rgba.green, rgba.blue);
-        float h = hsv[0];
-        float s = hsv[1];
-        float v = hsv[2];
-
-        if (s < MIN_SATURATION || v < MIN_VALUE) {
-            return Indexer.ArtifactColor.UNKNOWN;
-        }
-
-        if (inHueRange(h, GREEN_H_MIN, GREEN_H_MAX)) {
-            return Indexer.ArtifactColor.GREEN;
-        }
-
-        if (inHueRange(h, PURPLE_H_MIN, PURPLE_H_MAX)) {
-            return Indexer.ArtifactColor.PURPLE;
-        }
-
-        return Indexer.ArtifactColor.UNKNOWN;
-    }
-
-    //
-    private boolean inHueRange(float hueDeg, float minDeg, float maxDeg) {
-        hueDeg = wrapHue(hueDeg);
-        minDeg = wrapHue(minDeg);
-        maxDeg = wrapHue(maxDeg);
-
-        if (minDeg <= maxDeg) {
-            return hueDeg >= minDeg && hueDeg <= maxDeg;
-        } else {
-            // wrap-around (e.g., 300..30)
-            return hueDeg >= minDeg || hueDeg <= maxDeg;
-        }
-    }
-
-    private float wrapHue(float h) {
-        h %= 360f;
-        if (h < 0) h += 360f;
-        return h;
-    }
-
-    //Normalised RGB to HSV conversion
-    private float[] rgbToHsv(float r, float g, float b) {
-        float max = Math.max(r, Math.max(g, b));
-        float min = Math.min(r, Math.min(g, b));
-        float delta = max - min;
-
-        float h;
-        if (delta < 1e-6f) {
-            h = 0f;
-        } else if (max == r) {
-            h = 60f * (((g - b) / delta) % 6f);
-        } else if (max == g) {
-            h = 60f * (((b - r) / delta) + 2f);
-        } else {
-            h = 60f * (((r - g) / delta) + 4f);
-        }
-        if (h < 0f) h += 360f;
-
-        float s = (max <= 1e-6f) ? 0f : (delta / max);
-        float v = max;
-
-        return new float[]{ h, s, v };
     }
 }
