@@ -20,34 +20,34 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Autonomous(name = "Faster Blue Auto With Motif", group = "Autonomous")
 public class FasterBlueCloseMotif extends LinearOpMode {
 
-    public static double maxIntakeDrivingVel = 13;
+    public static double maxIntakeDrivingVel = 30;
 
     public static double OBELISK_X = 8;
-    public static double OBELISK_Y = -36;
-    public static double OBELISK_HEADING_DEG = 60;
+    public static double OBELISK_Y = 36;
+    public static double OBELISK_HEADING_DEG = -120;
 
-    public static double SHOOT_X = 17;
-    public static double SHOOT_Y = -40;
-    public static double SHOOT_HEADING_DEG = 140;
+    public static double SHOOT_X = -17;
+    public static double SHOOT_Y = 40;
+    public static double SHOOT_HEADING_DEG = -50;
     public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 0; // 2
 
     public static double INTAKE_START_X = 12;
     public static double INTAKE2_START_OFFSET_X = 3.0;
     public static double INTAKE3_START_OFFSET_X = 5.0;
-    public static double INTAKE_END_X = -13.5;
+    public static double INTAKE_END_X = 13.5;
     public static double intake_END_2And3_XOffset = 7.5;
 
-    public static double INTAKE1_Y = -48.5;
-    public static double INTAKE2_Y = -76;
-    public static double INTAKE3_Y = -96;
+    public static double INTAKE1_Y = 48.5;
+    public static double INTAKE2_Y = 76;
+    public static double INTAKE3_Y = 96;
 
-    public static double gate_X = -12;
-    public static double gate_Y = -60;
+    public static double gate_X = 12;
+    public static double gate_Y = 60;
 
     public static double gateWaitTime = 1.5;
 
     public static double PARK_X = 6;
-    public static double PARK_Y = -68;
+    public static double PARK_Y = 68;
 
     public static int SHOOT_RPM = 3280;
 
@@ -57,7 +57,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
     // bunch of compensations for bad rr
     @Override
     public void runOpMode() {
-        Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
+        Pose2d startPose = new Pose2d(0, 0, Math.toRadians(180));
 
         Hardware hardware = new Hardware(hardwareMap, telemetry, this, startPose);
         BotActions botActions = hardware.actions;
@@ -75,16 +75,16 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                 Math.toRadians(SHOOT_HEADING_DEG)
         );
 
-        Pose2d intake1PoseStart = new Pose2d(INTAKE_START_X, INTAKE1_Y, Math.toRadians(178));
-        Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(178));
-        Pose2d gate = new Pose2d(gate_X, gate_Y, Math.toRadians(-90));
+        Pose2d intake1PoseStart = new Pose2d(INTAKE_START_X, INTAKE1_Y, Math.toRadians(0));
+        Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(0));
+        Pose2d gate = new Pose2d(gate_X, gate_Y, Math.toRadians(90));
 
-        Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(178));
-        Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(178));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset - 16, INTAKE2_Y - 4, Math.toRadians(180));
+        Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(0));
+        Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(0));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset - 16, INTAKE2_Y + 4, Math.toRadians(0));
 
-        Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(180));
-        Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(180));
+        Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(0));
+        Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(0));
 
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
 
