@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -205,6 +206,8 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                 new ParallelAction(
                         botActions.actionPeriodic(),
                         new SequentialAction(
+                                new InstantAction(() -> drive.localizer.setPose(startPose)),
+                                //start,
                                 toObelisk,
                                 toShoot,
                                 intake1,
