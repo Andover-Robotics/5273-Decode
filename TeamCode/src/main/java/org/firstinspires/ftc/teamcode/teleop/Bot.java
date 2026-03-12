@@ -40,13 +40,13 @@ public class Bot extends BotPeriodics {
 
     public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
         super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement);
-        state = FSM.Intake;
+        state = FSM.MotifSelection;
     }
 
     public void teleopInit() {
         indexer.initializeColors(Indexer.ArtifactColor.EMPTY);
         indexer.setIntaking(true);
-        state = FSM.Intake;
+        state = FSM.MotifSelection;
         outtake.stop();
     }
 
