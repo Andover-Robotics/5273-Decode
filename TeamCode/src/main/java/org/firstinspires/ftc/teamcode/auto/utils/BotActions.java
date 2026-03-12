@@ -46,7 +46,8 @@ public class BotActions {
     public static double  timeToIntake = 2.50;
 
     public static boolean continuousAprilTagLock;
-    public static double cooldownFeedbackIntake = 150;
+    public static double cooldownFeedbackIntake = 0;
+    public static double quickspinRpmScale = 0.93;
     private double lastTurnCorrection;
 
     public BotActions(
@@ -68,7 +69,7 @@ public class BotActions {
     public Action actionStartOuttake(double rpm) {
         return new ParallelAction(
             new InstantAction(() -> indexer.setAutoOuttaking(true)),
-            new InstantAction(() -> outtake.set(rpm))
+            new InstantAction(() -> outtake.set(rpm * quickspinRpmScale))
         );
     }
 

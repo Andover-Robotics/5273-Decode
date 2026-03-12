@@ -88,7 +88,13 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(180));
 
-        // Later combine this with toShoot for smoother
+        // Remove actionStartOuttake in toShoot when adding this
+        Action start = new ParallelAction(
+                botActions.initializeAuto(Indexer.IndexerState.two),
+                botActions.actionStartOuttake(SHOOT_RPM)
+        );
+
+        // remove soon
         Action toObelisk = new ParallelAction(
                 drive.actionBuilder(startPose)
                         .strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)
