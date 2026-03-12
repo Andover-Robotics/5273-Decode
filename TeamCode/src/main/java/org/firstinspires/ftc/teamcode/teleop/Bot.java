@@ -211,7 +211,7 @@ public class Bot extends BotPeriodics {
     }
 
     private void applyPreSpinRPM() {
-        outtake.set(getTargetRPM()); // RPM mode: set shooter target RPM
+        outtake.set(getTargetRPM()*QUICKSPIN_OUTTAKE_RPM_SCALE); // RPM mode: set shooter target RPM
     }
 
     private Action actionNonIndexedDump() {

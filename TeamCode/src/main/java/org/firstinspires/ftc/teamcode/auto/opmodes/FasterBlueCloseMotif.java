@@ -90,7 +90,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
         // Remove actionStartOuttake in toShoot when adding this
         Action start = new ParallelAction(
                 botActions.initializeAuto(Indexer.IndexerState.two),
-                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.actionStartOuttake(SHOOT_RPM)
         );
 
         // remove soon
