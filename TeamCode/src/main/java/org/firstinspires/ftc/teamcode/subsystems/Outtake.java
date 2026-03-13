@@ -78,6 +78,14 @@ public class Outtake {
             {116.6, 4700}
     };
 
+    private static final double[][] REGRESSION_DATA_REDUCED = {
+            {46.4, 3400},
+            {61.7, 3660},
+            {78.7, 3775},
+            {88.6, 4100},
+            {116.6, 4700}
+    };
+
     public Outtake(HardwareMap hardwareMap, Mode mode) {
         shooter = new MotorEx(hardwareMap, "outtake");
         shooter.setInverted(true);
@@ -152,16 +160,24 @@ public class Outtake {
         return range * (range * (range * -0.000281754 + 0.228245) - 13.14333) + 3623.28132;
     }
 
-    private double linearInterpolationRegressionRPM(double range) {
+    private double linearInterpolation(double range, double[][] data) {
         double sum = 0;
-        for (int i = 0; i < REGRESSION_DATA.length - 1; i++) {
-            double min = i == 0 ? Double.MIN_VALUE : REGRESSION_DATA[i][0];
-            double max = i == REGRESSION_DATA.length - 2 ? Double.MAX_VALUE : REGRESSION_DATA[i + 1][0];
+        for (int i = 0; i < data.length - 1; i++) {
+            double min = i == 0 ? Double.MIN_VALUE : data[i][0];
+            double max = i == data.length - 2 ? Double.MAX_VALUE : data[i + 1][0];
             if (range >= min && range < max) sum +=
-                    (range - REGRESSION_DATA[i][0]) / (REGRESSION_DATA[i + 1][0] - REGRESSION_DATA[i][0]) *
-                            (REGRESSION_DATA[i + 1][1] - REGRESSION_DATA[i][1]) + REGRESSION_DATA[i][1];
+                    (range - data[i][0]) / (data[i + 1][0] - data[i][0]) *
+                            (data[i + 1][1] - data[i][1]) + data[i][1];
         }
         return sum;
+    }
+
+    private double linearInterpolationRegressionRPM(double range) {
+        return linearInterpolation(range, REGRESSION_DATA);
+    }
+
+    private double linearInterpolationRegressionReducedRPM(double range) {
+        return linearInterpolation(range, REGRESSION_DATA_REDUCED);
     }
 
     public double getRegressionRPM(double range)
@@ -170,7 +186,7 @@ public class Outtake {
             return INTAKE_MIN_RPM;
         }
         // Just use one of the three functions above
-        return linearInterpolationRegressionRPM(range);
+        return linearInterpolationRegressionReducedRPM(range);
     }
 
     // Within the range and has been in range for spinupInRangeMinTime
