@@ -109,7 +109,7 @@ public class BotActions {
                     telemetry.addData("Rotated To Motif", "Color");
                     // Indexer.IndexerState gotoState = Indexer.IndexerState.values()[(state.index - 1) % Indexer.IndexerState.values().length];
                     Indexer.IndexerState gotoState = state;
-                    indexer.moveTo(gotoState, true);
+                    indexer.moveTo(gotoState);
                     return;
                 }
             }

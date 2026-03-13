@@ -51,7 +51,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
 
     public static int SHOOT_RPM = 3580;
 
-    public static double timeUntilStartOuttake = 1.0; // Time until you start the outtake action, which still includes the wait for actuator
+    public static double timeUntilStartOuttake = 3.0; // Time until you start the outtake action, which still includes the wait for actuator
 
     // has quick outtake and quick intake
     // bunch of compensations for bad rr
