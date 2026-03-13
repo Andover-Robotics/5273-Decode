@@ -17,7 +17,7 @@ import java.util.Objects;
 public final class PinpointLocalizer implements Localizer {
     public static class Params {
         public double parYTicks = -2494.2960109075157; // y position of the parallel encoder (in tick units)
-        public double perpXTicks = -456.12387099359165; // x position of the perpendicular encoder (in tick units)
+        public double perpXTicks = -473.88616060370714; // x position of the perpendicular encoder (in tick units)
     }
 
     public static Params PARAMS = new Params();
@@ -26,7 +26,7 @@ public final class PinpointLocalizer implements Localizer {
     public final GoBildaPinpointDriver.EncoderDirection initialParDirection, initialPerpDirection;
 
     private Pose2d txWorldPinpoint;
-    private Pose2d txPinpointRobot = new Pose2d(0, 0, 0);
+    private Pose2d txPinpointRobot = new Pose2d(0, 0,  0);
 
     public PinpointLocalizer(HardwareMap hardwareMap, double inPerTick, Pose2d initialPose) {
         // TODO: make sure your config has a Pinpoint device with this name

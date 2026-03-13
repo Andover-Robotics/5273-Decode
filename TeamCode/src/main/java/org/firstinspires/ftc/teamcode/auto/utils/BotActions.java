@@ -38,14 +38,14 @@ public class BotActions {
     private final Aimer aprilAimer;
     private final MecanumDrive drive;
 
-    public static double NON_INDEX_SPIN_TIME = 1.35; //seconds of full-power indexer blast
-    public static double FULL_BLAST_POWER =0.25;
+    public static double NON_INDEX_SPIN_TIME = 1.67; //seconds of full-power indexer blast
+    public static double FULL_BLAST_POWER =0.35;
 
     public static double ball1TimeDisp = 0.66;
     public static double  ball2TimeDisp = 1.10;
     public static double  timeToIntake = 2.50;
 
-    public static boolean continuousAprilTagLock;
+    private boolean continuousAprilTagLock;
     public static double cooldownFeedbackIntake = 0;
     public static double quickspinRpmScale = 0.93;
     private double lastTurnCorrection;

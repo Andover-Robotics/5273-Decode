@@ -51,7 +51,7 @@ public class Indexer {
 
     // Offsets
     public static double offsetAngle = 77.0; // 77 for normal, 105 is for auto
-    public static double autoOuttakeOffsetAngle = 32.0;
+    public static double autoOuttakeOffsetAngle = 0.0;
     public static double outtakeOffsetAngle = 200.0;
 
     // Slot spacing for color sensing
