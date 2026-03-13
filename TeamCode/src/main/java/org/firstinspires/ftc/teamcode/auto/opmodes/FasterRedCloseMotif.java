@@ -44,8 +44,6 @@ public class FasterRedCloseMotif extends LinearOpMode {
     public static double gate_X = -12;
     public static double gate_Y = 60;
 
-    public static double gateWaitTime = 1.5;
-
     public static double PARK_X = 6;
     public static double PARK_Y = 68;
 
@@ -95,6 +93,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                 botActions.actionStartOuttake(SHOOT_RPM)
         );
 
+        /*
         // remove soon
         Action toObelisk = new ParallelAction(
                 drive.actionBuilder(startPose)
@@ -105,6 +104,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                 botActions.actionStartOuttake(SHOOT_RPM),
                 botActions.actionScanObelisk()
         );
+        */
 
         Action toShoot = new ParallelAction(
                 drive.actionBuilder(startPose) // obeliskPose
@@ -112,9 +112,10 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .build(),
 
                 botActions.actionScanObelisk(), // With new cam pose
-                botActions.actionStartOuttake(SHOOT_RPM),
-                //botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 0), // - no need in 12 ball or more
-
+                new SequentialAction(
+                botActions.actionStartOuttake(SHOOT_RPM)/*,
+                botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 0),*/ // - no need in 12 ball or more
+                ),
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake()
@@ -123,10 +124,6 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Action intake1 = botActions.actionIntakeThreeFeedback(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeDrivingVel);
 
-        Action goToGate = drive.actionBuilder(intake1PoseEnd)
-                .strafeToLinearHeading(gate.position, gate.heading)
-                .waitSeconds(gateWaitTime)
-                .build();
 
         Action backToShoot1 = new ParallelAction(
                 drive.actionBuilder(intake1PoseEnd) // goToGate
@@ -146,7 +143,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
-                        .strafeToSplineHeading(dodgeGate.position, dodgeGate.heading)
+                        .strafeTo(dodgeGate.position)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
@@ -213,7 +210,6 @@ public class FasterRedCloseMotif extends LinearOpMode {
                                 //toObelisk,
                                 toShoot,
                                 intake1,
-                                /*goToGate,*/
                                 backToShoot1,
                                 intake2,
                                 backToShoot2,
