@@ -133,7 +133,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 1),
+                botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 0),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake),

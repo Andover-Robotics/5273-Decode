@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Autonomous(name = "Faster Red Auto No Motif", group = "Autonomous")
 public class FasterRedClose extends LinearOpMode {
 
-    public static double maxIntakeDrivingVel = 17;
+    public static double maxIntakeDrivingVel = 30;
 
     public static double SHOOT_X = 17;
     public static double SHOOT_Y = 40;

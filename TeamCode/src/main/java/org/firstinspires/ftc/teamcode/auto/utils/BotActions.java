@@ -49,6 +49,7 @@ public class BotActions {
     public static double cooldownFeedbackIntake = 0;
     public static double quickspinRpmScale = 0.93;
     private double lastTurnCorrection;
+    private int obeliskId = 0;
 
     public BotActions(
             Hardware hardware,
@@ -118,7 +119,7 @@ public class BotActions {
     public Action actionSetSomeShizzle() {
         return new SequentialAction(
                 new InstantAction(() -> indexer.setAutoOuttaking(false)),
-                new InstantAction(() -> indexer.setIntaking(true)),
+                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.one)),
                 new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.two, true))
                 );
     }
@@ -142,7 +143,7 @@ public class BotActions {
         return new ParallelAction(
             new SequentialAction(
                 new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
-                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.one))
+                new InstantAction(() -> indexer.setIntaking(true, startingSlot))
             ),
             new InstantAction(actuator::down),
             new InstantAction(intake::runSlow)
@@ -244,9 +245,9 @@ public class BotActions {
                 }
 
                 aprilTag.scanObeliskTag();
-                int id = aprilTag.getObeliskId();
+                obeliskId = aprilTag.getObeliskId();
 
-                return !(id == 21 || id == 22 || id == 23);
+                return !(obeliskId == 21 || obeliskId == 22 || obeliskId == 23);
             }
         };
     }
@@ -288,7 +289,7 @@ public class BotActions {
     }
 
     public int getObeliskId() {
-        return aprilTag.getObeliskId();
+        return obeliskId;
     }
 
 
