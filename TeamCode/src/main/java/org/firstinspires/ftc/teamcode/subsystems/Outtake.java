@@ -46,6 +46,38 @@ public class Outtake {
     private long spinupStartTime = -1;
     public static double INTAKE_MIN_RPM = 3500.0;
 
+    private static final double[][] REGRESSION_DATA = {
+            {46.4, 3400},
+            {48.3, 3450},
+            {50.6, 3500},
+            {52.6, 3550},
+            {54.6, 3575},
+            {56.5, 3600},
+            {58.4, 3630},
+            {61.7, 3660},
+            {62.4, 3685},
+            {64.6, 3690},
+            {66.4, 3700},
+            {68.5, 3710},
+            {70.5, 3720},
+            {72.6, 3728},
+            {74.2, 3745},
+            {76.4, 3760},
+            {78.7, 3775},
+            {80.3, 3830},
+            {82.5, 3900},
+            {84.5, 3930},
+            {86.4, 3985},
+            {88.6, 4100},
+            {92.4, 4200},
+            {96.4, 4280},
+            {100.6, 4370},
+            {104.5, 4460},
+            {108, 4540},
+            {112.4, 4600},
+            {116.6, 4700}
+    };
+
     public Outtake(HardwareMap hardwareMap, Mode mode) {
         shooter = new MotorEx(hardwareMap, "outtake");
         shooter.setInverted(true);
@@ -112,12 +144,33 @@ public class Outtake {
         shooter2.set(motorPower);
     }
 
+    private double quarticRegressionRPM(double range) {
+        return range * (range * (range * (range * -0.000297337 + 0.0958661) - 11.09971) + 562.06918) - 6981.95351;
+    }
+
+    private double cubicRegressionRPM(double range) {
+        return range * (range * (range * -0.000281754 + 0.228245) - 13.14333) + 3623.28132;
+    }
+
+    private double linearInterpolationRegressionRPM(double range) {
+        double sum = 0;
+        for (int i = 0; i < REGRESSION_DATA.length - 1; i++) {
+            double min = i == 0 ? Double.MIN_VALUE : REGRESSION_DATA[i][0];
+            double max = i == REGRESSION_DATA.length - 2 ? Double.MAX_VALUE : REGRESSION_DATA[i + 1][0];
+            if (range >= min && range < max) sum +=
+                    (range - REGRESSION_DATA[i][0]) / (REGRESSION_DATA[i + 1][0] - REGRESSION_DATA[i][0]) *
+                            (REGRESSION_DATA[i + 1][1] - REGRESSION_DATA[i][1]) + REGRESSION_DATA[i][1];
+        }
+        return sum;
+    }
+
     public double getRegressionRPM(double range)
     {
         if (Double.isNaN(range) || range <= 0) {
             return INTAKE_MIN_RPM;
         }
-        return 0.0107081 * Math.pow(range, 3) -2.16323 * Math.pow(range, 2) +147.59773 * range + 186.44772;
+        // Just use one of the three functions above
+        return linearInterpolationRegressionRPM(range);
     }
 
     // Within the range and has been in range for spinupInRangeMinTime
