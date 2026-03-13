@@ -139,11 +139,11 @@ public class BotActions {
 
 
 
-    public Action initializeAuto(Indexer.IndexerState startingSlot) { // only temporary for testing, this is done in actionQuickOuttake
+    public Action initializeAuto(Indexer.IndexerState indexerInitializedSlot) { // only temporary for testing, this is done in actionQuickOuttake
         return new ParallelAction(
             new SequentialAction(
                 new InstantAction(() -> indexer.initializeColors(Indexer.ArtifactColor.EMPTY)),
-                new InstantAction(() -> indexer.setIntaking(true, startingSlot))
+                new InstantAction(() -> indexer.setIntaking(true, indexerInitializedSlot)) // just to make it so it starts at a consistent spot
             ),
             new InstantAction(actuator::down),
             new InstantAction(intake::runSlow)

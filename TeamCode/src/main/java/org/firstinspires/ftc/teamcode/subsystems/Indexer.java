@@ -189,9 +189,9 @@ public class Indexer {
         moveTo(newState, false);
     }
 
-    // Move to a slot and forceRecommand will reissue the target even if it's the current slot.
-    public void moveTo(IndexerState newState, boolean forceRecommand) {
-        if (!forceRecommand && newState == state) return;
+    // Move to a slot and forceRecommend will reissue the target even if it's the current slot.
+    public void moveTo(IndexerState newState, boolean forceRecommend) {
+        if (!forceRecommend && newState == state) return;
 
         double targetAngle = getSlotCenterAngle(newState);
 
