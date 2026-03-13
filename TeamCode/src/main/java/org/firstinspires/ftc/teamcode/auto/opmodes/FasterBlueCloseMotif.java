@@ -57,7 +57,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
     // bunch of compensations for bad rr
     @Override
     public void runOpMode() {
-        Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
+        Pose2d startPose = new Pose2d(0, 0, Math.toRadians(180));
 
         Hardware hardware = new Hardware(hardwareMap, telemetry, this, startPose);
         BotActions botActions = hardware.actions;
