@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Autonomous(name = "Faster Red Auto With Motif", group = "Autonomous")
 public class FasterRedCloseMotif extends LinearOpMode {
 
-    public static double maxIntakeDrivingVel = 30;
+    public static double maxIntakeDrivingVel = 15;
 
     public static double OBELISK_X = 8;
     public static double OBELISK_Y = 36;
@@ -28,16 +28,16 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
     public static double SHOOT_X = 17;
     public static double SHOOT_Y = 40;
-    public static double SHOOT_HEADING_DEG = -140;
+    public static double SHOOT_HEADING_DEG = -135;
     public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 2; // -2
 
     public static double INTAKE_START_X = 12;
     public static double INTAKE2_START_OFFSET_X = 3.0;
     public static double INTAKE3_START_OFFSET_X = 5.0;
-    public static double INTAKE_END_X = -13.5;
+    public static double INTAKE_END_X = -16.5;
     public static double intake_END_2And3_XOffset = 8;
 
-    public static double INTAKE1_Y = 48.5;
+    public static double INTAKE1_Y = 52;
     public static double INTAKE2_Y = 76;
     public static double INTAKE3_Y = 96;
 
@@ -49,7 +49,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
     public static int SHOOT_RPM = 3580;
 
-    public static double timeUntilStartOuttake = 3.0; // Time until you start the outtake action, which still includes the wait for actuator
+    public static double timeUntilStartOuttake = 2.5; // Time until you start the outtake action, which still includes the wait for actuator
 
     // bunch of compensations for bad rr
     // has quick outtake and quick intake
@@ -114,7 +114,8 @@ public class FasterRedCloseMotif extends LinearOpMode {
                 botActions.actionScanObelisk(), // With new cam pose
                 new SequentialAction(
                 botActions.actionStartOuttake(SHOOT_RPM)/*,
-                botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 0),*/ // - no need in 12 ball or more
+                new SleepAction(1),
+                botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 2),*/ // - no need in 12 ball or more
                 ),
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake),
@@ -131,10 +132,10 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 0),
+                botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 2),
 
                 new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake + 1),
+                        new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake()
                 )
         );
@@ -148,10 +149,10 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 0),
+                botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
 
                 new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake + 2.0),
+                        new SleepAction(timeUntilStartOuttake),
                         botActions.actionQuickOuttake()
                 )
         );
@@ -183,7 +184,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(3, botActions::getObeliskId, 0),
+                botActions.rotateToMotifColorBeforeOuttake(3, botActions::getObeliskId, 2),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake + 1.0),

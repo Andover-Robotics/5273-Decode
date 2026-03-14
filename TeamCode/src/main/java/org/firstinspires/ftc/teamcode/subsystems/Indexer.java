@@ -170,7 +170,7 @@ public class Indexer {
 
     public void setIntaking(boolean isIntaking, IndexerState moveToState) {
         this.intaking = isIntaking;
-        moveTo(moveToState, true);
+        moveTo(moveToState, true); // forceRecommend true
     }
 
     public void setAutoOuttaking(boolean isAutoOuttaking) {

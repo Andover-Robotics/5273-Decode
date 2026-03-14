@@ -39,7 +39,7 @@ public class BotActions {
     private final MecanumDrive drive;
 
     public static double NON_INDEX_SPIN_TIME = 1.67; //seconds of full-power indexer blast
-    public static double FULL_BLAST_POWER =0.35;
+    public static double FULL_BLAST_POWER = 0.30;
 
     public static double ball1TimeDisp = 0.66;
     public static double  ball2TimeDisp = 1.10;
@@ -82,7 +82,7 @@ public class BotActions {
                 new SleepAction(NON_INDEX_SPIN_TIME),
                 new InstantAction(indexer::stopIndexerPower),
                 new InstantAction(() -> indexer.setAutoOuttaking(false)),
-                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two)), // This means, if you don't move the indexer, the next intaken will enter slot 0
+                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.one)), // This means, if you don't move the indexer, the next intaken will enter slot 0
                 new InstantAction(outtake::stop),
                 new InstantAction(actuator::down),
                 new InstantAction(indexer::initializeColors)
@@ -109,7 +109,7 @@ public class BotActions {
                     telemetry.addData("Rotated To Motif", "Color");
                     // Indexer.IndexerState gotoState = Indexer.IndexerState.values()[(state.index - 1) % Indexer.IndexerState.values().length];
                     Indexer.IndexerState gotoState = state;
-                    indexer.moveTo(gotoState);
+                    indexer.moveTo(gotoState, true);
                     return;
                 }
             }
@@ -119,7 +119,7 @@ public class BotActions {
     public Action actionSetSomeShizzle() {
         return new SequentialAction(
                 new InstantAction(() -> indexer.setAutoOuttaking(false)),
-                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.one)),
+                new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two)),
                 new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.two, true))
                 );
     }

@@ -27,13 +27,19 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 import java.util.Arrays;
+import java.util.function.IntSupplier;
 
 @Config
         @Autonomous(name = "Testing opmode", group = "Autonomous")
         public class TestingOpmode extends LinearOpMode {
 
             public static int row = 1;
-            public static int id = 21;
+            public static IntSupplier id = new IntSupplier() {
+                @Override
+                public int getAsInt() {
+                    return 21;
+                }
+            };
 
             public static double maxVel1 = 10;
 
@@ -62,8 +68,12 @@ import java.util.Arrays;
 
 
                 Action testSomething = new SequentialAction(
-                        new ParallelAction(
-                                botActions.actionSetSomeShizzle()
+                        new SequentialAction(
+                                botActions.actionSetSomeShizzle(),
+                                new SleepAction(2),
+                                botActions.actionQuickOuttake(),
+                                new SleepAction(2),
+                                botActions.rotateToMotifColorBeforeOuttake(row, id, 2)
                                 /*drive.actionBuilder(poseStart)
                                         .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint1)
                                         .build()*/
@@ -78,8 +88,8 @@ import java.util.Arrays;
                         new ParallelAction(
                                 botActions.actionPeriodic(),
                                 new SequentialAction(
-                                        testSomething,
-                                        intakeThreeAction
+                                        testSomething/*,
+                                        intakeThreeAction*/
                                 )
                         )
                 );
