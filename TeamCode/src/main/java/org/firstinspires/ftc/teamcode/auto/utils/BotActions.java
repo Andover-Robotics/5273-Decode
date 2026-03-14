@@ -91,16 +91,19 @@ public class BotActions {
 
     // helpers at the end of the file
     public Action rotateToMotifColorBeforeOuttake(int row, IntSupplier id, int startingSlot) {
-        if (id.getAsInt() != 21 && id.getAsInt() != 22 && id.getAsInt() != 23) {
-            return new InstantAction(() ->{});
-        }
-
         return new InstantAction(() -> {
+            // inside action to read obelisk id when function runs not runtime
+            int tagId = id.getAsInt();
+            if (tagId != 21 && tagId != 22 && tagId != 23) {
+                telemetry.addData("No obelisk Id 21, 22 or 23, id is", tagId);
+                return;
+            }
+
             // set current color configuration
             applyCurrentColorsFromRow(row, startingSlot);
 
             // get desired firing order from obelisk id
-            Indexer.ArtifactColor[] desiredOrder = getDesiredShootOrder(id.getAsInt());
+            Indexer.ArtifactColor[] desiredOrder = getDesiredShootOrder(tagId);
 
             // values gets an array of the enums
             for (Indexer.IndexerState state : Indexer.IndexerState.values()) {
@@ -122,6 +125,14 @@ public class BotActions {
                 new InstantAction(() -> indexer.setIntaking(true, Indexer.IndexerState.two)),
                 new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.two, true))
                 );
+    }
+
+    public Action actionSetIntakeReverse() {
+        return new InstantAction(intake::runBackwardsSlow);
+    }
+
+    public Action actionSetIntakePassive() {
+        return new InstantAction(intake::runSlow);
     }
 
     public Action actionIntakeThree(Pose2d startActionPose, Pose2d startIntakePose, Pose2d endPose, MecanumDrive drive, double maxVel) {
@@ -263,6 +274,8 @@ public class BotActions {
                 drive.updatePoseEstimate();
                 outtake.periodic();
                 indexer.update();
+
+                telemetry.update(); // could remove later
 
                 if (continuousAprilTagLock) {
                     aprilTag.scanGoalTag();
