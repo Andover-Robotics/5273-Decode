@@ -107,6 +107,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
         );
         */
 
+        // BE CAREFUL ABOUT THE OBELISK SCANNING AND COLOR ROTATING TIMING
         Action toShoot = new ParallelAction(
                 drive.actionBuilder(startPose) // obeliskPose
                         .strafeTo(obeliskPose.position)
@@ -114,15 +115,16 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .build(),
 
                 new SequentialAction(
-                        new SleepAction(1),
+                        new SleepAction(0.5),
                         botActions.actionScanObelisk()
                 ),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                //botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 2), // - no need in 12 ball or more
 
                 new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake),
+                        new SleepAction(timeUntilStartOuttake - 1),
+                        botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 2),
+                        new SleepAction(1),
                         botActions.actionQuickOuttake()
                 )
         );
@@ -139,12 +141,15 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
+                botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 2),
 
                 new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake()
+                        new SleepAction(timeUntilStartOuttake - 1),
+                        botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 2),
+                        new SleepAction(1),
+                        botActions.actionQuickOuttake(),
+                        botActions.actionSetIntakePassive()
                 )
         );
 
@@ -156,12 +161,15 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
+                botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
 
                 new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake()
+                        new SleepAction(timeUntilStartOuttake - 1),
+                        botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
+                        new SleepAction(1),
+                        botActions.actionQuickOuttake(),
+                        botActions.actionSetIntakePassive()
                 )
         );
 
@@ -191,12 +199,15 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
+                botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(3, botActions::getObeliskId, 2),
 
                 new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake()
+                        new SleepAction(timeUntilStartOuttake - 1),
+                        botActions.rotateToMotifColorBeforeOuttake(3, botActions::getObeliskId, 2),
+                        new SleepAction(1),
+                        botActions.actionQuickOuttake(),
+                        botActions.actionSetIntakePassive()
                 )
         );
 
