@@ -81,7 +81,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(0));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(0));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset - 16, INTAKE2_Y + 4, Math.toRadians(0));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset - 16, INTAKE2_Y + 4, Math.toRadians(20));
 
         Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(0));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(0));
@@ -158,7 +158,33 @@ public class FasterBlueCloseMotif extends LinearOpMode {
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
                         .strafeTo(dodgeGate.position)
+                        //.splineTo()
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
+                        .build(),
+
+                botActions.actionSetIntakeReverse(),
+                botActions.actionStartOuttake(SHOOT_RPM),
+
+                new SequentialAction(
+                        new SleepAction(timeUntilStartOuttake - 1),
+                        botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
+                        new SleepAction(1),
+                        botActions.actionQuickOuttake(),
+                        botActions.actionSetIntakePassive()
+                )
+        );
+
+        Action backToShoot2Spline = new ParallelAction(
+                drive.actionBuilder(intake2PoseEnd)
+                        .setTangent(Math.toRadians(0))
+                        .splineTo(dodgeGate.position, dodgeGate.heading)
+                        .splineToSplineHeading(
+                                new Pose2d(
+                                        shootingPose.position,
+                                        shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT))
+                                ),
+                                Math.toRadians(0)
+                        )
                         .build(),
 
                 botActions.actionSetIntakeReverse(),
@@ -230,10 +256,9 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                                 //toObelisk,
                                 toShoot,
                                 intake1,
-                                /*goToGate,*/
                                 backToShoot1,
                                 intake2,
-                                backToShoot2,
+                                backToShoot2Spline,
                                 intake3,
                                 backToShoot3,
                                 toPark

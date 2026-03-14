@@ -80,7 +80,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X - INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(180));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 12, INTAKE2_Y + 4, Math.toRadians(180));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 12, INTAKE2_Y + 4, Math.toRadians(160));
 
         Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X - INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(180));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(180));
@@ -142,11 +142,37 @@ public class FasterRedCloseMotif extends LinearOpMode {
                 )
         );
 
+        Action backToShoot2Spline = new ParallelAction(
+                drive.actionBuilder(intake2PoseEnd)
+                        .setTangent(Math.toRadians(0))
+                        .splineTo(dodgeGate.position, dodgeGate.heading)
+                        .splineToSplineHeading(
+                                new Pose2d(
+                                        shootingPose.position,
+                                        shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT))
+                                ),
+                                Math.toRadians(0)
+                        )
+                        .build(),
+
+                botActions.actionSetIntakeReverse(),
+                botActions.actionStartOuttake(SHOOT_RPM),
+
+                new SequentialAction(
+                        new SleepAction(timeUntilStartOuttake - 1),
+                        botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
+                        new SleepAction(1),
+                        botActions.actionQuickOuttake(),
+                        botActions.actionSetIntakePassive()
+                )
+        );
+
         Action intake2 = botActions.actionIntakeThreeFeedback(shootingPose, intake2PoseStart, intake2PoseEnd, drive, maxIntakeDrivingVel);
 
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
                         .strafeTo(dodgeGate.position)
+                        //.splineTo()
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
@@ -221,7 +247,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                                 intake1,
                                 backToShoot1,
                                 intake2,
-                                backToShoot2,
+                                backToShoot2Spline,
                                 intake3,
                                 backToShoot3,
                                 toPark
