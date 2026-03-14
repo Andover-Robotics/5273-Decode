@@ -144,14 +144,14 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Action backToShoot2Spline = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
-                        .setTangent(Math.toRadians(0))
+                        //.setTangent(Math.toRadians()
                         .splineTo(dodgeGate.position, dodgeGate.heading)
                         .splineToSplineHeading(
                                 new Pose2d(
                                         shootingPose.position,
                                         shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT))
                                 ),
-                                Math.toRadians(0)
+                                shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT))
                         )
                         .build(),
 
@@ -172,7 +172,6 @@ public class FasterRedCloseMotif extends LinearOpMode {
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
                         .strafeTo(dodgeGate.position)
-                        //.splineTo()
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
@@ -187,25 +186,6 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         botActions.actionSetIntakePassive()
                 )
         );
-
-        /*Action backToShoot2 = new ParallelAction(
-                drive.actionBuilder(intake2PoseEnd)
-                        .setTangent(Math.toRadians(180))
-
-                        .splineToSplineHeading(
-                                shootingPose,
-                                Math.toRadians(20)
-                        )
-                        .build(),
-
-                botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 0),
-
-                new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake + 0.5),
-                        botActions.actionQuickOuttake()
-                )
-        );*/
 
         Action intake3 = botActions.actionIntakeThreeFeedback(shootingPose, intake3PoseStart, intake3PoseEnd, drive, maxIntakeDrivingVel);
 
