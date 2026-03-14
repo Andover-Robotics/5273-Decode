@@ -186,7 +186,7 @@ public class Outtake {
             return INTAKE_MIN_RPM;
         }
         // Just use one of the three functions above
-        return linearInterpolationRegressionReducedRPM(range);
+        return cubicRegressionRPM(range);
     }
 
     // Within the range and has been in range for spinupInRangeMinTime
