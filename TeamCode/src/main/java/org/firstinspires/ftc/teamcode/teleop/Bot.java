@@ -32,6 +32,8 @@ public class Bot extends BotPeriodics {
     public static double FULL_BLAST_POWER = 0.8;
     public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.93; // 1.12
 
+    public static double withinRpmRange = 150; // 1.12
+
     public Indexer.ArtifactColor[] motif;
 
     private Indexer.ArtifactColor[] PPG = new Indexer.ArtifactColor[]{Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN};
@@ -222,7 +224,7 @@ public class Bot extends BotPeriodics {
                 new Action() {
                     @Override
                     public boolean run(TelemetryPacket packet) {
-                        return !outtake.inRange(50);
+                        return !outtake.inRange(withinRpmRange);
                     }
                 },
                 new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),
@@ -255,7 +257,7 @@ public class Bot extends BotPeriodics {
                 new Action() {
                     @Override
                     public boolean run(TelemetryPacket p) {
-                        return !outtake.inRange(100.0);
+                        return !outtake.inRange(withinRpmRange);
                     }
                 },
                 new InstantAction(actuator::upIndexed),
@@ -290,7 +292,7 @@ public class Bot extends BotPeriodics {
                 new Action() {
                     @Override
                     public boolean run(TelemetryPacket p) {
-                        return !outtake.inRange(100.0);
+                        return !outtake.inRange(withinRpmRange);
                     }
                 },
                 new InstantAction(actuator::upIndexed),
