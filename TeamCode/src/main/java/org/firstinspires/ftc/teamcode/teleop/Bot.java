@@ -29,7 +29,7 @@ public class Bot extends BotPeriodics {
     public FSM state;
 
     public static double NON_INDEX_SPIN_TIME = 3; //seconds of full-power indexer blast
-    public static double FULL_BLAST_POWER = 0.25;
+    public static double FULL_BLAST_POWER = 0.8;
     public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.93; // 1.12
 
     public Indexer.ArtifactColor[] motif;

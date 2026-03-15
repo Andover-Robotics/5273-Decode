@@ -112,7 +112,7 @@ public class BotPeriodics {
                 lastAimUpdate = now;
                 targetData = aimer.calculateLocalizedTurnPower();
                 lastTurnCorrection = targetData[0];
-                targetRPM = outtake.getRegressionRPM(targetData[1]);
+                //targetRPM = outtake.getRegressionRPM(targetData[1]); TESTING ______________________
                 bearingTurnCorrection = targetData[2];
             }
             turnCorrection = lastTurnCorrection;

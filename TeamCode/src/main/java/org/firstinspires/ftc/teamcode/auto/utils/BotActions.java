@@ -38,14 +38,14 @@ public class BotActions {
     private final Aimer aprilAimer;
     private final MecanumDrive drive;
 
-    public static double NON_INDEX_SPIN_TIME = 2.0; //seconds of full-power indexer blast
-    public static double FULL_BLAST_POWER = 0.30;
+    public static double NON_INDEX_SPIN_TIME = 2.67; //seconds of full-power indexer blast
+    public static double FULL_BLAST_POWER = 0.80;
 
     public static double ball1TimeDisp = 0.66;
     public static double  ball2TimeDisp = 1.10;
     public static double  timeToIntake = 2.50;
 
-    private boolean continuousAprilTagLock;
+    private boolean continuousLock = false;
     public static double cooldownFeedbackIntake = 0;
     public static double quickspinRpmScale = 0.93;
     private double lastTurnCorrection;
@@ -99,6 +99,8 @@ public class BotActions {
                 return;
             }
 
+            indexer.setLoaded(false);
+
             // set current color configuration
             applyCurrentColorsFromRow(row, startingSlot);
 
@@ -113,6 +115,7 @@ public class BotActions {
                     // Indexer.IndexerState gotoState = Indexer.IndexerState.values()[(state.index - 1) % Indexer.IndexerState.values().length];
                     Indexer.IndexerState gotoState = state;
                     indexer.moveTo(gotoState, true);
+                    indexer.setLoaded(true);
                     return;
                 }
             }
@@ -282,7 +285,7 @@ public class BotActions {
                 telemetry.addData("obelisk id: ", obeliskId);
                 telemetry.update(); // could remove later
 
-                if (continuousAprilTagLock) {
+                if (continuousLock) {
                     aprilTag.scanGoalTag();
                     double bearing = aprilTag.getBearing();
 
@@ -310,6 +313,9 @@ public class BotActions {
         return obeliskId;
     }
 
+    public void setAprilTag(boolean trueFalse) {
+        continuousLock = trueFalse;
+    }
 
     private boolean matchesOrder(int stateIndex, Indexer.ArtifactColor[] desired) {
         return indexer.getColorAt(Indexer.IndexerState.values()[stateIndex % 3]) == desired[0]

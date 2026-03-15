@@ -73,7 +73,8 @@ import java.util.function.IntSupplier;
                                 new SleepAction(2),
                                 /*botActions.actionSetIntakeReverse(),
                                 new SleepAction(2)*/
-                                botActions.rotateToMotifColorBeforeOuttake(row, id, 2)
+                                //botActions.rotateToMotifColorBeforeOuttake(row, id, 2)
+                                botActions.actionQuickOuttake()
                                 /*drive.actionBuilder(poseStart)
                                         .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint1)
                                         .build()*/
