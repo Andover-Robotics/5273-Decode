@@ -109,7 +109,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Action toShoot = new ParallelAction(
                 drive.actionBuilder(startPose) // obeliskPose
-                        .strafeToSplineHeading(new Vector2d(shootingPose.position.x - 9, shootingPose.position.y - 14), SHOOT_HEADING_DEG)
+                        .strafeToSplineHeading(new Vector2d(shootingPose.position.x - 12, shootingPose.position.y - 14), SHOOT_HEADING_DEG)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build(),
 

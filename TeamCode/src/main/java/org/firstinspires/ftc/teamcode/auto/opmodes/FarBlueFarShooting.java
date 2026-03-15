@@ -17,17 +17,17 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
-@Autonomous(name = "Far Red Far Shooting auto", group = "Autonomous")
-public class FarRedFarShooting extends LinearOpMode {
+@Autonomous(name = "Far Blue Far Shooting auto", group = "Autonomous")
+public class FarBlueFarShooting extends LinearOpMode {
     public static double OBELISK_X = 0;
     public static double OBELISK_Y = 16;
     public static double OBELISK_HEADING_DEG = 135;
 
     public static double SHOOT_X = 0;
     public static double SHOOT_Y = 16;
-    public static double SHOOT_HEADING_DEG = 75;
+    public static double SHOOT_HEADING_DEG = 105;
 
-    public static double PARK_X = 26;
+    public static double PARK_X = -26;
     public static double PARK_Y = 0;
 
     public static double SHOOT_RPM = 4500;
