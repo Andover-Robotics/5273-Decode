@@ -51,7 +51,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
 
     public static int SHOOT_RPM = 3580;
 
-    public static double timeUntilStartOuttake = 2.5; // Time until you start the outtake action, which still includes the wait for actuator
+    public static double timeUntilStartOuttake = 2.75; // Time until you start the outtake action, which still includes the wait for actuator
 
     // has quick outtake and quick intake
     // bunch of compensations for bad rr
@@ -114,17 +114,12 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build(),
 
-                new SequentialAction(
-                        new SleepAction(0.5),
-                        botActions.actionScanObelisk()
-                ),
-
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake - 1),
+                        new SleepAction(timeUntilStartOuttake - 0.5),
                         botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 2),
-                        new SleepAction(1),
+                        new SleepAction(0.5),
                         botActions.actionQuickOuttake()
                 )
         );
@@ -141,7 +136,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
@@ -161,12 +156,12 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake - 1),
-                        botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
+                        botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 2),
                         new SleepAction(1),
                         botActions.actionQuickOuttake(),
                         botActions.actionSetIntakePassive()
@@ -186,7 +181,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         )
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
@@ -205,7 +200,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
@@ -229,6 +224,10 @@ public class FasterBlueCloseMotif extends LinearOpMode {
 
         Actions.runBlocking(
                 new ParallelAction(
+                        new SequentialAction(
+                                new SleepAction(0.5),
+                                botActions.actionScanObelisk()
+                        ),
                         botActions.actionPeriodic(),
                         new SequentialAction(
                                 new InstantAction(() -> drive.localizer.setPose(startPose)),
@@ -238,7 +237,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                                 intake1,
                                 backToShoot1,
                                 intake2,
-                                backToShoot2Spline,
+                                backToShoot2,
                                 intake3,
                                 backToShoot3,
                                 toPark

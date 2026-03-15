@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -108,16 +109,16 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Action toShoot = new ParallelAction(
                 drive.actionBuilder(startPose) // obeliskPose
+                        .strafeToSplineHeading(new Vector2d(shootingPose.position.x - 9, shootingPose.position.y - 14), SHOOT_HEADING_DEG)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build(),
 
-                botActions.actionScanObelisk(), // With new cam pose
                 botActions.actionStartOuttake(SHOOT_RPM),
 
             new SequentialAction(
-                    new SleepAction(timeUntilStartOuttake - 1),
+                    new SleepAction(timeUntilStartOuttake - 0.5),
                     botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 2),
-                    new SleepAction(1),
+                    new SleepAction(0.5),
                     botActions.actionQuickOuttake()
             )
         );
@@ -130,7 +131,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
@@ -155,12 +156,12 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         )
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake - 1),
-                        botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
+                        botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 2),
                         new SleepAction(1),
                         botActions.actionQuickOuttake(),
                         botActions.actionSetIntakePassive()
@@ -175,7 +176,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
@@ -194,7 +195,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
@@ -218,6 +219,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Actions.runBlocking(
                 new ParallelAction(
+                        botActions.actionScanObelisk(),
                         botActions.actionPeriodic(),
                         new SequentialAction(
                                 new InstantAction(() -> drive.localizer.setPose(startPose)),
@@ -227,7 +229,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                                 intake1,
                                 backToShoot1,
                                 intake2,
-                                backToShoot2Spline,
+                                backToShoot2,
                                 intake3,
                                 backToShoot3,
                                 toPark

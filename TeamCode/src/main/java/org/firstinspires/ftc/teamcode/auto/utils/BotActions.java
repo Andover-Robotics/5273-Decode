@@ -38,7 +38,7 @@ public class BotActions {
     private final Aimer aprilAimer;
     private final MecanumDrive drive;
 
-    public static double NON_INDEX_SPIN_TIME = 1.67; //seconds of full-power indexer blast
+    public static double NON_INDEX_SPIN_TIME = 2.0; //seconds of full-power indexer blast
     public static double FULL_BLAST_POWER = 0.30;
 
     public static double ball1TimeDisp = 0.66;
@@ -246,19 +246,23 @@ public class BotActions {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
+                /*if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
                     return false;
-                }
+                }*/
 
-                if (timer.seconds() > 5.0) {
+                /*if (timer.seconds() > 8.0) {
                     telemetry.addLine("Obelisk scan timed out");
+                    telemetry.update();
                     return false;
-                }
+                }*/
 
                 aprilTag.scanObeliskTag();
                 obeliskId = aprilTag.getObeliskId();
 
-                return !(obeliskId == 21 || obeliskId == 22 || obeliskId == 23);
+                if (obeliskId == 21 || obeliskId == 22 || obeliskId == 23)
+                    return false;
+
+                return true;
             }
         };
     }
@@ -275,6 +279,7 @@ public class BotActions {
                 outtake.periodic();
                 indexer.update();
 
+                telemetry.addData("obelisk id: ", obeliskId);
                 telemetry.update(); // could remove later
 
                 if (continuousAprilTagLock) {
