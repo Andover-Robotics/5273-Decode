@@ -101,6 +101,10 @@ public class BotPeriodics {
         actionHost.update();
         drive.updatePoseEstimate();
 
+        if (outtake.getTargetRPM() > 0) {
+            outtake.set(targetRPM * Bot.QUICKSPIN_OUTTAKE_RPM_SCALE);
+        }
+
         if(rangeRequested || continuousAprilTagLock){
             long now = System.currentTimeMillis();
 
