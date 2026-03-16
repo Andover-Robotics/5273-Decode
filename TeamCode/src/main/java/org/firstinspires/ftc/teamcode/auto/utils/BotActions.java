@@ -38,8 +38,8 @@ public class BotActions {
     private final Aimer aprilAimer;
     private final MecanumDrive drive;
 
-    public static double NON_INDEX_SPIN_TIME = 2.67; //seconds of full-power indexer blast
-    public static double FULL_BLAST_POWER = 0.80;
+    public static double NON_INDEX_SPIN_TIME = 2.5; //seconds of full-power indexer blast
+    public static double FULL_BLAST_POWER = 0.25;
 
     public static double ball1TimeDisp = 0.66;
     public static double  ball2TimeDisp = 1.10;
@@ -95,11 +95,9 @@ public class BotActions {
             // inside action to read obelisk id when function runs not runtime
             int tagId = id.getAsInt();
             if (tagId != 21 && tagId != 22 && tagId != 23) {
-                telemetry.addData("No obelisk Id 21, 22 or 23, id is", tagId);
+                //telemetry.addData("No obelisk Id 21, 22 or 23, id is", tagId);
                 return;
             }
-
-            indexer.setLoaded(false);
 
             // set current color configuration
             applyCurrentColorsFromRow(row, startingSlot);
@@ -109,13 +107,12 @@ public class BotActions {
 
             // values gets an array of the enums
             for (Indexer.IndexerState state : Indexer.IndexerState.values()) {
-                telemetry.addData("Started search for index of proper", "color");
+                //telemetry.addData("Started search for index of proper", "color");
                 if (matchesOrder(state.index, desiredOrder)) {
-                    telemetry.addData("Rotated To Motif", "Color");
+                    //telemetry.addData("Rotated To Motif", "Color");
                     // Indexer.IndexerState gotoState = Indexer.IndexerState.values()[(state.index - 1) % Indexer.IndexerState.values().length];
                     Indexer.IndexerState gotoState = state;
                     indexer.moveTo(gotoState, true);
-                    indexer.setLoaded(true);
                     return;
                 }
             }
@@ -282,8 +279,8 @@ public class BotActions {
                 outtake.periodic();
                 indexer.update();
 
-                telemetry.addData("obelisk id: ", obeliskId);
-                telemetry.update(); // could remove later
+                //telemetry.addData("obelisk id: ", obeliskId);
+                //telemetry.update(); // could remove later
 
                 if (continuousLock) {
                     aprilTag.scanGoalTag();

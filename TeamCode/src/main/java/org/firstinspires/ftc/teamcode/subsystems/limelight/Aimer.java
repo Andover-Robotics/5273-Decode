@@ -13,7 +13,7 @@ public class Aimer {
     //bottom right of field is (144,0) (blue human player), top left (near blue goal) is (0,144)
     //the bot is relocalized at the respective human player zone
 
-    public static double kP = 0.06;
+    public static double kP = 0.04;
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kF = 0.0;

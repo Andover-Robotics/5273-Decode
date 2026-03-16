@@ -50,8 +50,8 @@ public class Indexer {
 
 
     // Offsets
-    public static double offsetAngle = 98.0;
-    public static double autoOuttakeOffsetAngle = -15.0;
+    public static double offsetAngle = 92.0;
+    public static double autoOuttakeOffsetAngle = -2.0;
     public static double outtakeOffsetAngle = 186.0;
 
     // Slot spacing for color sensing
@@ -244,10 +244,10 @@ public class Indexer {
     // 6) If full and still have UNKNOWN slots, optionally move to unknown slots for rescan
     public void update() {
         handleDashboardCommands();
+        refreshLoadedAndServo();
 
         if (intaking && SCAN_COLORS && !allClassified()) {
             updateSlotClassification(debugClosestSlot());
-            refreshLoadedAndServo();
         }
 
         // Update full flag every loop based on stored memory

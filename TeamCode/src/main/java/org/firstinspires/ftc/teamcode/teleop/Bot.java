@@ -118,9 +118,6 @@ public class Bot extends BotPeriodics {
         //else intake.stop();
 
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) indexer.moveTo(indexer.getState().next());
-
-        if(g2.wasJustPressed(GamepadKeys.Button.X))
-            indexer.initializeColors(Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN);
         if (g2.wasJustPressed(GamepadKeys.Button.A))
             state = FSM.QuickOuttake;
         if (g2.wasJustPressed(GamepadKeys.Button.B)){
@@ -128,8 +125,6 @@ public class Bot extends BotPeriodics {
             indexer.setIntaking(false);
             indexer.moveTo(indexer.getState());
         }
-        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
-            indexer.prepareQuickspin(new Indexer.ArtifactColor[]{Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE,Indexer.ArtifactColor.PURPLE});
         if (g2.wasJustPressed(GamepadKeys.Button.Y)) state = FSM.Endgame;
         if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
             indexer.prepareQuickspin(motif);

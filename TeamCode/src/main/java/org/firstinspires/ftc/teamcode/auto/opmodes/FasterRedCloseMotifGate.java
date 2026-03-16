@@ -21,15 +21,15 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Autonomous(name = "Faster Red Gate Auto With Motif", group = "Autonomous")
 public class FasterRedCloseMotifGate extends LinearOpMode {
 
-    public static double maxIntakeDrivingVel = 15;
+    public static double maxIntakeDrivingVel = 12;
 
-    public static double OBELISK_X = 8;
-    public static double OBELISK_Y = 36;
-    public static double OBELISK_HEADING_DEG = -60;
+    public static double OBELISK_X = 5;
+    public static double OBELISK_Y = 22;
+    public static double OBELISK_HEADING_DEG = -120;
 
     public static double SHOOT_X = 17;
-    public static double SHOOT_Y = 40;
-    public static double SHOOT_HEADING_DEG = -135;
+    public static double SHOOT_Y = 42;
+    public static double SHOOT_HEADING_DEG = -125;
     public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 2; // -2
 
     public static double INTAKE_START_X = 12;
@@ -38,20 +38,20 @@ public class FasterRedCloseMotifGate extends LinearOpMode {
     public static double INTAKE_END_X = -16.5;
     public static double intake_END_2And3_XOffset = 8;
 
-    public static double INTAKE1_Y = 52;
+    public static double INTAKE1_Y = 48;
     public static double INTAKE2_Y = 76;
     public static double INTAKE3_Y = 96;
 
-    public static double gate_X = -12;
-    public static double gate_Y = 60;
-    public static double gate_wait_seconds = 1.5;
+    public static double gate_X = -16;
+    public static double gate_Y = 59;
+    public static double gateWaitTime = 1.0;
 
     public static double PARK_X = 6;
     public static double PARK_Y = 68;
 
     public static int SHOOT_RPM = 3580;
 
-    public static double timeUntilStartOuttake = 2.5; // Time until you start the outtake action, which still includes the wait for actuator
+    public static double timeUntilStartOuttake = 2.25; // Time until you start the outtake action, which still includes the wait for actuator
 
     // bunch of compensations for bad rr
     // has quick outtake and quick intake
@@ -78,7 +78,7 @@ public class FasterRedCloseMotifGate extends LinearOpMode {
 
         Pose2d intake1PoseStart = new Pose2d(INTAKE_START_X, INTAKE1_Y, Math.toRadians(180));
         Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(180));
-        Pose2d gatePose = new Pose2d(gate_X, gate_Y, Math.toRadians(90));
+        Pose2d gate = new Pose2d(gate_X, gate_Y, Math.toRadians(-88));
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X - INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(180));
@@ -110,7 +110,7 @@ public class FasterRedCloseMotifGate extends LinearOpMode {
 
         Action toShoot = new ParallelAction(
                 drive.actionBuilder(startPose) // obeliskPose
-                        .strafeToSplineHeading(new Vector2d(shootingPose.position.x - 12, shootingPose.position.y - 14), SHOOT_HEADING_DEG)
+                        //.strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)  ---- gated
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build(),
 
@@ -130,36 +130,10 @@ public class FasterRedCloseMotifGate extends LinearOpMode {
                 .strafeToLinearHeading(gate.position, gate.heading)
                 .waitSeconds(gateWaitTime)
                 .build();
-;
 
         Action backToShoot1 = new ParallelAction(
                 drive.actionBuilder(gate)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
-                        .build(),
-
-                //botActions.actionSetIntakeReverse(),
-                botActions.actionStartOuttake(SHOOT_RPM),
-
-                new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake - 1),
-                        botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 2),
-                        new SleepAction(1),
-                        botActions.actionQuickOuttake(),
-                        botActions.actionSetIntakePassive()
-                )
-        );
-
-        Action backToShoot2Spline = new ParallelAction(
-                drive.actionBuilder(intake2PoseEnd)
-                        //.setTangent(Math.toRadians()
-                        .splineTo(dodgeGate.position, dodgeGate.heading)
-                        .splineToSplineHeading(
-                                new Pose2d(
-                                        shootingPose.position,
-                                        shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT))
-                                ),
-                                shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT))
-                        )
                         .build(),
 
                 //botActions.actionSetIntakeReverse(),
@@ -180,6 +154,31 @@ public class FasterRedCloseMotifGate extends LinearOpMode {
                 drive.actionBuilder(intake2PoseEnd)
                         .strafeTo(dodgeGate.position)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
+                        .build(),
+
+                //botActions.actionSetIntakeReverse(),
+                botActions.actionStartOuttake(SHOOT_RPM),
+
+                new SequentialAction(
+                        new SleepAction(timeUntilStartOuttake - 1),
+                        botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
+                        new SleepAction(1),
+                        botActions.actionQuickOuttake(),
+                        botActions.actionSetIntakePassive()
+                )
+        );
+
+        Action backToShoot2Spline = new ParallelAction(
+                drive.actionBuilder(intake2PoseEnd)
+                        //.setTangent(Math.toRadians()
+                        .splineTo(dodgeGate.position, dodgeGate.heading)
+                        .splineToSplineHeading(
+                                new Pose2d(
+                                        shootingPose.position,
+                                        shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT))
+                                ),
+                                shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT))
+                        )
                         .build(),
 
                 //botActions.actionSetIntakeReverse(),
