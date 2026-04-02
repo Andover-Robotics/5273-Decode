@@ -41,9 +41,9 @@ public class BotPeriodics {
     protected boolean rangeRequested = false;
     protected double[] targetData = {0,0,0};
 
-    protected boolean continuousIntake = true;
+    protected boolean continuousIntake = false;
 
-    public static double targetRPM = 3800;
+    public static double targetRPM = 2000;
     protected static final long AIM_UPDATE_INTERVAL_MS = 20;
 
     protected boolean twoMovementMode;
@@ -108,7 +108,7 @@ public class BotPeriodics {
                 lastAimUpdate = now;
                 targetData = aimer.calculateLocalizedTurnPower();
                 lastTurnCorrection = targetData[0];
-                targetRPM = outtake.getRegressionRPM(targetData[1]);
+                targetRPM = 2000;
                 bearingTurnCorrection = targetData[2];
             }
             turnCorrection = lastTurnCorrection;

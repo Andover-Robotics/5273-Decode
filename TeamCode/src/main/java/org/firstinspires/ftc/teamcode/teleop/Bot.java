@@ -41,6 +41,7 @@ public class Bot extends BotPeriodics {
     public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
         super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement);
         state = FSM.MotifSelection;
+        hardwareMap.voltageSensor.iterator().next().getVoltage(); // ensure voltage sensor is initialized before teleop starts
     }
 
     public void teleopInit() {
@@ -211,18 +212,19 @@ public class Bot extends BotPeriodics {
     }
 
     private void applyPreSpinRPM() {
-        outtake.set(getTargetRPM()*QUICKSPIN_OUTTAKE_RPM_SCALE); // RPM mode: set shooter target RPM
+        outtake.set(2000*QUICKSPIN_OUTTAKE_RPM_SCALE); // RPM mode: set shooter target RPM
     }
 
     private Action actionNonIndexedDump() {
-        final double rpm = getTargetRPM() * QUICKSPIN_OUTTAKE_RPM_SCALE;
+        final double rpm = 2000;
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),
                 new InstantAction(() -> outtake.set(rpm)),
                 new Action() {
                     @Override
                     public boolean run(TelemetryPacket packet) {
-                        return !outtake.inRange(50);
+                        outtake.set(2000*QUICKSPIN_OUTTAKE_RPM_SCALE);
+                        return !outtake.inRange(150);
                     }
                 },
                 new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),
@@ -244,7 +246,7 @@ public class Bot extends BotPeriodics {
             return new InstantAction(() -> {});
         }
 
-        final double rpm = getTargetRPM();
+        final double rpm = 2000;
 
         return new SequentialAction(
                 new InstantAction(() -> indexer.setIntaking(false)),
@@ -279,7 +281,7 @@ public class Bot extends BotPeriodics {
             });
         }
 
-        final double rpm = getTargetRPM();
+        final double rpm = 2000;
 
         return new SequentialAction(
                 new InstantAction(actuator::down),
