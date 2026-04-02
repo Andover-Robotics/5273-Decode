@@ -7,7 +7,6 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -18,46 +17,49 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
-@Autonomous(name = "Faster Red Auto With Motif", group = "Autonomous")
-public class FasterRedCloseMotif extends LinearOpMode {
+@Autonomous(name = "Faster Blue Gate Auto With Motif", group = "Autonomous")
+public class FasterBlueCloseMotifGate extends LinearOpMode {
 
     public static double maxIntakeDrivingVel = 12;
 
-    public static double OBELISK_X = 5;
-    public static double OBELISK_Y = 22;
-    public static double OBELISK_HEADING_DEG = -170;
+    public static double OBELISK_X = -19.5;
+    public static double OBELISK_Y = 13;
+    public static double OBELISK_HEADING_DEG = -15;
 
-    public static double SHOOT_X = 17;
+    public static double SHOOT_X = -17;
     public static double SHOOT_Y = 42;
-    public static double SHOOT_HEADING_DEG = -125;
-    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 2; // -2
+    public static double SHOOT_HEADING_DEG = -55;
+    public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 2; // 2
 
-    public static double INTAKE_START_X = 12;
+    public static double INTAKE_START_X = -12;
     public static double INTAKE2_START_OFFSET_X = 3.0;
     public static double INTAKE3_START_OFFSET_X = 5.0;
-    public static double INTAKE_END_X = -16.5;
-    public static double intake_END_2And3_XOffset = 8;
+    public static double INTAKE_END_X = 18.5;
+    public static double intake_END_2And3_XOffset = 7.5;
 
-    public static double INTAKE1_Y = 49;
+    public static double INTAKE1_Y = 48;
     public static double INTAKE2_Y = 76;
     public static double INTAKE3_Y = 96;
 
-    public static double PARK_X = 6;
+    public static double gate_X = 16;
+    public static double gate_Y = 59;
+    public static double gateWaitTime = 1.0;
+
+    public static double PARK_X = -6;
     public static double PARK_Y = 68;
 
     public static int SHOOT_RPM = 3580;
 
     public static double timeUntilStartOuttake = 2.25; // Time until you start the outtake action, which still includes the wait for actuator
 
-    // bunch of compensations for bad rr
     // has quick outtake and quick intake
+    // bunch of compensations for bad rr
     @Override
     public void runOpMode() {
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(180));
 
         Hardware hardware = new Hardware(hardwareMap, telemetry, this, startPose);
         BotActions botActions = hardware.actions;
-
         MecanumDrive drive = hardware.mecanumDrive;
 
         Pose2d obeliskPose = new Pose2d(
@@ -72,17 +74,18 @@ public class FasterRedCloseMotif extends LinearOpMode {
                 Math.toRadians(SHOOT_HEADING_DEG)
         );
 
-        Pose2d intake1PoseStart = new Pose2d(INTAKE_START_X, INTAKE1_Y, Math.toRadians(180));
-        Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(180));
+        Pose2d intake1PoseStart = new Pose2d(INTAKE_START_X, INTAKE1_Y, Math.toRadians(0));
+        Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(0));
+        Pose2d gate = new Pose2d(gate_X, gate_Y, Math.toRadians(-92));
 
-        Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X - INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
-        Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(180));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset + 12, INTAKE2_Y + 4, Math.toRadians(160));
+        Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(0));
+        Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(0));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset - 16, INTAKE2_Y + 4, Math.toRadians(20));
 
-        Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X - INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(180));
-        Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(180));
+        Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(0));
+        Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(0));
 
-        Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(180));
+        Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));
 
         // Remove actionStartOuttake in toShoot when adding this
         Action start = new ParallelAction(
@@ -103,26 +106,32 @@ public class FasterRedCloseMotif extends LinearOpMode {
         );
         */
 
+        // BE CAREFUL ABOUT THE OBELISK SCANNING AND COLOR ROTATING TIMING
         Action toShoot = new ParallelAction(
                 drive.actionBuilder(startPose) // obeliskPose
-                        .strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)
+                        //.strafeTo(obeliskPose.position)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
 
-            new SequentialAction(
-                    new SleepAction(timeUntilStartOuttake - 0.5),
-                    botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 2),
-                    new SleepAction(0.5),
-                    botActions.actionQuickOuttake()
-            )
+                new SequentialAction(
+                        new SleepAction(timeUntilStartOuttake - 0.5),
+                        //botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 2),
+                        new SleepAction(0.5),
+                        botActions.actionQuickOuttake()
+                )
         );
 
         Action intake1 = botActions.actionIntakeThreeFeedback(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeDrivingVel);
 
+        Action goToGate = drive.actionBuilder(intake1PoseEnd)
+                .strafeToLinearHeading(gate.position, gate.heading)
+                .waitSeconds(gateWaitTime)
+                .build();
+
         Action backToShoot1 = new ParallelAction(
-                drive.actionBuilder(intake1PoseEnd) // goToGate
+                drive.actionBuilder(gate) // goToGate
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
@@ -160,7 +169,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Action backToShoot2Spline = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
-                        //.setTangent(Math.toRadians()
+                        //.setTangent()
                         .splineTo(dodgeGate.position, dodgeGate.heading)
                         .splineToSplineHeading(
                                 new Pose2d(
@@ -176,7 +185,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake - 1),
-                        botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 2),
+                        botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
                         new SleepAction(1),
                         botActions.actionQuickOuttake(),
                         botActions.actionSetIntakePassive()
@@ -214,7 +223,10 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Actions.runBlocking(
                 new ParallelAction(
-                        botActions.actionScanObelisk(),
+                        new SequentialAction(
+                                new SleepAction(1.0),
+                                botActions.actionScanObelisk()
+                        ),
                         botActions.actionPeriodic(),
                         new SequentialAction(
                                 new InstantAction(() -> drive.localizer.setPose(startPose)),
@@ -222,6 +234,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                                 //toObelisk,
                                 toShoot,
                                 intake1,
+                                goToGate,
                                 backToShoot1,
                                 intake2,
                                 backToShoot2,

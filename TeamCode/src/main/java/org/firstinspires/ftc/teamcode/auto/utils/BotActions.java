@@ -38,14 +38,14 @@ public class BotActions {
     private final Aimer aprilAimer;
     private final MecanumDrive drive;
 
-    public static double NON_INDEX_SPIN_TIME = 1.67; //seconds of full-power indexer blast
-    public static double FULL_BLAST_POWER = 0.30;
+    public static double NON_INDEX_SPIN_TIME = 2.5; //seconds of full-power indexer blast
+    public static double FULL_BLAST_POWER = 0.25;
 
     public static double ball1TimeDisp = 0.66;
     public static double  ball2TimeDisp = 1.10;
     public static double  timeToIntake = 2.50;
 
-    private boolean continuousAprilTagLock;
+    private boolean continuousLock = false;
     public static double cooldownFeedbackIntake = 0;
     public static double quickspinRpmScale = 0.93;
     private double lastTurnCorrection;
@@ -95,7 +95,7 @@ public class BotActions {
             // inside action to read obelisk id when function runs not runtime
             int tagId = id.getAsInt();
             if (tagId != 21 && tagId != 22 && tagId != 23) {
-                telemetry.addData("No obelisk Id 21, 22 or 23, id is", tagId);
+                //telemetry.addData("No obelisk Id 21, 22 or 23, id is", tagId);
                 return;
             }
 
@@ -107,9 +107,9 @@ public class BotActions {
 
             // values gets an array of the enums
             for (Indexer.IndexerState state : Indexer.IndexerState.values()) {
-                telemetry.addData("Started search for index of proper", "color");
+                //telemetry.addData("Started search for index of proper", "color");
                 if (matchesOrder(state.index, desiredOrder)) {
-                    telemetry.addData("Rotated To Motif", "Color");
+                    //telemetry.addData("Rotated To Motif", "Color");
                     // Indexer.IndexerState gotoState = Indexer.IndexerState.values()[(state.index - 1) % Indexer.IndexerState.values().length];
                     Indexer.IndexerState gotoState = state;
                     indexer.moveTo(gotoState, true);
@@ -246,19 +246,23 @@ public class BotActions {
 
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-                if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
+                /*if (!opMode.opModeIsActive() || opMode.isStopRequested()) {
                     return false;
-                }
+                }*/
 
-                if (timer.seconds() > 5.0) {
+                /*if (timer.seconds() > 8.0) {
                     telemetry.addLine("Obelisk scan timed out");
+                    telemetry.update();
                     return false;
-                }
+                }*/
 
                 aprilTag.scanObeliskTag();
                 obeliskId = aprilTag.getObeliskId();
 
-                return !(obeliskId == 21 || obeliskId == 22 || obeliskId == 23);
+                if (obeliskId == 21 || obeliskId == 22 || obeliskId == 23)
+                    return false;
+
+                return true;
             }
         };
     }
@@ -275,9 +279,10 @@ public class BotActions {
                 outtake.periodic();
                 indexer.update();
 
-                telemetry.update(); // could remove later
+                //telemetry.addData("obelisk id: ", obeliskId);
+                //telemetry.update(); // could remove later
 
-                if (continuousAprilTagLock) {
+                if (continuousLock) {
                     aprilTag.scanGoalTag();
                     double bearing = aprilTag.getBearing();
 
@@ -305,6 +310,9 @@ public class BotActions {
         return obeliskId;
     }
 
+    public void setAprilTag(boolean trueFalse) {
+        continuousLock = trueFalse;
+    }
 
     private boolean matchesOrder(int stateIndex, Indexer.ArtifactColor[] desired) {
         return indexer.getColorAt(Indexer.IndexerState.values()[stateIndex % 3]) == desired[0]

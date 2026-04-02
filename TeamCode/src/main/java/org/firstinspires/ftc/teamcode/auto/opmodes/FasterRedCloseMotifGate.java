@@ -18,14 +18,14 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
-@Autonomous(name = "Faster Red Auto With Motif", group = "Autonomous")
-public class FasterRedCloseMotif extends LinearOpMode {
+@Autonomous(name = "Faster Red Gate Auto With Motif", group = "Autonomous")
+public class FasterRedCloseMotifGate extends LinearOpMode {
 
     public static double maxIntakeDrivingVel = 12;
 
     public static double OBELISK_X = 5;
     public static double OBELISK_Y = 22;
-    public static double OBELISK_HEADING_DEG = -170;
+    public static double OBELISK_HEADING_DEG = -120;
 
     public static double SHOOT_X = 17;
     public static double SHOOT_Y = 42;
@@ -38,9 +38,13 @@ public class FasterRedCloseMotif extends LinearOpMode {
     public static double INTAKE_END_X = -16.5;
     public static double intake_END_2And3_XOffset = 8;
 
-    public static double INTAKE1_Y = 49;
+    public static double INTAKE1_Y = 48;
     public static double INTAKE2_Y = 76;
     public static double INTAKE3_Y = 96;
+
+    public static double gate_X = -16;
+    public static double gate_Y = 59;
+    public static double gateWaitTime = 1.0;
 
     public static double PARK_X = 6;
     public static double PARK_Y = 68;
@@ -74,6 +78,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Pose2d intake1PoseStart = new Pose2d(INTAKE_START_X, INTAKE1_Y, Math.toRadians(180));
         Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(180));
+        Pose2d gate = new Pose2d(gate_X, gate_Y, Math.toRadians(-88));
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X - INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(180));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X - intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(180));
@@ -105,7 +110,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Action toShoot = new ParallelAction(
                 drive.actionBuilder(startPose) // obeliskPose
-                        .strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)
+                        //.strafeToSplineHeading(obeliskPose.position, obeliskPose.heading)  ---- gated
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build(),
 
@@ -121,8 +126,13 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
         Action intake1 = botActions.actionIntakeThreeFeedback(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeDrivingVel);
 
+        Action goToGate = drive.actionBuilder(intake1PoseEnd)
+                .strafeToLinearHeading(gate.position, gate.heading)
+                .waitSeconds(gateWaitTime)
+                .build();
+
         Action backToShoot1 = new ParallelAction(
-                drive.actionBuilder(intake1PoseEnd) // goToGate
+                drive.actionBuilder(gate)
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
@@ -176,7 +186,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake - 1),
-                        botActions.rotateToMotifColorBeforeOuttake(1, botActions::getObeliskId, 2),
+                        botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
                         new SleepAction(1),
                         botActions.actionQuickOuttake(),
                         botActions.actionSetIntakePassive()
@@ -222,6 +232,7 @@ public class FasterRedCloseMotif extends LinearOpMode {
                                 //toObelisk,
                                 toShoot,
                                 intake1,
+                                goToGate,
                                 backToShoot1,
                                 intake2,
                                 backToShoot2,
@@ -233,3 +244,4 @@ public class FasterRedCloseMotif extends LinearOpMode {
         );
     }
 }
+

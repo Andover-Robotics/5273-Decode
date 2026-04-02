@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -18,7 +19,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Config
 @Autonomous(name = "Far Leave Auto", group = "Autonomous")
 public class FarLeave extends LinearOpMode {
-    public static double PARK_X = 26;
+    public static double PARK_X = 24;
     public static double PARK_Y = 0;
 
     @Override
@@ -42,7 +43,9 @@ public class FarLeave extends LinearOpMode {
 
         Actions.runBlocking(
                 new ParallelAction(
+                        botActions.actionPeriodic(),
                         new SequentialAction(
+                                new InstantAction(() -> drive.localizer.setPose(startPose)),
                                 toPark
                         )
                 )

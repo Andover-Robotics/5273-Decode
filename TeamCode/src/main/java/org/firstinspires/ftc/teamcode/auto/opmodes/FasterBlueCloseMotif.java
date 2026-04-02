@@ -20,15 +20,15 @@ import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 @Autonomous(name = "Faster Blue Auto With Motif", group = "Autonomous")
 public class FasterBlueCloseMotif extends LinearOpMode {
 
-    public static double maxIntakeDrivingVel = 15;
+    public static double maxIntakeDrivingVel = 12;
 
     public static double OBELISK_X = -19.5;
-    public static double OBELISK_Y = 13;
+    public static double OBELISK_Y = 18;
     public static double OBELISK_HEADING_DEG = -15;
 
     public static double SHOOT_X = -17;
-    public static double SHOOT_Y = 40;
-    public static double SHOOT_HEADING_DEG = -45;
+    public static double SHOOT_Y = 42;
+    public static double SHOOT_HEADING_DEG = -55;
     public static double SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT = 2; // 2
 
     public static double INTAKE_START_X = -12;
@@ -37,21 +37,16 @@ public class FasterBlueCloseMotif extends LinearOpMode {
     public static double INTAKE_END_X = 18.5;
     public static double intake_END_2And3_XOffset = 7.5;
 
-    public static double INTAKE1_Y = 52;
+    public static double INTAKE1_Y = 48;
     public static double INTAKE2_Y = 76;
     public static double INTAKE3_Y = 96;
-
-    public static double gate_X = 12;
-    public static double gate_Y = 60;
-
-    public static double gateWaitTime = 1.5;
 
     public static double PARK_X = -6;
     public static double PARK_Y = 68;
 
     public static int SHOOT_RPM = 3580;
 
-    public static double timeUntilStartOuttake = 2.5; // Time until you start the outtake action, which still includes the wait for actuator
+    public static double timeUntilStartOuttake = 2.25; // Time until you start the outtake action, which still includes the wait for actuator
 
     // has quick outtake and quick intake
     // bunch of compensations for bad rr
@@ -77,11 +72,10 @@ public class FasterBlueCloseMotif extends LinearOpMode {
 
         Pose2d intake1PoseStart = new Pose2d(INTAKE_START_X, INTAKE1_Y, Math.toRadians(0));
         Pose2d intake1PoseEnd = new Pose2d(INTAKE_END_X, INTAKE1_Y, Math.toRadians(0));
-        Pose2d gate = new Pose2d(gate_X, gate_Y, Math.toRadians(90));
 
         Pose2d intake2PoseStart = new Pose2d(INTAKE_START_X + INTAKE2_START_OFFSET_X, INTAKE2_Y, Math.toRadians(0));
         Pose2d intake2PoseEnd = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset, INTAKE2_Y, Math.toRadians(0));
-        Pose2d dodgeGate = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset - 16, INTAKE2_Y + 4, Math.toRadians(0));
+        Pose2d dodgeGate = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset - 16, INTAKE2_Y + 4, Math.toRadians(20));
 
         Pose2d intake3PoseStart = new Pose2d(INTAKE_START_X + INTAKE3_START_OFFSET_X, INTAKE3_Y, Math.toRadians(0));
         Pose2d intake3PoseEnd = new Pose2d(INTAKE_END_X + intake_END_2And3_XOffset, INTAKE3_Y, Math.toRadians(0));
@@ -114,34 +108,24 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build(),
 
-                new SequentialAction(
-                        new SleepAction(0.5),
-                        botActions.actionScanObelisk()
-                ),
-
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake - 1),
+                        new SleepAction(timeUntilStartOuttake - 0.5),
                         botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 2),
-                        new SleepAction(1),
+                        new SleepAction(0.5),
                         botActions.actionQuickOuttake()
                 )
         );
 
         Action intake1 = botActions.actionIntakeThreeFeedback(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeDrivingVel);
 
-        Action goToGate = drive.actionBuilder(intake1PoseEnd)
-                .strafeToLinearHeading(gate.position, gate.heading)
-                .waitSeconds(gateWaitTime)
-                .build();
-
         Action backToShoot1 = new ParallelAction(
                 drive.actionBuilder(intake1PoseEnd) // goToGate
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
@@ -161,7 +145,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
@@ -173,24 +157,30 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                 )
         );
 
-        /*Action backToShoot2 = new ParallelAction(
+        Action backToShoot2Spline = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
-                        .setTangent(Math.toRadians(0))
-
+                        //.setTangent()
+                        .splineTo(dodgeGate.position, dodgeGate.heading)
                         .splineToSplineHeading(
-                                shootingPose,
-                                Math.toRadians(160)
+                                new Pose2d(
+                                        shootingPose.position,
+                                        shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT))
+                                ),
+                                shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT))
                         )
                         .build(),
 
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 0),
 
                 new SequentialAction(
-                        new SleepAction(timeUntilStartOuttake + 0.5),
-                        botActions.actionQuickOuttake()
+                        new SleepAction(timeUntilStartOuttake - 1),
+                        botActions.rotateToMotifColorBeforeOuttake(2, botActions::getObeliskId, 2),
+                        new SleepAction(1),
+                        botActions.actionQuickOuttake(),
+                        botActions.actionSetIntakePassive()
                 )
-        );*/
+        );
 
         Action intake3 = botActions.actionIntakeThreeFeedback(shootingPose, intake3PoseStart, intake3PoseEnd, drive, maxIntakeDrivingVel);
 
@@ -199,7 +189,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionSetIntakeReverse(),
+                //botActions.actionSetIntakeReverse(),
                 botActions.actionStartOuttake(SHOOT_RPM),
 
                 new SequentialAction(
@@ -223,6 +213,10 @@ public class FasterBlueCloseMotif extends LinearOpMode {
 
         Actions.runBlocking(
                 new ParallelAction(
+                        new SequentialAction(
+                                new SleepAction(0.5),
+                                botActions.actionScanObelisk()
+                        ),
                         botActions.actionPeriodic(),
                         new SequentialAction(
                                 new InstantAction(() -> drive.localizer.setPose(startPose)),
@@ -230,7 +224,7 @@ public class FasterBlueCloseMotif extends LinearOpMode {
                                 //toObelisk,
                                 toShoot,
                                 intake1,
-                                /*goToGate,*/
+                                //goToGate,
                                 backToShoot1,
                                 intake2,
                                 backToShoot2,

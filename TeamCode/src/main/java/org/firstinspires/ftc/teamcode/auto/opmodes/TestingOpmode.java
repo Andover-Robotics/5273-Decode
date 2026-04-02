@@ -71,9 +71,10 @@ import java.util.function.IntSupplier;
                         new SequentialAction(
                                 botActions.actionSetSomeShizzle(),
                                 new SleepAction(2),
-                                botActions.actionQuickOuttake(),
-                                new SleepAction(2),
-                                botActions.rotateToMotifColorBeforeOuttake(row, id, 2)
+                                /*botActions.actionSetIntakeReverse(),
+                                new SleepAction(2)*/
+                                //botActions.rotateToMotifColorBeforeOuttake(row, id, 2)
+                                botActions.actionQuickOuttake()
                                 /*drive.actionBuilder(poseStart)
                                         .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint1)
                                         .build()*/
@@ -86,6 +87,10 @@ import java.util.function.IntSupplier;
 
                 Actions.runBlocking(
                         new ParallelAction(
+                                /*new SequentialAction(
+                                        new SleepAction(0.5),
+                                        botActions.actionScanObelisk()
+                                ),*/
                                 botActions.actionPeriodic(),
                                 new SequentialAction(
                                         testSomething/*,

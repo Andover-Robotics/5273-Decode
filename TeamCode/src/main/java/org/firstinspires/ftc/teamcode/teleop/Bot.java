@@ -32,6 +32,8 @@ public class Bot extends BotPeriodics {
     public static double FULL_BLAST_POWER = 0.25;
     public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.93; // 1.12
 
+    public static double withinRpmRange = 150; // 1.12
+
     public Indexer.ArtifactColor[] motif;
 
     private Indexer.ArtifactColor[] PPG = new Indexer.ArtifactColor[]{Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN};
@@ -127,8 +129,6 @@ public class Bot extends BotPeriodics {
             indexer.setIntaking(false);
             indexer.moveTo(indexer.getState());
         }
-        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
-            indexer.prepareQuickspin(new Indexer.ArtifactColor[]{Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE,Indexer.ArtifactColor.PURPLE});
         if (g2.wasJustPressed(GamepadKeys.Button.Y)) state = FSM.Endgame;
         if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
             indexer.prepareQuickspin(motif);
@@ -224,7 +224,7 @@ public class Bot extends BotPeriodics {
                     @Override
                     public boolean run(TelemetryPacket packet) {
                         outtake.set(2000*QUICKSPIN_OUTTAKE_RPM_SCALE);
-                        return !outtake.inRange(150);
+                        return !outtake.inRange(withinRpmRange);
                     }
                 },
                 new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),
@@ -257,7 +257,7 @@ public class Bot extends BotPeriodics {
                 new Action() {
                     @Override
                     public boolean run(TelemetryPacket p) {
-                        return !outtake.inRange(100.0);
+                        return !outtake.inRange(withinRpmRange);
                     }
                 },
                 new InstantAction(actuator::upIndexed),
@@ -292,7 +292,7 @@ public class Bot extends BotPeriodics {
                 new Action() {
                     @Override
                     public boolean run(TelemetryPacket p) {
-                        return !outtake.inRange(100.0);
+                        return !outtake.inRange(withinRpmRange);
                     }
                 },
                 new InstantAction(actuator::upIndexed),

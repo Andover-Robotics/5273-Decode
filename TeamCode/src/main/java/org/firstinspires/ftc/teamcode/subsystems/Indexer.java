@@ -50,9 +50,9 @@ public class Indexer {
 
 
     // Offsets
-    public static double offsetAngle = 77.0; // 77 for normal, 105 is for auto
-    public static double autoOuttakeOffsetAngle = 0.0;
-    public static double outtakeOffsetAngle = 200.0;
+    public static double offsetAngle = 92.0;
+    public static double autoOuttakeOffsetAngle = -2.0;
+    public static double outtakeOffsetAngle = 186.0;
 
     // Slot spacing for color sensing
     private static final double SLOT_SPACING_DEG = 120.0;
@@ -467,6 +467,10 @@ public class Indexer {
 
     public double getVoltage() { return servoControl.getVoltage(); }
     public double getTargetVoltage() { return servoControl.getTargetVoltage(); }
+
+    public void setLoaded(boolean loaded) {
+        servoControl.setLoaded(loaded);
+    }
 
     /* =========================
        UTIL
