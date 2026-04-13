@@ -115,22 +115,12 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
             );
         }
 
-        if (g1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) fieldCentric = true;
-        if (g1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) fieldCentric = false;
-
-        double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
-        double leftTrigger2 = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
-        double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-        double rightTrigger2 = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-
-        boolean leftDown = leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
-        boolean rightDown = rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || rightTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
-
-        if(leftDown){
+        if (g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > .01) {
             intake.run();
         }
-        else if(rightDown) intake.runBackwards();
-
+        else {
+            intake.stop();
+        }
 
         if (g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01)
             outtake.set(shooterRPM);
