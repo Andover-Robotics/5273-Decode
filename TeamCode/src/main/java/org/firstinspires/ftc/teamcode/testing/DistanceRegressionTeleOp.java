@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.Aimer;
+import org.firstinspires.ftc.teamcode.teleop.TeleopConstants;
 
 @Config
 @TeleOp(name = "DistanceRegressionTeleOp", group = "AA_main")
@@ -33,7 +34,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
     private double lastTurnCorrection = 0;
     private double bearingTurnCorrection = 0;
 
-    public static double shooterRPM = 0;
+    public static double shooterRPM = 1000;
 
     private boolean continuousAprilTagLock = false;
     private boolean fieldCentric = false;
@@ -88,7 +89,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
                 double[] data = aprilAimer.calculateLocalizedTurnPower();
 
                 lastTurnCorrection = data[0];
-                shooterRPM = outtake.getRegressionRPM(data[1]);
+                //shooterRPM = outtake.getRegressionRPM(data[1]);
                 bearingTurnCorrection = data[2];
             }
 
@@ -117,10 +118,19 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         if (g1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) fieldCentric = true;
         if (g1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) fieldCentric = false;
 
-        if (g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.01)
+        double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        double leftTrigger2 = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        double rightTrigger2 = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+
+        boolean leftDown = leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
+        boolean rightDown = rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || rightTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
+
+        if(leftDown){
             intake.run();
-        else
-            intake.stop();
+        }
+        else if(rightDown) intake.runBackwards();
+
 
         if (g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01)
             outtake.set(shooterRPM);
@@ -144,13 +154,23 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
         indexer.update();
 
-        if (g2.wasJustPressed(GamepadKeys.Button.X)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.A)) {
             continuousAprilTagLock = true;
             aprilTag.setCurrentCameraScannedId(0);
         }
 
-        if (g2.wasJustPressed(GamepadKeys.Button.Y)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.B)) {
             continuousAprilTagLock = false;
+        }
+
+        if (g1.wasJustPressed(GamepadKeys.Button.X)) {
+            if (colorGoalSelected.equals("Blue"))
+                aprilAimer.relocalize();
+            else if (colorGoalSelected.equals("Red"))
+                aprilAimer.relocalize();
+            else {
+                aprilAimer.relocalize();
+            }
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
