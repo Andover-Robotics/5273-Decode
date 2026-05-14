@@ -41,14 +41,12 @@ public class BotPeriodics {
     protected boolean rangeRequested = false;
     protected double[] targetData = {0,0,0};
 
-    protected boolean continuousIntake = true;
+    protected boolean continuousIntake = false;
 
-    public static double targetRPM = 3800;
+    public static double targetRPM = 2000;
     protected static final long AIM_UPDATE_INTERVAL_MS = 20;
 
     protected boolean twoMovementMode;
-
-    public static boolean TESTING_SHOOTING = false;
 
     public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
         intake = new Intake(hardwareMap);
@@ -104,7 +102,7 @@ public class BotPeriodics {
         drive.updatePoseEstimate();
 
         if (outtake.getTargetRPM() > 0) {
-            outtake.set(targetRPM * Bot.QUICKSPIN_OUTTAKE_RPM_SCALE);
+            outtake.set(2000 * Bot.QUICKSPIN_OUTTAKE_RPM_SCALE);
         }
 
         if(rangeRequested || continuousAprilTagLock){
@@ -114,9 +112,7 @@ public class BotPeriodics {
                 lastAimUpdate = now;
                 targetData = aimer.calculateLocalizedTurnPower();
                 lastTurnCorrection = targetData[0];
-                if (!TESTING_SHOOTING) {
-                    targetRPM = outtake.getRegressionRPM(targetData[1]);
-                }
+                targetRPM = 2000;
                 bearingTurnCorrection = targetData[2];
             }
             turnCorrection = lastTurnCorrection;

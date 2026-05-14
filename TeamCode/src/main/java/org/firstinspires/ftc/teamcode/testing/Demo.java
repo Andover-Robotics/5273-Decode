@@ -39,7 +39,7 @@ class DemoBot extends BotPeriodics {
     public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.94; // 1.12
     // Press-and-hold pre-spin minimum RPM
     public static double INTAKE_MIN_RPM = 3500.0;
-    public static double RPM = 2000.0;
+    public static double RPM =  1800.0;
 
     public DemoBot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive drive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
         super(hardwareMap, tele, drive, gamepad1, gamepad2, twoMovement);
@@ -83,7 +83,7 @@ class DemoBot extends BotPeriodics {
             if(actuator.getState() == Actuator.ActuatorState.DOWN){
                 actuator.upQuick();
             } else if (actuator.getState() == Actuator.ActuatorState.UP_QUICK){
-                actuator.upIndexed();
+                actuator.upQuick();
             } else {
                 actuator.down();
             }

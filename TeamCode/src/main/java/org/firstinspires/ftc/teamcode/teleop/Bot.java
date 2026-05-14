@@ -29,7 +29,7 @@ public class Bot extends BotPeriodics {
     public FSM state;
 
     public static double NON_INDEX_SPIN_TIME = 3; //seconds of full-power indexer blast
-    public static double FULL_BLAST_POWER = 0.8;
+    public static double FULL_BLAST_POWER = 0.25;
     public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.93; // 1.12
 
     public static double withinRpmRange = 150; // 1.12
@@ -43,6 +43,7 @@ public class Bot extends BotPeriodics {
     public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
         super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement);
         state = FSM.MotifSelection;
+        hardwareMap.voltageSensor.iterator().next().getVoltage(); // ensure voltage sensor is initialized before teleop starts
     }
 
     public void teleopInit() {
@@ -118,6 +119,9 @@ public class Bot extends BotPeriodics {
         //else intake.stop();
 
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) indexer.moveTo(indexer.getState().next());
+
+        if(g2.wasJustPressed(GamepadKeys.Button.X))
+            indexer.initializeColors(Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN);
         if (g2.wasJustPressed(GamepadKeys.Button.A))
             state = FSM.QuickOuttake;
         if (g2.wasJustPressed(GamepadKeys.Button.B)){
@@ -208,17 +212,18 @@ public class Bot extends BotPeriodics {
     }
 
     private void applyPreSpinRPM() {
-        outtake.set(getTargetRPM()*QUICKSPIN_OUTTAKE_RPM_SCALE); // RPM mode: set shooter target RPM
+        outtake.set(2000*QUICKSPIN_OUTTAKE_RPM_SCALE); // RPM mode: set shooter target RPM
     }
 
     private Action actionNonIndexedDump() {
-        final double rpm = getTargetRPM() * QUICKSPIN_OUTTAKE_RPM_SCALE;
+        final double rpm = 2000;
         return new SequentialAction(
                 new InstantAction(actuator::upQuick),
                 new InstantAction(() -> outtake.set(rpm)),
                 new Action() {
                     @Override
                     public boolean run(TelemetryPacket packet) {
+                        outtake.set(2000*QUICKSPIN_OUTTAKE_RPM_SCALE);
                         return !outtake.inRange(withinRpmRange);
                     }
                 },
@@ -241,7 +246,7 @@ public class Bot extends BotPeriodics {
             return new InstantAction(() -> {});
         }
 
-        final double rpm = getTargetRPM();
+        final double rpm = 2000;
 
         return new SequentialAction(
                 new InstantAction(() -> indexer.setIntaking(false)),
@@ -276,7 +281,7 @@ public class Bot extends BotPeriodics {
             });
         }
 
-        final double rpm = getTargetRPM();
+        final double rpm = 2000;
 
         return new SequentialAction(
                 new InstantAction(actuator::down),
