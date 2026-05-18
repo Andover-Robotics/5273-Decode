@@ -8,10 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
-import org.firstinspires.ftc.teamcode.subsystems.Actuator;
-import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
-import org.firstinspires.ftc.teamcode.subsystems.limelight.Aimer;
-import org.firstinspires.ftc.teamcode.subsystems.Indexer;
+import org.firstinspires.ftc.teamcode.subsystems.Aimer;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Movement;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
@@ -19,11 +16,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 @Config
 public class BotPeriodics {
     protected final Intake intake;
-    protected final Indexer indexer;
-    protected final Actuator actuator;
     protected final Outtake outtake;
     protected final Movement movement;
-    protected final AprilTag aprilTag;
     protected final Aimer aimer;
     protected final MecanumDrive drive;
     protected final GamepadEx g1;
@@ -33,7 +27,7 @@ public class BotPeriodics {
     protected ActionHost actionHost;
     // camera vision
     protected boolean fieldCentric = false;
-    protected boolean continuousAprilTagLock = false;
+    protected boolean aimLock = false;
     protected long lastAimUpdate = 0;
     protected double lastTurnCorrection = 0.0;
     protected double turnCorrection = 0.0;
@@ -50,12 +44,9 @@ public class BotPeriodics {
 
     public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
         intake = new Intake(hardwareMap);
-        indexer = new Indexer(hardwareMap);
-        actuator = new Actuator(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         drive = mecanumDrive;
         movement = new Movement(hardwareMap, drive);
-        aprilTag = new AprilTag(hardwareMap, tele);
         aimer = new Aimer(drive);
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
@@ -69,34 +60,12 @@ public class BotPeriodics {
         g1.readButtons();
         g2.readButtons();
 
-        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
-            continuousIntake = !continuousIntake;
-
-        double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
-        double leftTrigger2 = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
-        double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-        double rightTrigger2 = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-
-        boolean leftDown = leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
-        boolean rightDown = rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || rightTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
-
-        boolean inRange = indexer.isWithinTargetDegrees(5);
-
-        if(leftDown){
-            intake.run();
-        }
-        else if(rightDown) intake.runBackwards();
-        else if(continuousIntake) intake.runSlow();
-        else intake.stop();
-
-        // driver one (constant
-        handleAprilTagLock();
+        handleIntake();
+        handleAimLock();
         handleMovement();
         handleAllianceSelection();
-
         handleTelemetry();
 
-        indexer.update();
         outtake.periodic();
         actionHost.update();
         drive.updatePoseEstimate();
@@ -105,7 +74,7 @@ public class BotPeriodics {
             outtake.set(2000 * Bot.QUICKSPIN_OUTTAKE_RPM_SCALE);
         }
 
-        if(rangeRequested || continuousAprilTagLock){
+        if(rangeRequested || aimLock){
             long now = System.currentTimeMillis();
 
             if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
@@ -118,51 +87,47 @@ public class BotPeriodics {
             turnCorrection = lastTurnCorrection;
         }
     }
+
+    private void handleIntake() {
+        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) continuousIntake = !continuousIntake;
+        double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        double leftTrigger2 = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        double rightTrigger2 = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        boolean leftDown = leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
+        boolean rightDown = rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || rightTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
+        if(leftDown) intake.run();
+        else if(rightDown) intake.runBackwards();
+        else if(continuousIntake) intake.runSlow();
+        else intake.stop();
+    }
+
     // Periodic Handlers
     protected void handleTelemetry()
     {
         telemetry.addData("Field Centric", fieldCentric);
-        telemetry.addData("Indexer State", "%s -> %s",
-                indexer.getState(), indexer.getState().next());
-        telemetry.addData("Indexer Voltages",
-                "Target: %.3f , Actual: %.3f",
-                indexer.getTargetVoltage(), indexer.getVoltage());
         telemetry.addData("Outtake RPM", outtake.getRPM());
         telemetry.addData("Target RMP", outtake.getTargetRPM());
-        telemetry.addData("Actuator up?", actuator.isActivated());
-        telemetry.addData("Indexer Loaded?", indexer.isLoaded());
-        telemetry.addData("April Lock", continuousAprilTagLock);
         telemetry.addData("Bot Range", targetData[1]);
         telemetry.addData("Alliance selected", colorGoalSelected);
         telemetry.addData("Turn Correction:", turnCorrection);
         telemetry.addData("Intake power: ", intake.getPower());
         telemetry.addData("Last Turn Correction", lastTurnCorrection);
-        for (Indexer.IndexerState s : Indexer.IndexerState.values()) {
-            telemetry.addData(
-                    "Slot " + s.index,
-                    "%s (err=%.1f°)",
-                    indexer.getColorAt(s),
-                    indexer.debugSlotErrorDeg(s)
-            );
-        }
         telemetry.update();
     }
 
     protected void handleAllianceSelection() {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
-            aprilTag.setPipeline(0);
             aimer.setBlueTarget();
             colorGoalSelected = "Blue";
         }
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
-            aprilTag.setPipeline(1);
             aimer.setRedTarget();
             colorGoalSelected = "Red";
         }
     }
 
     protected void handleMovement() {
-
         double lx = g1.getLeftX();
         double ly = g1.getLeftY();
         double rx = g1.getRightX();
@@ -175,19 +140,16 @@ public class BotPeriodics {
         else movement.teleopTick(lx, ly, rx, turnCorrection);
     }
 
-    protected void handleAprilTagLock() {
-
+    protected void handleAimLock() {
         // Toggle continuous lock
         if (g1.wasJustPressed(GamepadKeys.Button.A)) {
-            continuousAprilTagLock = true;
+            aimLock = true;
             g1.gamepad.rumbleBlips(2);
         }
-
         if (g1.wasJustPressed(GamepadKeys.Button.B)) {
-            continuousAprilTagLock = false;
+            aimLock = false;
             g1.gamepad.rumbleBlips(1);
         }
-
         if (g1.wasJustPressed(GamepadKeys.Button.X)) {
             if (colorGoalSelected.equals("Blue"))
                 aimer.relocalize();
@@ -197,8 +159,7 @@ public class BotPeriodics {
                 aimer.relocalize();
             }
         }
-
-        if (!continuousAprilTagLock){
+        if (!aimLock){
             turnCorrection = 0;
         }
     }

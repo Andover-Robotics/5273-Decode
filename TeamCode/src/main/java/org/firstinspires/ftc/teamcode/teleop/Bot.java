@@ -12,84 +12,44 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
-import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 
 @Config
 public class Bot extends BotPeriodics {
     // haptics & lights
     private boolean rumbledAlready = false;
     public enum FSM {
-        MotifSelection,
         Intake,
-        QuickOuttake,
-        SortOuttake,
-        Endgame
+        Outtake
     }
 
     public FSM state;
-
-    public static double NON_INDEX_SPIN_TIME = 3; //seconds of full-power indexer blast
-    public static double FULL_BLAST_POWER = 0.25;
-    public static double QUICKSPIN_OUTTAKE_RPM_SCALE = 0.93; // 1.12
-
-    public static double withinRpmRange = 150; // 1.12
-
-    public Indexer.ArtifactColor[] motif;
-
-    private Indexer.ArtifactColor[] PPG = new Indexer.ArtifactColor[]{Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN};
-    private Indexer.ArtifactColor[] PGP = new Indexer.ArtifactColor[]{Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE};
-    private Indexer.ArtifactColor[] GPP = new Indexer.ArtifactColor[]{Indexer.ArtifactColor.GREEN, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE};
+    public static double withinRpmRange = 150; //
+    public static double FIRE_TIME = 3.0;
 
     public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
         super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement);
-        state = FSM.MotifSelection;
+        state = FSM.Outtake;
         hardwareMap.voltageSensor.iterator().next().getVoltage(); // ensure voltage sensor is initialized before teleop starts
     }
 
     public void teleopInit() {
-        indexer.initializeColors(Indexer.ArtifactColor.EMPTY);
-        indexer.setIntaking(true);
-        state = FSM.MotifSelection;
+        state = FSM.Outtake;
         outtake.stop();
     }
 
     public void teleopStart(){
-        actuator.down();
-        indexer.moveTo(Indexer.IndexerState.zero);
+        //TODO: Determine necessity of this john
     }
 
     public void teleopTick()
     {
         handlePeriodics();
         switch (state) {
-            case MotifSelection:
-                if (g2.wasJustPressed(GamepadKeys.Button.X)){
-                    motif = PPG;
-                    indexer.prepareQuickspin(motif);
-                    state = FSM.Intake;
-                }
-                if (g2.wasJustPressed(GamepadKeys.Button.Y)){
-                    motif = PGP;
-                    indexer.prepareQuickspin(motif);
-                    state = FSM.Intake;
-                }
-                if (g2.wasJustPressed(GamepadKeys.Button.B)){
-                    motif = GPP;
-                    indexer.prepareQuickspin(motif);
-                    state = FSM.Intake;
-                }
-                break;
             case Intake:
                 handleIntakeState();
                 break;
-            case QuickOuttake:
-                handleQuickOuttakeState();
-                break;
-            case SortOuttake:
-                handleSortOuttakeState();
-                break;
-            case Endgame:
-                handleEndgameState();
+            case Outtake:
+                handleOuttakeState();
                 break;
         }
     }
@@ -98,12 +58,12 @@ public class Bot extends BotPeriodics {
     private void handleIntakeState() {
         double leftTrigger = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         //double rightTrigger = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-
         // Press-and-hold right bumper to spin up shooter while in Intake
+        //safety measure - until you purposefully spin up (or change states, it can't shoot)
         if (!actionHost.isRunning()) {
             if (g2.gamepad.right_bumper) {
                 rangeRequested = true;
-                state = FSM.QuickOuttake;
+                state = FSM.Outtake;
                 applyPreSpinRPM();
             } else {
                 outtake.stop();
@@ -111,29 +71,10 @@ public class Bot extends BotPeriodics {
             }
         }
 
-
-        if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
-        else intake.stop();
-
-        //if (rightTrigger > TRIGGER_DEADZONE) intake.runBackwards();
-        //else intake.stop();
-
-        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) indexer.moveTo(indexer.getState().next());
-
-        if(g2.wasJustPressed(GamepadKeys.Button.X))
-            indexer.initializeColors(Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.PURPLE, Indexer.ArtifactColor.GREEN);
         if (g2.wasJustPressed(GamepadKeys.Button.A))
-            state = FSM.QuickOuttake;
-        if (g2.wasJustPressed(GamepadKeys.Button.B)){
-            state = FSM.SortOuttake;
-            indexer.setIntaking(false);
-            indexer.moveTo(indexer.getState());
-        }
-        if (g2.wasJustPressed(GamepadKeys.Button.Y)) state = FSM.Endgame;
-        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
-            indexer.prepareQuickspin(motif);
+            state = FSM.Outtake;
 
-        if(indexer.isFull() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){
+        if(storage.isFull() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){
             g1.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
             g2.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
             rumbledAlready = true;
@@ -142,20 +83,18 @@ public class Bot extends BotPeriodics {
 
     protected void handleAllianceSelection() {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
-            aprilTag.setPipeline(0);
             aimer.setBlueTarget();
             g1.gamepad.setLedColor(0, 0, 1, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Blue";
         }
         if (g1.wasJustPressed(GamepadKeys.Button.START)) {
-            aprilTag.setPipeline(1);
             aimer.setRedTarget();
             g1.gamepad.setLedColor(1, 0, 0, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Red";
         }
     }
 
-    private void handleQuickOuttakeState() {
+    private void handleOuttakeState() {
         // Allow press-and-hold pre-spin while in QuickOuttake (before running actions)
         if (!actionHost.isRunning()) {
             if (g2.gamepad.right_bumper) {
@@ -168,142 +107,28 @@ public class Bot extends BotPeriodics {
         }
 
         if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.X)) {
-            actionHost.start(actionNonIndexedDump());
+            actionHost.start(actionFire());
             rumbledAlready = false;
             state = FSM.Intake;
-        }
-        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
-            indexer.prepareQuickspin(motif);
-        if (g2.wasJustPressed(GamepadKeys.Button.BACK)) {
-            actionHost.abort();
-        }
-        if (g2.wasJustPressed(GamepadKeys.Button.A)) {
-            state = FSM.Intake;
-            indexer.setIntaking(true);
-            rumbledAlready = false;
-        }
-    }
 
-    private void handleSortOuttakeState() {
-        if (!actionHost.isRunning()) {
-            if (g2.wasJustPressed(GamepadKeys.Button.X)) {
-                actionHost.start(actionFireGreen());
-            }
-            if (g2.wasJustPressed(GamepadKeys.Button.Y)) {
-                actionHost.start(actionFirePurple());
-            }
-        }
-        if (g2.wasJustPressed(GamepadKeys.Button.BACK)) {
-            actionHost.abort();
-        }
-        if (g2.wasJustPressed(GamepadKeys.Button.A)) {
-            indexer.setIntaking(true);
-            state = FSM.Intake;
-        }
-    }
-
-
-    private void handleEndgameState() {
-        if (g2.wasJustPressed(GamepadKeys.Button.A)) {
-            state = FSM.Intake;
-
-            indexer.setIntaking(true);
-        }
-    }
+    }}
 
     private void applyPreSpinRPM() {
-        outtake.set(2000*QUICKSPIN_OUTTAKE_RPM_SCALE); // RPM mode: set shooter target RPM
+        outtake.set(2000); // RPM mode: set shooter target RPM
     }
 
-    private Action actionNonIndexedDump() {
+    private Action actionFire() {
         final double rpm = 2000;
         return new SequentialAction(
-                new InstantAction(actuator::upQuick),
                 new InstantAction(() -> outtake.set(rpm)),
-                new Action() {
-                    @Override
-                    public boolean run(TelemetryPacket packet) {
-                        outtake.set(2000*QUICKSPIN_OUTTAKE_RPM_SCALE);
-                        return !outtake.inRange(withinRpmRange);
-                    }
+                packet -> {
+                    outtake.set(2000);
+                    return !outtake.inRange(withinRpmRange);
                 },
-                new InstantAction(() -> indexer.setIndexerPower(FULL_BLAST_POWER)),
-                new SleepAction(NON_INDEX_SPIN_TIME),
-                new InstantAction(indexer::stopIndexerPower),
-                new InstantAction(outtake::stop),
-                new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.setIntaking(true)),
-                new InstantAction(indexer::initializeColors),
-                new InstantAction(() -> indexer.moveTo(Indexer.IndexerState.zero))
-        );
-    }
-
-    private Action actionFireGreen() {
-        final Indexer.IndexerState slot =
-                indexer.findBestSlotForColor(Indexer.ArtifactColor.GREEN);
-
-        if (slot == null) {
-            return new InstantAction(() -> {});
-        }
-
-        final double rpm = 2000;
-
-        return new SequentialAction(
-                new InstantAction(() -> indexer.setIntaking(false)),
-                new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.moveTo(slot, true)),
-                new InstantAction(() -> outtake.set(rpm)),
-                // wait for shooter RPM to be within 100 instead of fixed spinup
-                new Action() {
-                    @Override
-                    public boolean run(TelemetryPacket p) {
-                        return !outtake.inRange(withinRpmRange);
-                    }
-                },
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(1),
-
-                new InstantAction(() ->
-                        indexer.assignSlotColor(slot, Indexer.ArtifactColor.EMPTY)
-                ),
-
-                new InstantAction(outtake::stop),
-                new InstantAction(actuator::down)
-        );
-    }
-
-    private Action actionFirePurple() {
-        final Indexer.IndexerState slot =
-                indexer.findBestSlotForColor(Indexer.ArtifactColor.PURPLE);
-
-        if (slot == null) {
-            return new InstantAction(() -> {
-            });
-        }
-
-        final double rpm = 2000;
-
-        return new SequentialAction(
-                new InstantAction(actuator::down),
-                new InstantAction(() -> indexer.moveTo(slot, true)),
-
-                new InstantAction(() -> outtake.set(rpm)),
-                // wait for shooter RPM to be within 100 instead of fixed spinup
-                new Action() {
-                    @Override
-                    public boolean run(TelemetryPacket p) {
-                        return !outtake.inRange(withinRpmRange);
-                    }
-                },
-                new InstantAction(actuator::upIndexed),
-                new SleepAction(1),
-
-                new InstantAction(() ->
-                        indexer.assignSlotColor(slot, Indexer.ArtifactColor.EMPTY)
-                ),
-
-                new InstantAction(outtake::stop),
-                new InstantAction(actuator::down)
+                new InstantAction(storage::openGate),
+                new SleepAction(FIRE_TIME),
+                new InstantAction(storage::closeGate),
+                new InstantAction(outtake::stop)
         );
     }
 }
