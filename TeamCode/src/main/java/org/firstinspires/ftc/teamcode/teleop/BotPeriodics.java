@@ -71,7 +71,7 @@ public class BotPeriodics {
         drive.updatePoseEstimate();
 
         if (outtake.getTargetRPM() > 0) {
-            outtake.set(2000 * Bot.QUICKSPIN_OUTTAKE_RPM_SCALE);
+            outtake.set(targetRPM);
         }
 
         if(rangeRequested || aimLock){
@@ -81,7 +81,7 @@ public class BotPeriodics {
                 lastAimUpdate = now;
                 targetData = aimer.calculateLocalizedTurnPower();
                 lastTurnCorrection = targetData[0];
-                targetRPM = 2000;
+                targetRPM = outtake.getRegressionRPM(targetData[1]);
                 bearingTurnCorrection = targetData[2];
             }
             turnCorrection = lastTurnCorrection;

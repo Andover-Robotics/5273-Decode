@@ -114,15 +114,15 @@ public class Bot extends BotPeriodics {
     }}
 
     private void applyPreSpinRPM() {
-        outtake.set(2000); // RPM mode: set shooter target RPM
+        outtake.set(getTargetRPM()); // RPM mode: set shooter target RPM
     }
 
     private Action actionFire() {
-        final double rpm = 2000;
+        final double rpm = getTargetRPM();
         return new SequentialAction(
                 new InstantAction(() -> outtake.set(rpm)),
                 packet -> {
-                    outtake.set(2000);
+                    outtake.set(getTargetRPM());
                     return !outtake.inRange(withinRpmRange);
                 },
                 new InstantAction(storage::openGate),
