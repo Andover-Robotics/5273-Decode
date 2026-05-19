@@ -87,7 +87,6 @@ public class BotPeriodics {
             turnCorrection = lastTurnCorrection;
         }
     }
-
     private void handleIntake() {
         if(g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) continuousIntake = !continuousIntake;
         double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
