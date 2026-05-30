@@ -14,16 +14,17 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
 import org.firstinspires.ftc.teamcode.subsystems.Aimer;
+import org.firstinspires.ftc.teamcode.subsystems.Storage;
 
 @Config
 @TeleOp(name = "Localized aiming tester", group = "AA_main")
 public class LocalizedAimingTester extends LinearOpMode {
 
     private Intake intake;
-    private Indexer indexer;
-    private Actuator actuator;
+    private Storage storage;
     private Outtake outtake;
     private Movement movement;
+    private Turret turret;
 
     private AprilTag aprilTag;
     private Aimer aimer;
@@ -38,6 +39,7 @@ public class LocalizedAimingTester extends LinearOpMode {
 
     private boolean continuousGoalLock = false;
     private boolean fieldCentric = false;
+    public static boolean drivetrainAim = false;
 
     public static long aimUpdateInterval = 20; // ms
     private static String colorGoalSelected = "";
@@ -46,8 +48,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         intake = new Intake(hardwareMap);
-        indexer = new Indexer(hardwareMap);
-        actuator = new Actuator(hardwareMap);
+        storage = new Storage(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         drive = new MecanumDrive(hardwareMap, startPose);
         movement = new Movement(hardwareMap, drive);
@@ -70,9 +71,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     }
 
     private void startServos() {
-        actuator.down();
-        indexer.moveTo(Indexer.IndexerState.one);
-        indexer.setIntaking(true);
+        storage.closeGate();
     }
 
     // teleop type shift
@@ -102,21 +101,43 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         //drivetrain control
-        if (fieldCentric) {
-            movement.teleopTickFieldCentric(
-                    g1.getLeftX(),
-                    g1.getLeftY(),
-                    g1.getRightX(),
-                    turnCorrection,
-                    true
-            );
-        } else {
-            movement.teleopTick(
-                    g1.getLeftX(),
-                    g1.getLeftY(),
-                    g1.getRightX(),
-                    turnCorrection
-            );
+        if (drivetrainAim) {
+            if (fieldCentric) {
+                movement.teleopTickFieldCentric(
+                        g1.getLeftX(),
+                        g1.getLeftY(),
+                        g1.getRightX(),
+                        turnCorrection,
+                        true
+                );
+            } else {
+                movement.teleopTick(
+                        g1.getLeftX(),
+                        g1.getLeftY(),
+                        g1.getRightX(),
+                        turnCorrection
+                );
+            }
+        }
+        else {
+            if (fieldCentric) {
+                movement.teleopTickFieldCentric(
+                        g1.getLeftX(),
+                        g1.getLeftY(),
+                        g1.getRightX(),
+                        0,
+                        true
+                );
+            } else {
+                movement.teleopTick(
+                        g1.getLeftX(),
+                        g1.getLeftY(),
+                        g1.getRightX(),
+                        0
+                );
+            }
+
+            turret.rotate(bearingTurnCorrection);
         }
 
         // Toggle field centric
@@ -127,42 +148,42 @@ public class LocalizedAimingTester extends LinearOpMode {
         // intake control
         if (g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.01) {
             intake.run();
-        } else {
+            storage.runTransfer();
+        }
+        // Eject
+        else if (g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01) {
+            intake.runBackwards();
+            storage.runTransferBackwards();
+        }
+        else {
             intake.stop();
+            storage.stopTransfer();
         }
 
-        //outtake control
-        if (g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01) {
+        if (g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01)
             outtake.set(shooterRPM);
-        } else {
+        else
             outtake.stop();
-        }
 
-        // spindexer control
-        // Advance state
-        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-            indexer.moveTo(indexer.getState().next());
-        }
+        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_UP))
+            storage.openGate();
 
-        //actuator control
-        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
-            actuator.up();
-        }
-        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            actuator.down();
-        }
+        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
+            storage.closeGate();
 
-        // Scan obelisk
-        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT))
             aprilTag.scanObeliskTag();
-        }
 
-        // Set intaking ON
-        if (g1.wasJustPressed(GamepadKeys.Button.A) && !actuator.isActivated()) {
-            indexer.setIntaking(!indexer.isIntaking());
+        if (g1.wasJustPressed(GamepadKeys.Button.A)) {
+            continuousGoalLock = true;
+            aprilTag.setCurrentCameraScannedId(0);
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.B)) {
+            continuousGoalLock = false;
+        }
+
+        if (g1.wasJustPressed(GamepadKeys.Button.Y)) {
             if (colorGoalSelected.equals("Blue"))
                 aimer.relocalize();
             else if (colorGoalSelected.equals("Red"))
@@ -170,19 +191,6 @@ public class LocalizedAimingTester extends LinearOpMode {
             else {
                 aimer.relocalize();
             }
-        }
-
-        indexer.update();
-
-        // Begin continuous lock
-        if (g1.wasJustPressed(GamepadKeys.Button.X)) {
-            continuousGoalLock = true;
-            aprilTag.setCurrentCameraScannedId(0);
-        }
-
-        // Stop continuous lock
-        if (g1.wasJustPressed(GamepadKeys.Button.Y)) {
-            continuousGoalLock = false;
         }
 
         // Alliance selection
