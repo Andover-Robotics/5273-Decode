@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Config
 public class Intake {
     public static double SLOW_MULTIPLIER = 0.5;
-    public static double INTAKING_POWER = -1;
+    public static double INTAKING_POWER = 1;
     private MotorEx intakeMotor;
 
     public Intake(HardwareMap hardwareMap)
@@ -17,7 +17,7 @@ public class Intake {
     public void stop()
     {
         intakeMotor.stopMotor();
-    }d
+    }
     public void run()
     {
         intakeMotor.set(INTAKING_POWER);
