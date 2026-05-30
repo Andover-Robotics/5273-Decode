@@ -1,28 +1,30 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Config
 public class Turret {
-    public static double TICKS_TO_DEGREES = 0;
-    public static double ZERO_OFFSET = 0;
-    private final DcMotor motor;
+    private final SimpleServo servo1;
+    private final SimpleServo servo2;
+    private double angle = -67.0;
+
 
     public Turret(HardwareMap hardwareMap) {
-        motor = hardwareMap.get(DcMotor.class, "TurretMotor");
-        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        // May be needed?
-        // motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        servo1 = new SimpleServo(hardwareMap, "turretServo1", 0, 360);
+        servo2 = new SimpleServo(hardwareMap, "turretServo2", 0, 360);
+        // set initial position
+        servo1.setPosition(0);
+        servo2.setPosition(0);
     }
 
-    public double getCurrentAngle() {
-        double curAngle = motor.getCurrentPosition() * TICKS_TO_DEGREES + ZERO_OFFSET;
-        // In Java -2 % 5 = -2, not 3
-        return ((curAngle % 360) + 360) % 360;
-    }
-    public void setPower(double power) {
-        motor.setPower(power);
+    public double getCurrentAngle() {return angle;}
+    public void rotate(double angle) {
+        this.angle = angle;
+        double position = (angle / 355);
+        servo1.setPosition(position);
+        servo2.setPosition(position);
     }
 }
