@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
+import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 
 @Config
 @Autonomous(name = "Far Blue Far Shooting auto", group = "Autonomous")
@@ -52,7 +54,6 @@ public class FarBlueFarShooting extends LinearOpMode {
 
                 new SequentialAction(
                         new SleepAction(2),
-                        botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 2),
                         new SleepAction(2)
                 )
         );
@@ -66,7 +67,6 @@ public class FarBlueFarShooting extends LinearOpMode {
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake - 0.5),
-                        botActions.rotateToMotifColorBeforeOuttake(0, botActions::getObeliskId, 2),
                         new SleepAction(0.5),
                         botActions.actionQuickOuttake()
                 )

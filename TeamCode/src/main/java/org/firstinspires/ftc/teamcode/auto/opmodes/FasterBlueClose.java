@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
+import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 
 @Config
 @Autonomous(name = "Faster Blue Auto No Motif", group = "Autonomous")
@@ -79,7 +81,6 @@ public class FasterBlueClose extends LinearOpMode {
                         .build(),
 
                 botActions.actionStartOuttake(SHOOT_RPM),
-                botActions.initializeAuto(Indexer.IndexerState.two),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake),
@@ -87,7 +88,7 @@ public class FasterBlueClose extends LinearOpMode {
                 )
         );
 
-        Action intake1 = botActions.actionIntakeThreeFeedback(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeDrivingVel);
+        //Action intake1 = botActions.actionIntakeThreeFeedback(shootingPose, intake1PoseStart, intake1PoseEnd, drive, maxIntakeDrivingVel);
 
         Action goToGate = drive.actionBuilder(intake1PoseEnd)
                 .strafeToLinearHeading(gate.position, gate.heading)
@@ -107,7 +108,7 @@ public class FasterBlueClose extends LinearOpMode {
                 )
         );
 
-        Action intake2 = botActions.actionIntakeThreeFeedback(shootingPose, intake2PoseStart, intake2PoseEnd, drive, maxIntakeDrivingVel);
+        //Action intake2 = botActions.actionIntakeThreeFeedback(shootingPose, intake2PoseStart, intake2PoseEnd, drive, maxIntakeDrivingVel);
 
         Action backToShoot2 = new ParallelAction(
                 drive.actionBuilder(intake2PoseEnd)
@@ -142,7 +143,7 @@ public class FasterBlueClose extends LinearOpMode {
                 )
         );*/
 
-        Action intake3 = botActions.actionIntakeThreeFeedback(shootingPose, intake3PoseStart, intake3PoseEnd, drive, maxIntakeDrivingVel);
+        //Action intake3 = botActions.actionIntakeThreeFeedback(shootingPose, intake3PoseStart, intake3PoseEnd, drive, maxIntakeDrivingVel);
 
         Action backToShoot3 = new ParallelAction(
                 drive.actionBuilder(intake3PoseEnd)
@@ -172,12 +173,12 @@ public class FasterBlueClose extends LinearOpMode {
                         botActions.actionPeriodic(),
                         new SequentialAction(
                                 toShoot,
-                                intake1,
+                                //intake1,
                                 /*goToGate,*/
                                 backToShoot1,
-                                intake2,
+                                //intake2,
                                 backToShoot2,
-                                intake3,
+                                //intake3,
                                 backToShoot3,
                                 toPark
                         )

@@ -44,14 +44,11 @@ class DemoBot extends BotPeriodics {
     }
 
     public void teleopInit() {
-        indexer.initializeColors(Indexer.ArtifactColor.EMPTY);
-        indexer.setIntaking(true);
         outtake.stop();
     }
 
     public void teleopStart(){
-        actuator.down();
-        indexer.moveTo(Indexer.IndexerState.zero,true);
+        storage.closeGate();
     }
 
     public void teleopTick()
@@ -75,20 +72,13 @@ class DemoBot extends BotPeriodics {
         if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) intake.run();
         else intake.stop();
 
-        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) indexer.moveTo(indexer.getState().next());
+        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT));
 
         if(g2.wasJustPressed(GamepadKeys.Button.DPAD_UP)){
-            if(actuator.getState() == Actuator.ActuatorState.DOWN){
-                actuator.upQuick();
-            } else if (actuator.getState() == Actuator.ActuatorState.UP_QUICK){
-                actuator.upQuick();
-            } else {
-                actuator.down();
-            }
+
         }
 
         if(g2.wasJustPressed(GamepadKeys.Button.X)){
-            indexer.setIntaking(!indexer.isIntaking(),indexer.getState());
         }
     }
 

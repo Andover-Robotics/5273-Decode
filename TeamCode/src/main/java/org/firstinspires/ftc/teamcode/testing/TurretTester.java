@@ -14,7 +14,6 @@ public class TurretTester extends LinearOpMode {
         waitForStart();
         GamepadEx gamepad = new GamepadEx(gamepad1);
         while (opModeIsActive()) {
-            turret.setPower(gamepad.getLeftX());
             telemetry.addData("turret position", turret.getCurrentAngle());
             telemetry.update();
         }

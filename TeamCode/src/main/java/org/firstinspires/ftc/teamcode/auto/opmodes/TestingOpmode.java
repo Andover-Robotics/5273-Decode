@@ -11,12 +11,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
+import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 
 import java.util.function.IntSupplier;
 
 @Config
         @Autonomous(name = "Testing opmode", group = "Autonomous")
         public class TestingOpmode extends LinearOpMode {
+            private Hardware hardware;
 
             public static int row = 1;
             public static IntSupplier id = new IntSupplier() {
@@ -43,13 +46,7 @@ import java.util.function.IntSupplier;
                 Pose2d endPose = new Pose2d(1, 1, Math.toRadians(1));
 
 
-                Action intakeThreeAction = botActions.actionIntakeThreeFeedback(
-                        poseStart,
-                        endPose,
-                        endPose,
-                        drive,
-                        maxVel1
-                );
+                Action intakeThreeAction;
 
 
                 Action testSomething = new SequentialAction(

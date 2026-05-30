@@ -9,7 +9,6 @@ public class Paths {
 
     public static Action buildPath(
             MecanumDrive mecanumDrive,
-            BotActions actions,
             Pose2d startPose,
             Vector2d shootPos,
             Vector2d parkPos,

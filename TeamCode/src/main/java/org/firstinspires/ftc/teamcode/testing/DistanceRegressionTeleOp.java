@@ -14,15 +14,14 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 import org.firstinspires.ftc.teamcode.subsystems.limelight.AprilTag;
 import org.firstinspires.ftc.teamcode.subsystems.Aimer;
-import org.firstinspires.ftc.teamcode.teleop.TeleopConstants;
+import org.firstinspires.ftc.teamcode.subsystems.Storage;
 
 @Config
 @TeleOp(name = "DistanceRegressionTeleOp", group = "AA_main")
 public class DistanceRegressionTeleOp extends LinearOpMode {
 
     private Intake intake;
-    private Indexer indexer;
-    private Actuator actuator;
+    private Storage storage;
     private Outtake outtake;
     private Movement movement;
 
@@ -44,8 +43,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         intake = new Intake(hardwareMap);
-        indexer = new Indexer(hardwareMap);
-        actuator = new Actuator(hardwareMap);
+        storage = new Storage(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
         movement = new Movement(hardwareMap, drive);
@@ -70,9 +68,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
     }
 
     private void startServos() {
-        actuator.down();
-        indexer.moveTo(Indexer.IndexerState.one);
-        indexer.setIntaking(true);
+        storage.closeGate();
     }
 
     public void teleopTick(GamepadEx g1, GamepadEx g2, Telemetry telemetry) {
@@ -127,22 +123,14 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         else
             outtake.stop();
 
-        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT))
-            indexer.moveTo(indexer.getState().next());
-
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_UP))
-            actuator.up();
+            storage.openGate();
 
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
-            actuator.down();
+            storage.closeGate();
 
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT))
             aprilTag.scanObeliskTag();
-
-        if (g2.wasJustPressed(GamepadKeys.Button.A) && !actuator.isActivated())
-            indexer.setIntaking(!indexer.isIntaking());
-
-        indexer.update();
 
         if (g1.wasJustPressed(GamepadKeys.Button.A)) {
             continuousAprilTagLock = true;
