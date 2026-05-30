@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Aimer;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Movement;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
+import org.firstinspires.ftc.teamcode.subsystems.Storage;
 
 @Config
 public class BotPeriodics {
@@ -20,6 +21,7 @@ public class BotPeriodics {
     protected final Movement movement;
     protected final Aimer aimer;
     protected final MecanumDrive drive;
+    protected final Storage storage;
     protected final GamepadEx g1;
     protected final GamepadEx g2;
     protected final Telemetry telemetry;
@@ -46,6 +48,7 @@ public class BotPeriodics {
         intake = new Intake(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         drive = mecanumDrive;
+        storage = new Storage(hardwareMap);
         movement = new Movement(hardwareMap, drive);
         aimer = new Aimer(drive);
         g1 = new GamepadEx(gamepad1);
