@@ -196,12 +196,12 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
 
-        if (g1.wasJustPressed(GamepadKeys.Button.A)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             continuousGoalLock = true;
             aprilTag.setCurrentCameraScannedId(0);
         }
 
-        if (g1.wasJustPressed(GamepadKeys.Button.B)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
             continuousGoalLock = false;
         }
 

@@ -196,11 +196,11 @@ public class BotPeriodics {
 
     protected void handleAimLock() {
         // Toggle continuous lock
-        if (g1.wasJustPressed(GamepadKeys.Button.A)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             aimLock = true;
             g1.gamepad.rumbleBlips(2);
         }
-        if (g1.wasJustPressed(GamepadKeys.Button.B)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
             aimLock = false;
             g1.gamepad.rumbleBlips(1);
         }
