@@ -27,4 +27,11 @@ public class Turret {
         servo1.setPosition(position);
         servo2.setPosition(position);
     }
+
+    public void setServo1(double angle) {
+        servo1.setPosition(angle / 355);
+    }
+    public void setServo2(double angle) {
+        servo2.setPosition(angle / 355);
+    }
 }

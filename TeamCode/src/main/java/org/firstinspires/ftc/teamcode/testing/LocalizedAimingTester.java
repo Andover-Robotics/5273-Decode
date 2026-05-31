@@ -35,7 +35,12 @@ public class LocalizedAimingTester extends LinearOpMode {
     private long lastAimUpdateTime = 0;
     private double lastTurnCorrection = 0;
     private double bearingTurnCorrection = 0;
+    private double bearingAvoidCorrection = 0;
+    public static double BEARING_AVOID_IN_DEGREES = 20;
     public static double shooterRPM;
+
+    public static double theAngle1 = 0;
+    public static double theAngle2 = 0;
 
     private boolean continuousGoalLock = false;
     private boolean fieldCentric = false;
@@ -52,6 +57,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         drive = new MecanumDrive(hardwareMap, startPose);
         movement = new Movement(hardwareMap, drive);
+        turret = new Turret(hardwareMap);
 
         aprilTag = new AprilTag(hardwareMap, telemetry);
         aimer = new Aimer(drive);
@@ -120,12 +126,19 @@ public class LocalizedAimingTester extends LinearOpMode {
             }
         }
         else {
+            if (bearingTurnCorrection >= 180 - BEARING_AVOID_IN_DEGREES){
+                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-BEARING_AVOID_IN_DEGREES);
+            }
+            if (bearingTurnCorrection <= -180 + BEARING_AVOID_IN_DEGREES) {
+                bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(BEARING_AVOID_IN_DEGREES);
+            }
+
             if (fieldCentric) {
                 movement.teleopTickFieldCentric(
                         g1.getLeftX(),
                         g1.getLeftY(),
                         g1.getRightX(),
-                        0,
+                        bearingAvoidCorrection,
                         true
                 );
             } else {
@@ -133,11 +146,13 @@ public class LocalizedAimingTester extends LinearOpMode {
                         g1.getLeftX(),
                         g1.getLeftY(),
                         g1.getRightX(),
-                        0
+                        bearingAvoidCorrection
                 );
             }
 
-            turret.rotate(bearingTurnCorrection);
+            bearingAvoidCorrection = 0;
+
+            turret.rotate(Math.toDegrees(drive.localizer.getPose().heading.log()));
         }
 
         // Toggle field centric
@@ -171,8 +186,15 @@ public class LocalizedAimingTester extends LinearOpMode {
         if (g1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
             storage.closeGate();
 
-        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT))
-            aprilTag.scanObeliskTag();
+
+        // Testing
+        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+            turret.setServo1(theAngle1);
+        }
+        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+            turret.setServo2(theAngle2);
+        }
+
 
         if (g1.wasJustPressed(GamepadKeys.Button.A)) {
             continuousGoalLock = true;

@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Movement;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.subsystems.Storage;
+import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
 @Config
 public class BotPeriodics {
@@ -22,13 +23,17 @@ public class BotPeriodics {
     protected final Aimer aimer;
     protected final MecanumDrive drive;
     protected final Storage storage;
+    protected final Turret turret;
     protected final GamepadEx g1;
     protected final GamepadEx g2;
     protected final Telemetry telemetry;
     protected double bearingTurnCorrection = 0;
+    private double bearingAvoidCorrection = 0;
+    public static double BEARING_AVOID_IN_DEGREES = 20;
     protected ActionHost actionHost;
     // camera vision
     protected boolean fieldCentric = false;
+    public static boolean drivetrainAim = false;
     protected boolean aimLock = false;
     protected long lastAimUpdate = 0;
     protected double lastTurnCorrection = 0.0;
@@ -49,6 +54,7 @@ public class BotPeriodics {
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         drive = mecanumDrive;
         storage = new Storage(hardwareMap);
+        turret = new Turret(hardwareMap);
         movement = new Movement(hardwareMap, drive);
         aimer = new Aimer(drive);
         g1 = new GamepadEx(gamepad1);
@@ -138,8 +144,54 @@ public class BotPeriodics {
              ly = g2.getLeftY();
              rx = g2.getRightX();
         }
-        if (fieldCentric) movement.teleopTickFieldCentric(lx, ly, rx, turnCorrection, true);
-        else movement.teleopTick(lx, ly, rx, turnCorrection);
+
+        if (drivetrainAim) {
+            if (fieldCentric) {
+                movement.teleopTickFieldCentric(
+                        lx,
+                        ly,
+                        rx,
+                        turnCorrection,
+                        true
+                );
+            } else {
+                movement.teleopTick(
+                        lx,
+                        ly,
+                        rx,
+                        turnCorrection
+                );
+            }
+        }
+        else {
+            if (bearingTurnCorrection >= 180 - BEARING_AVOID_IN_DEGREES){
+                bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-BEARING_AVOID_IN_DEGREES);
+            }
+            if (bearingTurnCorrection <= -180 + BEARING_AVOID_IN_DEGREES) {
+                bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(BEARING_AVOID_IN_DEGREES);
+            }
+
+            if (fieldCentric) {
+                movement.teleopTickFieldCentric(
+                        g1.getLeftX(),
+                        g1.getLeftY(),
+                        g1.getRightX(),
+                        bearingAvoidCorrection,
+                        true
+                );
+            } else {
+                movement.teleopTick(
+                        g1.getLeftX(),
+                        g1.getLeftY(),
+                        g1.getRightX(),
+                        bearingAvoidCorrection
+                );
+            }
+
+            bearingAvoidCorrection = 0;
+
+            turret.rotate(Math.toDegrees(drive.localizer.getPose().heading.log()));
+        }
     }
 
     protected void handleAimLock() {
