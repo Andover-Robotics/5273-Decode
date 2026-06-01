@@ -62,12 +62,10 @@ public class Bot extends BotPeriodics {
         //safety measure - until you purposefully spin up (or change states, it can't shoot)
         if (!actionHost.isRunning()) {
             if (g2.gamepad.right_bumper) {
-                rangeRequested = true;
                 state = FSM.Outtake;
                 applyPreSpinRPM();
             } else {
                 outtake.stop();
-                rangeRequested = false;
             }
         }
 
@@ -99,9 +97,7 @@ public class Bot extends BotPeriodics {
         if (!actionHost.isRunning()) {
             if (g2.gamepad.right_bumper) {
                 applyPreSpinRPM();
-                rangeRequested = true;
             } else {
-                rangeRequested = false;
                 outtake.stop();
             }
         }

@@ -82,7 +82,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
             if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
                 lastAimUpdate = now;
 
-                double[] data = aprilAimer.calculateLocalizedTurnPower();
+                double[] data = aprilAimer.calculateLocalizedData();
 
                 lastTurnCorrection = data[0];
                 //shooterRPM = outtake.getRegressionRPM(data[1]);

@@ -42,7 +42,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     public static double theAngle1 = 0;
     public static double theAngle2 = 0;
 
-    private boolean continuousGoalLock = false;
+    private boolean aimlock = false;
     private boolean fieldCentric = false;
     public static boolean drivetrainAim = false;
 
@@ -87,58 +87,78 @@ public class LocalizedAimingTester extends LinearOpMode {
 
         double turnCorrection = 0;
         double[] data = {0, 0, 0};
-        if (continuousGoalLock) {
-            currentTime = System.currentTimeMillis();
+        currentTime = System.currentTimeMillis();
 
-            // Run scan + PID only every AIM_UPDATE_INTERVAL_MS
-            if (currentTime - lastAimUpdateTime >= aimUpdateInterval) {
-                lastAimUpdateTime = currentTime;
-                data = aimer.calculateLocalizedTurnPower();
-                lastTurnCorrection = data[0];
-                shooterRPM = outtake.getRegressionRPM(data[1]);
-                bearingTurnCorrection = data[2];
-            }
-
-            turnCorrection = lastTurnCorrection;
-
-            // turnCorrection = 0.9 * lastTurnCorrection; - don't want this
-        } else {
-            turnCorrection = 0;
+        // Run scan + PID only every AIM_UPDATE_INTERVAL_MS
+        if (currentTime - lastAimUpdateTime >= aimUpdateInterval) {
+            lastAimUpdateTime = currentTime;
+            data = aimer.calculateLocalizedData();
+            lastTurnCorrection = data[0];
+            shooterRPM = outtake.getRegressionRPM(data[1]);
+            bearingTurnCorrection = data[2];
         }
 
-        //drivetrain control
-        if (drivetrainAim) {
-            if (fieldCentric) {
-                movement.teleopTickFieldCentric(
-                        g1.getLeftX(),
-                        g1.getLeftY(),
-                        g1.getRightX(),
-                        turnCorrection,
-                        true
-                );
+        turnCorrection = lastTurnCorrection;
+        // turnCorrection = 0.9 * lastTurnCorrection; - don't want this
+
+        if (aimlock) {
+            //drivetrain control
+            if (drivetrainAim) {
+                if (fieldCentric) {
+                    movement.teleopTickFieldCentric(
+                            g1.getLeftX(),
+                            g1.getLeftY(),
+                            g1.getRightX(),
+                            turnCorrection,
+                            true
+                    );
+                } else {
+                    movement.teleopTick(
+                            g1.getLeftX(),
+                            g1.getLeftY(),
+                            g1.getRightX(),
+                            turnCorrection
+                    );
+                }
             } else {
-                movement.teleopTick(
-                        g1.getLeftX(),
-                        g1.getLeftY(),
-                        g1.getRightX(),
-                        turnCorrection
-                );
+                if (bearingTurnCorrection >= 180 - BEARING_AVOID_IN_DEGREES) {
+                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-BEARING_AVOID_IN_DEGREES);
+                }
+                if (bearingTurnCorrection <= -180 + BEARING_AVOID_IN_DEGREES) {
+                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(BEARING_AVOID_IN_DEGREES);
+                }
+
+                // turret control
+                if (fieldCentric) {
+                    movement.teleopTickFieldCentric(
+                            g1.getLeftX(),
+                            g1.getLeftY(),
+                            g1.getRightX(),
+                            bearingAvoidCorrection,
+                            true
+                    );
+                } else {
+                    movement.teleopTick(
+                            g1.getLeftX(),
+                            g1.getLeftY(),
+                            g1.getRightX(),
+                            bearingAvoidCorrection
+                    );
+                }
+
+                bearingAvoidCorrection = 0;
+
+                turret.rotate(Math.toDegrees(drive.localizer.getPose().heading.log()));
             }
         }
         else {
-            if (bearingTurnCorrection >= 180 - BEARING_AVOID_IN_DEGREES){
-                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-BEARING_AVOID_IN_DEGREES);
-            }
-            if (bearingTurnCorrection <= -180 + BEARING_AVOID_IN_DEGREES) {
-                bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(BEARING_AVOID_IN_DEGREES);
-            }
-
+            // No lock in
             if (fieldCentric) {
                 movement.teleopTickFieldCentric(
                         g1.getLeftX(),
                         g1.getLeftY(),
                         g1.getRightX(),
-                        bearingAvoidCorrection,
+                        0,
                         true
                 );
             } else {
@@ -146,13 +166,9 @@ public class LocalizedAimingTester extends LinearOpMode {
                         g1.getLeftX(),
                         g1.getLeftY(),
                         g1.getRightX(),
-                        bearingAvoidCorrection
+                        0
                 );
             }
-
-            bearingAvoidCorrection = 0;
-
-            turret.rotate(Math.toDegrees(drive.localizer.getPose().heading.log()));
         }
 
         // Toggle field centric
@@ -197,12 +213,12 @@ public class LocalizedAimingTester extends LinearOpMode {
 
 
         if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-            continuousGoalLock = true;
+            aimlock = true;
             aprilTag.setCurrentCameraScannedId(0);
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-            continuousGoalLock = false;
+            aimlock = false;
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.Y)) {
@@ -234,7 +250,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         telemetry.addData("Bot Range", data[1]); // moved limelight
         telemetry.addData("measured RPM", outtake.getRPM());
         telemetry.addData("Outtake Power", outtake.getPower());
-        telemetry.addData("Localized Lock", continuousGoalLock);
+        telemetry.addData("Localized Lock", aimlock);
         telemetry.addData("x", drive.localizer.getPose().position.x);
         telemetry.addData("y", drive.localizer.getPose().position.y);
         telemetry.addData("heading (deg)", Math.toDegrees(drive.localizer.getPose().heading.log()));

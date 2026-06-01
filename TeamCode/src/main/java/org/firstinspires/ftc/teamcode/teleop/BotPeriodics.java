@@ -39,7 +39,6 @@ public class BotPeriodics {
     protected double lastTurnCorrection = 0.0;
     protected double turnCorrection = 0.0;
     protected String colorGoalSelected = "";
-    protected boolean rangeRequested = false;
     protected double[] targetData = {0,0,0};
 
     protected boolean continuousIntake = false;
@@ -83,18 +82,16 @@ public class BotPeriodics {
             outtake.set(targetRPM);
         }
 
-        if(rangeRequested || aimLock){
-            long now = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
 
-            if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
-                lastAimUpdate = now;
-                targetData = aimer.calculateLocalizedTurnPower();
-                lastTurnCorrection = targetData[0];
-                targetRPM = outtake.getRegressionRPM(targetData[1]);
-                bearingTurnCorrection = targetData[2];
-            }
-            turnCorrection = lastTurnCorrection;
+        if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
+            lastAimUpdate = now;
+            targetData = aimer.calculateLocalizedData();
+            lastTurnCorrection = targetData[0];
+            targetRPM = outtake.getRegressionRPM(targetData[1]);
+            bearingTurnCorrection = targetData[2];
         }
+        turnCorrection = lastTurnCorrection;
     }
     private void handleIntake() {
         if(g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) continuousIntake = !continuousIntake;
@@ -145,52 +142,73 @@ public class BotPeriodics {
              rx = g2.getRightX();
         }
 
-        if (drivetrainAim) {
-            if (fieldCentric) {
-                movement.teleopTickFieldCentric(
-                        lx,
-                        ly,
-                        rx,
-                        turnCorrection,
-                        true
-                );
-            } else {
-                movement.teleopTick(
-                        lx,
-                        ly,
-                        rx,
-                        turnCorrection
-                );
+        if (aimLock) {
+            if (drivetrainAim) {
+                if (fieldCentric) {
+                    movement.teleopTickFieldCentric(
+                            lx,
+                            ly,
+                            rx,
+                            turnCorrection,
+                            true
+                    );
+                } else {
+                    movement.teleopTick(
+                            lx,
+                            ly,
+                            rx,
+                            turnCorrection
+                    );
+                }
+            }
+            else {
+                if (bearingTurnCorrection >= 180 - BEARING_AVOID_IN_DEGREES) {
+                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-BEARING_AVOID_IN_DEGREES);
+                }
+                if (bearingTurnCorrection <= -180 + BEARING_AVOID_IN_DEGREES) {
+                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(BEARING_AVOID_IN_DEGREES);
+                }
+
+                if (fieldCentric) {
+                    movement.teleopTickFieldCentric(
+                            lx,
+                            ly,
+                            rx,
+                            bearingAvoidCorrection,
+                            true
+                    );
+                } else {
+                    movement.teleopTick(
+                            lx,
+                            ly,
+                            rx,
+                            bearingAvoidCorrection
+                    );
+                }
+
+                bearingAvoidCorrection = 0;
+
+                turret.rotate(Math.toDegrees(drive.localizer.getPose().heading.log()));
             }
         }
         else {
-            if (bearingTurnCorrection >= 180 - BEARING_AVOID_IN_DEGREES){
-                bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-BEARING_AVOID_IN_DEGREES);
-            }
-            if (bearingTurnCorrection <= -180 + BEARING_AVOID_IN_DEGREES) {
-                bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(BEARING_AVOID_IN_DEGREES);
-            }
-
+            // no lock in
             if (fieldCentric) {
                 movement.teleopTickFieldCentric(
-                        g1.getLeftX(),
-                        g1.getLeftY(),
-                        g1.getRightX(),
-                        bearingAvoidCorrection,
+                        lx,
+                        ly,
+                        rx,
+                        0,
                         true
                 );
             } else {
                 movement.teleopTick(
-                        g1.getLeftX(),
-                        g1.getLeftY(),
-                        g1.getRightX(),
-                        bearingAvoidCorrection
+                        lx,
+                        ly,
+                        rx,
+                        0
                 );
             }
-
-            bearingAvoidCorrection = 0;
-
-            turret.rotate(Math.toDegrees(drive.localizer.getPose().heading.log()));
         }
     }
 

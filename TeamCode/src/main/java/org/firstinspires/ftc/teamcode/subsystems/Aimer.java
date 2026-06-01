@@ -71,7 +71,7 @@ public class Aimer {
         }
     }
 
-    public double[] calculateLocalizedTurnPower() {
+    public double[] calculateLocalizedData() {
         Pose2d robotPose = drive.localizer.getPose();
 
         // Vector from robot -> tag in field coordinates
