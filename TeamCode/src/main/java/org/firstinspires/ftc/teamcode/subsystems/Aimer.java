@@ -93,7 +93,7 @@ public class Aimer {
         bearing = angleWrapDegrees(bearing);
 
         double turnPower = -calculateTurnPowerFromBearing(bearing);
-        return new double[]{turnPower, range, bearing};
+        return new double[]{turnPower, range, bearing, Math.toDegrees(desiredHeading)};
     }
 
     private double angleWrapDegrees(double angle) {

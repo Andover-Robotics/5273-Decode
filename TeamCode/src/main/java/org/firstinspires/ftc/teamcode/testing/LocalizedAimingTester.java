@@ -36,6 +36,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     private double lastTurnCorrection = 0;
     private double bearingTurnCorrection = 0;
     private double bearingAvoidCorrection = 0;
+    public static double goalHeading = 0;
     public static double BEARING_AVOID_IN_DEGREES = 20;
     public static double shooterRPM;
 
@@ -96,6 +97,7 @@ public class LocalizedAimingTester extends LinearOpMode {
             lastTurnCorrection = data[0];
             shooterRPM = outtake.getRegressionRPM(data[1]);
             bearingTurnCorrection = data[2];
+            goalHeading = data[3];
         }
 
         turnCorrection = lastTurnCorrection;
@@ -148,7 +150,7 @@ public class LocalizedAimingTester extends LinearOpMode {
 
                 bearingAvoidCorrection = 0;
 
-                turret.rotate(Math.toDegrees(drive.localizer.getPose().heading.log()));
+                turret.rotate(bearingTurnCorrection);
             }
         }
         else {
@@ -203,14 +205,9 @@ public class LocalizedAimingTester extends LinearOpMode {
             storage.closeGate();
 
 
-        // Testing
         if (g1.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-            turret.setServo1(theAngle1);
+            turret.setServos(0);
         }
-        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
-            turret.setServo2(theAngle2);
-        }
-
 
         if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             aimlock = true;
@@ -254,6 +251,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         telemetry.addData("x", drive.localizer.getPose().position.x);
         telemetry.addData("y", drive.localizer.getPose().position.y);
         telemetry.addData("heading (deg)", Math.toDegrees(drive.localizer.getPose().heading.log()));
+        telemetry.addData("Goal heading (deg)", goalHeading);
         telemetry.addData("heading error (deg)", bearingTurnCorrection);
         telemetry.addData("tagPose x", Aimer.tagPose.position.x);
         telemetry.addData("tagPose y", Aimer.tagPose.position.y);

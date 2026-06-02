@@ -10,6 +10,7 @@ public class Turret {
     private final SimpleServo servo1;
     private final SimpleServo servo2;
     private double angle = -67.0;
+    public static double actualRangeOfMotion = 360.0;
 
 
     public Turret(HardwareMap hardwareMap) {
@@ -22,16 +23,29 @@ public class Turret {
 
     public double getCurrentAngle() {return angle;}
     public void rotate(double angle) {
-        this.angle = angle;
-        double position = (angle / 355);
-        servo1.setPosition(position);
-        servo2.setPosition(position);
+        /*        0.5
+                1.0 0.0
+         when angle is 0 degrees, servo sets to 0.5
+         when angle is 180 degrees, servo sets to 0.0
+         when angle is -180 degrees, servo sets to 1.0
+        */
+
+        // normalize heading error to servo's 0 to 1, negate angle based on whether turret is clockwise or counterclockwise from 0 to 1
+        double servoPos = (-angle+180)/actualRangeOfMotion;
+        servo1.setPosition(servoPos);
+        servo2.setPosition(servoPos);
     }
 
+    public void setServos(double angle) {
+        servo1.setPosition(angle / actualRangeOfMotion);
+        servo2.setPosition(angle / actualRangeOfMotion);
+    }
+
+    // used for testing
     public void setServo1(double angle) {
-        servo1.setPosition(angle / 355);
+        servo1.setPosition(angle / actualRangeOfMotion);
     }
     public void setServo2(double angle) {
-        servo2.setPosition(angle / 355);
+        servo2.setPosition(angle / actualRangeOfMotion);
     }
 }
