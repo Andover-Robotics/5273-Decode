@@ -15,10 +15,10 @@ import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 
 @Config
-@Autonomous(name = "Far Leave Auto", group = "Autonomous")
-public class FarLeave extends LinearOpMode {
-    public static double PARK_X = 24;
-    public static double PARK_Y = 0;
+@Autonomous(name = "Far Leave Y Auto", group = "Autonomous")
+public class FarLeaveY extends LinearOpMode {
+    public static double PARK_X = 0;
+    public static double PARK_Y = 24;
 
     @Override
     public void runOpMode() {
