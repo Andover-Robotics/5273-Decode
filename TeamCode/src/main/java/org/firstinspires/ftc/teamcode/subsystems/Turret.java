@@ -10,7 +10,7 @@ public class Turret {
     private final SimpleServo servo1;
     private final SimpleServo servo2;
     private double angle = -67.0;
-    public static double actualRangeOfMotion = 360.0;
+    public static double actualRangeOfMotion = 322.0;
 
 
     public Turret(HardwareMap hardwareMap) {
@@ -28,6 +28,8 @@ public class Turret {
          when angle is 0 degrees, servo sets to 0.5
          when angle is 180 degrees, servo sets to 0.0
          when angle is -180 degrees, servo sets to 1.0
+
+         The spot where the turret needs to do a 360 is in the back
         */
 
         // normalize heading error to servo's 0 to 1, negate angle based on whether turret is clockwise or counterclockwise from 0 to 1

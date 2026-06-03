@@ -62,12 +62,13 @@ public class Aimer {
     }
 
     public void relocalize(){
-        int botThick = 9;
-        //RED Human player zone
+        double botWidth = 14.9375;
+        double botLength = 17.875;
+        // -2.25 because turret not centered
         if(selectedGoal == Goal.RED){
-            drive.localizer.setPose(new Pose2d(0+botThick, 0+botThick, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(0+botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
         } else if (selectedGoal == Goal.BLUE){
-            drive.localizer.setPose(new Pose2d(144-botThick, 0+botThick, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(144-botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
         }
     }
 
