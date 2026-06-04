@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Storage {
     private final MotorEx transfer;
     private final SimpleServo gate;
-    public static double gateClosedPos = 0;
-    public static double gateOpenPos = 1;
+    public static double gateClosedPos = 0.2;
+    public static double gateOpenPos = 0;
     public static double TRANSFER_POWER = -1;
     public static double TRANSFER_POWER_STALL = -0.5;
     public Storage (HardwareMap hardwareMap){

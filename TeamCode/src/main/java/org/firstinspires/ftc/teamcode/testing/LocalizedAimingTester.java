@@ -37,7 +37,8 @@ public class LocalizedAimingTester extends LinearOpMode {
     private double bearingTurnCorrection = 0;
     private double bearingAvoidCorrection = 0;
     public static double goalHeading = 0;
-    public static double BEARING_AVOID_IN_DEGREES = 20;
+    public static double BEARING_AVOID_IN_DEGREES = 30;
+    public static boolean mecanumAvoid = true;
     public static double servoOffset = 92.5;
     public static double shooterRPM;
 
@@ -129,16 +130,19 @@ public class LocalizedAimingTester extends LinearOpMode {
                     );
                 }
             } else {
-                // Avoiding the heading where servo must wraparound, to disable set BEARING_AVOID_IN_DEGREES = 0
-                double wrappedTurnCorrection = angleWrapDegrees(bearingTurnCorrection + servoOffset);
-                double posLimit = 180 - BEARING_AVOID_IN_DEGREES; // counter clockwise limit
-                double negLimit = -180 + BEARING_AVOID_IN_DEGREES; // clockwise limit
+                if (mecanumAvoid) {
+                    // Avoiding the heading where servo must wraparound, to disable set BEARING_AVOID_IN_DEGREES = 0
+                    double wrappedTurnCorrection = angleWrapDegrees(bearingTurnCorrection + servoOffset + 180);
+                    double posLimit = 180 - BEARING_AVOID_IN_DEGREES; // counter clockwise limit
+                    double negLimit = -180 + BEARING_AVOID_IN_DEGREES; // clockwise limit
 
-                if (wrappedTurnCorrection >= posLimit) {
-                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-(wrappedTurnCorrection - posLimit));
-                }
-                else if (wrappedTurnCorrection <= negLimit) {
-                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(negLimit - wrappedTurnCorrection);
+                    if (wrappedTurnCorrection >= posLimit) {
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-(wrappedTurnCorrection - posLimit));
+                    } else if (wrappedTurnCorrection <= negLimit) {
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(negLimit - wrappedTurnCorrection);
+                    } else {
+                        bearingAvoidCorrection = 0;
+                    }
                 }
                 else {
                     bearingAvoidCorrection = 0;
@@ -206,6 +210,8 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         if (g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01)
+            outtake.set(shooterRPM);
+        else if (g1.wasJustPressed(GamepadKeys.Button.X))
             outtake.set(shooterRPM);
         else
             outtake.stop();
