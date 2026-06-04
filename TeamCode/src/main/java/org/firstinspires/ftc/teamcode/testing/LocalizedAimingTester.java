@@ -199,6 +199,16 @@ public class LocalizedAimingTester extends LinearOpMode {
             intake.run();
             storage.runTransfer();
         }
+        else if (g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.01) {
+            intake.run();
+            storage.runTransfer();
+        }
+        else {
+            intake.stop();
+            storage.stopTransfer();
+        }
+
+        /* Right is used for outtake for testing
         // Eject
         else if (g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01) {
             intake.runBackwards();
@@ -207,11 +217,11 @@ public class LocalizedAimingTester extends LinearOpMode {
         else {
             intake.stop();
             storage.stopTransfer();
-        }
+        }*/
 
         if (g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01)
             outtake.set(shooterRPM);
-        else if (g1.wasJustPressed(GamepadKeys.Button.X))
+        else if (g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01) // Testing
             outtake.set(shooterRPM);
         else
             outtake.stop();
