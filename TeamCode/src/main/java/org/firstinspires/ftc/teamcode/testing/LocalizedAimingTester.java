@@ -38,6 +38,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     private double bearingAvoidCorrection = 0;
     public static double goalHeading = 0;
     public static double BEARING_AVOID_IN_DEGREES = 20;
+    public static double servoOffset = 92.5;
     public static double shooterRPM;
 
     public static double theAngle1 = 0;
@@ -79,6 +80,11 @@ public class LocalizedAimingTester extends LinearOpMode {
 
     private void startServos() {
         storage.closeGate();
+    }
+
+    // wrapped to (-180, 180)
+    private double angleWrapDegrees(double angle) {
+        return ((angle + 180) % 360 + 360) % 360 - 180;
     }
 
     // teleop type shift
@@ -123,11 +129,19 @@ public class LocalizedAimingTester extends LinearOpMode {
                     );
                 }
             } else {
-                if (bearingTurnCorrection >= 180 - BEARING_AVOID_IN_DEGREES) {
-                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-BEARING_AVOID_IN_DEGREES);
+                // Avoiding the heading where servo must wraparound, to disable set BEARING_AVOID_IN_DEGREES = 0
+                double wrappedTurnCorrection = angleWrapDegrees(bearingTurnCorrection + servoOffset);
+                double posLimit = 180 - BEARING_AVOID_IN_DEGREES; // counter clockwise limit
+                double negLimit = -180 + BEARING_AVOID_IN_DEGREES; // clockwise limit
+
+                if (wrappedTurnCorrection >= posLimit) {
+                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-(wrappedTurnCorrection - posLimit));
                 }
-                if (bearingTurnCorrection <= -180 + BEARING_AVOID_IN_DEGREES) {
-                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(BEARING_AVOID_IN_DEGREES);
+                else if (wrappedTurnCorrection <= negLimit) {
+                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(negLimit - wrappedTurnCorrection);
+                }
+                else {
+                    bearingAvoidCorrection = 0;
                 }
 
                 // turret control
@@ -147,8 +161,6 @@ public class LocalizedAimingTester extends LinearOpMode {
                             bearingAvoidCorrection
                     );
                 }
-
-                bearingAvoidCorrection = 0;
 
                 turret.rotate(bearingTurnCorrection);
             }
