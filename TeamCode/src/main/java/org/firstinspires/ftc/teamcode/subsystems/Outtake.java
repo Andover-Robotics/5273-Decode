@@ -45,6 +45,7 @@ public class Outtake {
     private long inRangeStartTime = -1;
     private long spinupStartTime = -1;
     public static double INTAKE_MIN_RPM = 3500.0;
+    public static double multiplierForTesting = 0.767;
 
     private static final double[][] REGRESSION_DATA = {
             {46.4, 3400},
@@ -185,6 +186,9 @@ public class Outtake {
         if (Double.isNaN(range) || range <= 0) {
             return INTAKE_MIN_RPM;
         }
+
+        range *= multiplierForTesting;
+
         // Just use one of the three functions above
         return cubicRegressionRPM(range);
     }
