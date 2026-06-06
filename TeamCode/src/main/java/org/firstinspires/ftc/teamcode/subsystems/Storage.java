@@ -3,9 +3,10 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
 public class Storage {
@@ -14,11 +15,16 @@ public class Storage {
     public static double gateClosedPos = 0.2;
     public static double gateOpenPos = 0;
     public static double TRANSFER_POWER = -1;
-    public static double TRANSFER_POWER_STALL = -0.5;
+    public static double fullDurationThreshold = 1000; // ms
+    public static double fullCurrentThreshold = 0; // amps
+    private ElapsedTime fullDurationTimer;
+    private double current = 0; // amps
+
     private static boolean gateOpen = false;
     public Storage (HardwareMap hardwareMap){
         transfer = new MotorEx(hardwareMap, "transfer");
         gate = new SimpleServo(hardwareMap, "gate", 0, 360);
+        fullDurationTimer = new ElapsedTime();
     }
     public void openGate()
     {
@@ -43,8 +49,18 @@ public class Storage {
         transfer.set(-TRANSFER_POWER);
     }
 
+    public void updateForIfFull() {
+        current = transfer.motorEx.getCurrent(CurrentUnit.AMPS);
+        if (!(current >= fullCurrentThreshold)) {
+            fullDurationTimer.reset();
+        }
+    }
+
     public boolean isFull() {
-        /* Probably voltage based detection with intake*/
-        return false;
+        return current >= fullCurrentThreshold && fullDurationTimer.milliseconds() >= fullDurationThreshold;
+    }
+
+    public double getCurrent() {
+        return current;
     }
 }

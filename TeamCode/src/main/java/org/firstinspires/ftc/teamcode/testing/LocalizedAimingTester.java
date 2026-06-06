@@ -291,6 +291,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         telemetry.addData("Obelisk ID", aprilTag.getObeliskId());
         long now = System.currentTimeMillis();
         telemetry.addData("Loop time: ", now - lastTick);
+        telemetry.addData("Transfer Current (amps): ", storage.getCurrent());
         telemetry.update();
         lastTick = now;
         currentTime = now;

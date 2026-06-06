@@ -73,14 +73,20 @@ public class BotPeriodics {
         g1.readButtons();
         g2.readButtons();
 
-        handleIntake();
-        handleOuttake();
-        handleStorage();
+        if (!actionHost.isRunning()) {
+            handleIntake();
+            handleOuttake();
+            handleStorage();
+        }
+
         handleAimLock();
         handleMovement();
         handleAllianceSelection();
         handleTelemetry();
 
+        handleManualTurret();
+
+        storage.updateForIfFull();
         outtake.periodic();
         actionHost.update();
         drive.updatePoseEstimate();
@@ -100,38 +106,34 @@ public class BotPeriodics {
         double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
-        if (!actionHost.isRunning()) {
-            if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
-                intake.run();
-                if (!manualTransfer)
-                    storage.runTransfer();
-            }
-            else if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
-                intake.runBackwards(); // only run intake backwards to eject only 4th ball
-                if (!manualTransfer)
-                    storage.stopTransfer();
-            }
-            else if (continuousIntake) {
-                intake.runSlow();
-                if (!manualTransfer)
-                    storage.stopTransfer();
-            }
-            else {
-                intake.stop();
-                if (!manualTransfer)
-                    storage.stopTransfer();
-            }
+        if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
+            intake.run();
+            if (!manualTransfer)
+                storage.runTransfer();
+        }
+        else if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
+            intake.runBackwards(); // only run intake backwards to eject only 4th ball
+            if (!manualTransfer)
+                storage.stopTransfer();
+        }
+        else if (continuousIntake) {
+            intake.runSlow();
+            if (!manualTransfer)
+                storage.stopTransfer();
+        }
+        else {
+            intake.stop();
+            if (!manualTransfer)
+                storage.stopTransfer();
         }
     }
 
     private void handleOuttake() {
         double rightTrigger = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
-        if (!actionHost.isRunning()) {
-            if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE)
-                outtake.set(getTargetRPM());
-            else outtake.stop();
-        }
+        if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE)
+            outtake.set(getTargetRPM());
+        else outtake.stop();
     }
 
     private void handleStorage() {
@@ -139,23 +141,33 @@ public class BotPeriodics {
         GamepadKeys.Button closeGateButton = GamepadKeys.Button.DPAD_DOWN;
         double leftTrigger = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
 
-        if (!actionHost.isRunning()) {
-            if (g2.wasJustPressed(openGateButton)) {
-                storage.openGate();
-            }
-            else if (g2.wasJustPressed(closeGateButton)) {
-                storage.closeGate();
-            }
-
-            if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
-                manualTransfer = true;
-                storage.runTransfer();
-            }
-            else {
-                manualTransfer = false;
-                storage.stopTransfer();
-            }
+        if (g2.wasJustPressed(openGateButton)) {
+            storage.openGate();
         }
+        else if (g2.wasJustPressed(closeGateButton)) {
+            storage.closeGate();
+        }
+
+        if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
+            manualTransfer = true;
+            storage.runTransfer();
+        }
+        else {
+            manualTransfer = false;
+            storage.stopTransfer();
+        }
+    }
+
+    private void handleManualTurret() {
+        // TODO:
+
+        // get it to have stick 360 corresponding to turret360
+        g2.getLeftX();
+        g2.getLeftY();
+
+        // for fine grained control
+        g2.getRightX();
+
     }
 
     // Periodic Handlers
@@ -187,11 +199,6 @@ public class BotPeriodics {
         double lx = g1.getLeftX();
         double ly = g1.getLeftY();
         double rx = g1.getRightX();
-        if(twoMovementMode){
-             lx = g2.getLeftX();
-             ly = g2.getLeftY();
-             rx = g2.getRightX();
-        }
 
         if (aimlock) {
             //drivetrain control
@@ -307,8 +314,8 @@ public class BotPeriodics {
         return ((angle + 180) % 360 + 360) % 360 - 180;
     }
 
-    protected void stopAimLock() {
-        aimlock = false;
+    protected void setAimlock(boolean lock) {
+        aimlock = lock;
     }
 }
 
