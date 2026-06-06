@@ -19,6 +19,8 @@ public class Movement {
     private final MecanumDrive drive;
     //private final IMU imu;
     private final double STRAFE_MULTIPLIER = 1.0, ROTATION_MULTIPLIER = 0.8;
+    private final double SLOW_MULTIPLIER = 0.5;
+    private boolean slowToggled = false;
 
     /**
      * Initializes a Movement instance.
@@ -76,6 +78,12 @@ public class Movement {
         double lateral = leftStickX * STRAFE_MULTIPLIER;
         double yaw = rightStickX * ROTATION_MULTIPLIER + turnCorrection;
 
+        if(slowToggled){
+            axial *= SLOW_MULTIPLIER;
+            lateral *= SLOW_MULTIPLIER;
+            yaw *= SLOW_MULTIPLIER;
+        }
+
         // This button choice was made so that it is hard to hit on accident,
         // it can be freely changed based on preference.
         // The equivalent button is start on Xbox-style controllers.
@@ -124,6 +132,18 @@ public class Movement {
 
     public void setPose(Pose2d newPose) {
         drive.localizer.setPose(newPose);
+    }
+
+    public boolean isSlow(){
+        return slowToggled;
+    }
+
+    public void setSlow(boolean slow){
+        slowToggled = slow;
+    }
+
+    public void tooggleSlow(){
+        slowToggled = !slowToggled;
     }
 }
 

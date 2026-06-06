@@ -187,11 +187,16 @@ public class BotPeriodics {
         double lx = g1.getLeftX();
         double ly = g1.getLeftY();
         double rx = g1.getRightX();
+
+        boolean slow = false;
+        slow = g1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) || g1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON);
         if(twoMovementMode){
              lx = g2.getLeftX();
              ly = g2.getLeftY();
              rx = g2.getRightX();
+             slow = g2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) || g2.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON);
         }
+        movement.setSlow(slow);
 
         if (aimlock) {
             //drivetrain control
@@ -206,9 +211,9 @@ public class BotPeriodics {
                     );
                 } else {
                     movement.teleopTick(
-                            g1.getLeftX(),
-                            g1.getLeftY(),
-                            g1.getRightX(),
+                            lx,
+                            ly,
+                            rx,
                             turnCorrection
                     );
                 }
