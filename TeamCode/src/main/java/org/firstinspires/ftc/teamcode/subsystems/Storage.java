@@ -15,6 +15,7 @@ public class Storage {
     public static double gateOpenPos = 0;
     public static double TRANSFER_POWER = -1;
     public static double TRANSFER_POWER_STALL = -0.5;
+    private static boolean gateOpen = false;
     public Storage (HardwareMap hardwareMap){
         transfer = new MotorEx(hardwareMap, "transfer");
         gate = new SimpleServo(hardwareMap, "gate", 0, 360);
@@ -22,9 +23,12 @@ public class Storage {
     public void openGate()
     {
         gate.setPosition(gateOpenPos);
+        gateOpen = true;
     }
     public void closeGate() {
         gate.setPosition(gateClosedPos);
+        gateOpen = true;
+
     }
 
     public void runTransfer() {

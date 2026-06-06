@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Config
 public class Intake {
-    public static double SLOW_MULTIPLIER = 0.5;
+    public static double SLOW_MULTIPLIER = 0.25;
     public static double INTAKING_POWER = 1;
     private MotorEx intakeMotor;
 

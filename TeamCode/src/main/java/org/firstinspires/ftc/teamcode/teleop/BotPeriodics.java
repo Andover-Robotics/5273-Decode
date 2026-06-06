@@ -34,14 +34,19 @@ public class BotPeriodics {
     // camera vision
     protected boolean fieldCentric = false;
     public static boolean drivetrainAim = false;
-    protected boolean aimLock = false;
+    protected boolean aimlock = false;
+    public static boolean mecanumAvoid = true;
+    public static double servoOffset = 92.5;
     protected long lastAimUpdate = 0;
     protected double lastTurnCorrection = 0.0;
     protected double turnCorrection = 0.0;
     protected String colorGoalSelected = "";
     protected double[] targetData = {0,0,0};
 
-    protected boolean continuousIntake = false;
+    private boolean isFireActionRunning = false;
+    private boolean manualTransfer = false;
+
+    public static boolean continuousIntake = true;
 
     public static double targetRPM = 2000;
     protected static final long AIM_UPDATE_INTERVAL_MS = 20;
@@ -62,13 +67,15 @@ public class BotPeriodics {
         telemetry = tele;
         twoMovementMode = useMovement;
     }
-    
+
     protected void handlePeriodics()
     {
         g1.readButtons();
         g2.readButtons();
 
         handleIntake();
+        handleOuttake();
+        handleStorage();
         handleAimLock();
         handleMovement();
         handleAllianceSelection();
@@ -77,10 +84,6 @@ public class BotPeriodics {
         outtake.periodic();
         actionHost.update();
         drive.updatePoseEstimate();
-
-        if (outtake.getTargetRPM() > 0) {
-            outtake.set(targetRPM);
-        }
 
         long now = System.currentTimeMillis();
 
@@ -94,17 +97,65 @@ public class BotPeriodics {
         turnCorrection = lastTurnCorrection;
     }
     private void handleIntake() {
-        if(g2.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) continuousIntake = !continuousIntake;
         double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
-        double leftTrigger2 = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-        double rightTrigger2 = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-        boolean leftDown = leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || leftTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
-        boolean rightDown = rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE || rightTrigger2 > TeleopConstants.Gamepad.TRIGGER_DEADZONE;
-        if(leftDown) intake.run();
-        else if(rightDown) intake.runBackwards();
-        else if(continuousIntake) intake.runSlow();
-        else intake.stop();
+
+        if (!actionHost.isRunning()) {
+            if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
+                intake.run();
+                if (!manualTransfer)
+                    storage.runTransfer();
+            }
+            else if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
+                intake.runBackwards(); // only run intake backwards to eject only 4th ball
+                if (!manualTransfer)
+                    storage.stopTransfer();
+            }
+            else if (continuousIntake) {
+                intake.runSlow();
+                if (!manualTransfer)
+                    storage.stopTransfer();
+            }
+            else {
+                intake.stop();
+                if (!manualTransfer)
+                    storage.stopTransfer();
+            }
+        }
+    }
+
+    private void handleOuttake() {
+        double rightTrigger = g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+
+        if (!actionHost.isRunning()) {
+            if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE)
+                outtake.set(getTargetRPM());
+            else outtake.stop();
+        }
+    }
+
+    private void handleStorage() {
+        GamepadKeys.Button openGateButton = GamepadKeys.Button.DPAD_UP;
+        GamepadKeys.Button closeGateButton = GamepadKeys.Button.DPAD_DOWN;
+        double leftTrigger = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+
+        if (!actionHost.isRunning()) {
+            if (g2.wasJustPressed(openGateButton)) {
+                storage.openGate();
+            }
+            else if (g2.wasJustPressed(closeGateButton)) {
+                storage.closeGate();
+            }
+
+            if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
+                manualTransfer = true;
+                storage.runTransfer();
+            }
+            else {
+                manualTransfer = false;
+                storage.stopTransfer();
+            }
+        }
     }
 
     // Periodic Handlers
@@ -142,70 +193,80 @@ public class BotPeriodics {
              rx = g2.getRightX();
         }
 
-        if (aimLock) {
+        if (aimlock) {
+            //drivetrain control
             if (drivetrainAim) {
                 if (fieldCentric) {
                     movement.teleopTickFieldCentric(
-                            lx,
-                            ly,
-                            rx,
+                            g1.getLeftX(),
+                            g1.getLeftY(),
+                            g1.getRightX(),
                             turnCorrection,
                             true
                     );
                 } else {
                     movement.teleopTick(
-                            lx,
-                            ly,
-                            rx,
+                            g1.getLeftX(),
+                            g1.getLeftY(),
+                            g1.getRightX(),
                             turnCorrection
                     );
                 }
-            }
-            else {
-                if (bearingTurnCorrection >= 180 - BEARING_AVOID_IN_DEGREES) {
-                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-BEARING_AVOID_IN_DEGREES);
+            } else {
+                if (mecanumAvoid) {
+                    // Avoiding the heading where servo must wraparound, to disable set BEARING_AVOID_IN_DEGREES = 0
+                    double wrappedTurnCorrection = angleWrapDegrees(bearingTurnCorrection + servoOffset + 180);
+                    double posLimit = 180 - BEARING_AVOID_IN_DEGREES; // counter clockwise limit
+                    double negLimit = -180 + BEARING_AVOID_IN_DEGREES; // clockwise limit
+
+                    if (wrappedTurnCorrection >= posLimit) {
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-(wrappedTurnCorrection - posLimit));
+                    } else if (wrappedTurnCorrection <= negLimit) {
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(negLimit - wrappedTurnCorrection);
+                    } else {
+                        bearingAvoidCorrection = 0;
+                    }
                 }
-                if (bearingTurnCorrection <= -180 + BEARING_AVOID_IN_DEGREES) {
-                    bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(BEARING_AVOID_IN_DEGREES);
+                else {
+                    bearingAvoidCorrection = 0;
                 }
 
+                // turret control
                 if (fieldCentric) {
                     movement.teleopTickFieldCentric(
-                            lx,
-                            ly,
-                            rx,
+                            g1.getLeftX(),
+                            g1.getLeftY(),
+                            g1.getRightX(),
                             bearingAvoidCorrection,
                             true
                     );
                 } else {
                     movement.teleopTick(
-                            lx,
-                            ly,
-                            rx,
+                            g1.getLeftX(),
+                            g1.getLeftY(),
+                            g1.getRightX(),
                             bearingAvoidCorrection
                     );
                 }
 
-                bearingAvoidCorrection = 0;
-
-                turret.rotate(Math.toDegrees(drive.localizer.getPose().heading.log()));
+                turret.rotate(bearingTurnCorrection);
             }
         }
         else {
-            // no lock in
+            // No lock in
             if (fieldCentric) {
                 movement.teleopTickFieldCentric(
-                        lx,
-                        ly,
-                        rx,
+                        g1.getLeftX(),
+                        g1.getLeftY(),
+                        g1.getRightX(),
                         0,
                         true
                 );
             } else {
                 movement.teleopTick(
-                        lx,
-                        ly,
-                        rx,
+                        g1.getLeftX(),
+                        g1.getLeftY(),
+                        g1.getRightX(),
                         0
                 );
             }
@@ -214,13 +275,15 @@ public class BotPeriodics {
 
     protected void handleAimLock() {
         // Toggle continuous lock
-        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-            aimLock = true;
+        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) || g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+            aimlock = true;
             g1.gamepad.rumbleBlips(2);
+            g2.gamepad.rumbleBlips(2);
         }
-        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-            aimLock = false;
+        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) || g2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+            aimlock = false;
             g1.gamepad.rumbleBlips(1);
+            g2.gamepad.rumbleBlips(1);
         }
         if (g1.wasJustPressed(GamepadKeys.Button.X)) {
             if (colorGoalSelected.equals("Blue"))
@@ -231,13 +294,21 @@ public class BotPeriodics {
                 aimer.relocalize();
             }
         }
-        if (!aimLock){
+        if (!aimlock){
             turnCorrection = 0;
         }
     }
 
     protected double getTargetRPM() {
         return targetRPM;
+    }
+
+    protected double angleWrapDegrees(double angle) {
+        return ((angle + 180) % 360 + 360) % 360 - 180;
+    }
+
+    protected void stopAimLock() {
+        aimlock = false;
     }
 }
 
