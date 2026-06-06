@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SequentialAction;
@@ -43,13 +42,23 @@ public class Bot extends BotPeriodics {
 
     // MAINLINE HANDLERS
     private void handleIntakeFeedback() {
-        if(storage.isFull() && !rumbledAlready && !g1.gamepad.isRumbling() && !g2.gamepad.isRumbling()){
+        if(storage.isFull() && !rumbledAlready){
+            setAimlock(true);
+            rumbledAlready = true;
+
             g1.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
             g2.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
-            rumbledAlready = true;
         }
     }
 
+    private void handleOuttakeActions() {
+        if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.A) && aimlock) {
+            actionHost.start(actionFire());
+            rumbledAlready = false;
+        }
+    }
+
+    @Override
     protected void handleAllianceSelection() {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
             aimer.setBlueTarget();
@@ -60,13 +69,6 @@ public class Bot extends BotPeriodics {
             aimer.setRedTarget();
             g1.gamepad.setLedColor(1, 0, 0, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Red";
-        }
-    }
-
-    private void handleOuttakeActions() {
-        if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.A) && aimlock) {
-            actionHost.start(actionFire());
-            rumbledAlready = false;
         }
     }
 
@@ -84,7 +86,7 @@ public class Bot extends BotPeriodics {
                 new InstantAction(storage::closeGate),
                 new InstantAction(outtake::stop),
                 new InstantAction(storage::stopTransfer),
-                new InstantAction(() -> stopAimLock())
+                new InstantAction(() -> setAimlock(false))
         );
     }
 }
