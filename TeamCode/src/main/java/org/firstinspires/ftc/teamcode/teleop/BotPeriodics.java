@@ -43,12 +43,10 @@ public class BotPeriodics {
     protected String colorGoalSelected = "";
     protected double[] targetData = {0,0,0};
 
-    private boolean isFireActionRunning = false;
-    private boolean manualTransfer = false;
-
     public static boolean continuousIntake = true;
 
     public static double targetRPM = 2000;
+    public static double outtakeEjectRpm = 670;
     protected static final long AIM_UPDATE_INTERVAL_MS = 20;
 
     protected boolean twoMovementMode;
@@ -57,7 +55,7 @@ public class BotPeriodics {
         intake = new Intake(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         drive = mecanumDrive;
-        storage = new Storage(hardwareMap);
+        storage = new Storage(hardwareMap, intake);
         turret = new Turret(hardwareMap);
         movement = new Movement(hardwareMap, drive);
         aimer = new Aimer(drive);
@@ -108,23 +106,19 @@ public class BotPeriodics {
 
         if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
             intake.run();
-            if (!manualTransfer)
-                storage.runTransfer();
+            storage.runTransfer();
         }
         else if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
             intake.runBackwards(); // only run intake backwards to eject only 4th ball
-            if (!manualTransfer)
-                storage.stopTransfer();
+            storage.stopTransfer();
         }
         else if (continuousIntake) {
             intake.runSlow();
-            if (!manualTransfer)
-                storage.stopTransfer();
+            storage.stopTransfer();
         }
         else {
             intake.stop();
-            if (!manualTransfer)
-                storage.stopTransfer();
+            storage.stopTransfer();
         }
     }
 
@@ -133,6 +127,8 @@ public class BotPeriodics {
 
         if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE)
             outtake.set(getTargetRPM());
+        else if (g2.getButton(GamepadKeys.Button.B))
+            outtake.set(outtakeEjectRpm);
         else outtake.stop();
     }
 
@@ -149,12 +145,15 @@ public class BotPeriodics {
         }
 
         if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
-            manualTransfer = true;
             storage.runTransfer();
+            intake.run();
         }
-        else {
-            manualTransfer = false;
-            storage.stopTransfer();
+        else if (g1.getButton(GamepadKeys.Button.Y) || g2.getButton(GamepadKeys.Button.Y)) {
+            storage.runTransferBackwards();
+            intake.runBackwards();
+        }
+        else if (g2.getButton(GamepadKeys.Button.X)) {
+            storage.runTransferBackwards();
         }
     }
 
@@ -181,15 +180,17 @@ public class BotPeriodics {
         telemetry.addData("Turn Correction:", turnCorrection);
         telemetry.addData("Intake power: ", intake.getPower());
         telemetry.addData("Last Turn Correction", lastTurnCorrection);
+        telemetry.addData("Last Turn Correction", lastTurnCorrection);
+        telemetry.addData("Transfer Current (amps): ", storage.getCurrent());
         telemetry.update();
     }
 
     protected void handleAllianceSelection() {
-        if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.BACK) || g2.wasJustPressed(GamepadKeys.Button.BACK)) {
             aimer.setBlueTarget();
             colorGoalSelected = "Blue";
         }
-        if (g1.wasJustPressed(GamepadKeys.Button.START)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.START) || g2.wasJustPressed(GamepadKeys.Button.START)) {
             aimer.setRedTarget();
             colorGoalSelected = "Red";
         }

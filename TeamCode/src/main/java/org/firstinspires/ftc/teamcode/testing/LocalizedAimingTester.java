@@ -39,7 +39,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     public static double goalHeading = 0;
     public static double BEARING_AVOID_IN_DEGREES = 30;
     public static boolean mecanumAvoid = true;
-    public static double servoOffset = 92.5;
+    public static double servoOffset = 86.0;
     public static double shooterRPM;
 
     public static double theAngle1 = 0;
@@ -56,7 +56,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         intake = new Intake(hardwareMap);
-        storage = new Storage(hardwareMap);
+        storage = new Storage(hardwareMap, intake);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         drive = new MecanumDrive(hardwareMap, startPose);
         movement = new Movement(hardwareMap, drive);
@@ -70,6 +70,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         GamepadEx gp2 = new GamepadEx(gamepad2);
 
         startServos();
+        storage.closeGate();
 
         waitForStart();
         while (opModeIsActive()) {
@@ -92,6 +93,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     public void teleopTick(GamepadEx g1, GamepadEx g2, Telemetry telemetry) {
         outtake.periodic();
         drive.updatePoseEstimate();
+        storage.updateForIfFull();
 
         double turnCorrection = 0;
         double[] data = {0, 0, 0};
@@ -190,8 +192,8 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         // Toggle field centric
-        if (g1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON)) fieldCentric = true;
-        if (g1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)) fieldCentric = false;
+        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) fieldCentric = true;
+        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) fieldCentric = false;
 
 
         // intake control
@@ -203,6 +205,10 @@ public class LocalizedAimingTester extends LinearOpMode {
             intake.run();
             storage.runTransfer();
         }
+        else if (g1.getButton(GamepadKeys.Button.A))
+            intake.run();
+        else if (g1.getButton(GamepadKeys.Button.B))
+            storage.runTransfer();
         else {
             intake.stop();
             storage.stopTransfer();

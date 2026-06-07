@@ -16,6 +16,9 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 public class Bot extends BotPeriodics {
     // haptics & lights
     private boolean rumbledAlready = false;
+    private boolean finishedInitialGateClose = false;
+    private long teleOpStartTime;
+    public static long timeToReverseTransferAfterStartBeforeCloseGate = 500; // ms
 
     public static double withinRpmRange = 150; //
     public static double FIRE_TIME = 3.0;
@@ -30,11 +33,18 @@ public class Bot extends BotPeriodics {
     }
 
     public void teleopStart(){
-        //TODO: Determine necessity of this john
+        teleOpStartTime = System.currentTimeMillis();
+        storage.runTransferBackwards();
     }
 
     public void teleopTick()
     {
+        if (!finishedInitialGateClose && System.currentTimeMillis() >= teleOpStartTime + timeToReverseTransferAfterStartBeforeCloseGate) {
+            storage.closeGate();
+            storage.stopTransfer();
+            finishedInitialGateClose = true;
+        }
+
         handlePeriodics();
         handleIntakeFeedback();
         handleOuttakeActions();
@@ -44,7 +54,7 @@ public class Bot extends BotPeriodics {
     private void handleIntakeFeedback() {
         if(storage.isFull() && !rumbledAlready){
             setAimlock(true);
-            rumbledAlready = true;
+            setRumbledAlready(true);
 
             g1.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
             g2.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
@@ -54,18 +64,17 @@ public class Bot extends BotPeriodics {
     private void handleOuttakeActions() {
         if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.A) && aimlock) {
             actionHost.start(actionFire());
-            rumbledAlready = false;
         }
     }
 
     @Override
     protected void handleAllianceSelection() {
-        if (g1.wasJustPressed(GamepadKeys.Button.BACK)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.BACK) || g2.wasJustPressed(GamepadKeys.Button.BACK)) {
             aimer.setBlueTarget();
             g1.gamepad.setLedColor(0, 0, 1, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Blue";
         }
-        if (g1.wasJustPressed(GamepadKeys.Button.START)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.START) || g2.wasJustPressed(GamepadKeys.Button.START)) {
             aimer.setRedTarget();
             g1.gamepad.setLedColor(1, 0, 0, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
             colorGoalSelected = "Red";
@@ -80,13 +89,20 @@ public class Bot extends BotPeriodics {
                     outtake.set(getTargetRPM());
                     return !outtake.inRange(withinRpmRange);
                 },
+                new InstantAction(intake::run),
                 new InstantAction(storage::runTransfer),
                 new InstantAction(storage::openGate),
                 new SleepAction(FIRE_TIME),
                 new InstantAction(storage::closeGate),
+                new InstantAction(intake::stop),
                 new InstantAction(outtake::stop),
                 new InstantAction(storage::stopTransfer),
-                new InstantAction(() -> setAimlock(false))
+                new InstantAction(() -> setAimlock(false)),
+                new InstantAction(() -> setRumbledAlready(false))
         );
+    }
+
+    private void setRumbledAlready(boolean rumbled) {
+        rumbledAlready = rumbled;
     }
 }

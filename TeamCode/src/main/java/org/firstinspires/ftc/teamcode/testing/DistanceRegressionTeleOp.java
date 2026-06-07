@@ -43,7 +43,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         intake = new Intake(hardwareMap);
-        storage = new Storage(hardwareMap);
+        storage = new Storage(hardwareMap, intake);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
         movement = new Movement(hardwareMap, drive);

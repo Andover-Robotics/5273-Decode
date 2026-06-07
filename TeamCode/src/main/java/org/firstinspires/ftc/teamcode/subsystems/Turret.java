@@ -11,7 +11,7 @@ public class Turret {
     private final SimpleServo servo2;
     private double angle = -67.0;
     public static double actualRangeOfMotion = 322.0;
-    public static double servoOffset = 92.5;
+    public static double servoOffset = 86.0;
 
 
     public Turret(HardwareMap hardwareMap) {

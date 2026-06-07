@@ -12,19 +12,22 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 public class Storage {
     private final MotorEx transfer;
     private final SimpleServo gate;
-    public static double gateClosedPos = 0.2;
-    public static double gateOpenPos = 0;
+    private final Intake intake;
+
+    public static double gateClosedPos = 0.345;
+    public static double gateOpenPos = 0.067;
     public static double TRANSFER_POWER = -1;
     public static double fullDurationThreshold = 1000; // ms
-    public static double fullCurrentThreshold = 0; // amps
+    public static double fullCurrentThreshold = 15.0; // amps
     private ElapsedTime fullDurationTimer;
     private double current = 0; // amps
 
     private static boolean gateOpen = false;
-    public Storage (HardwareMap hardwareMap){
+    public Storage (HardwareMap hardwareMap, Intake intake){
         transfer = new MotorEx(hardwareMap, "transfer");
         gate = new SimpleServo(hardwareMap, "gate", 0, 360);
         fullDurationTimer = new ElapsedTime();
+        this.intake = intake;
     }
     public void openGate()
     {
@@ -33,7 +36,7 @@ public class Storage {
     }
     public void closeGate() {
         gate.setPosition(gateClosedPos);
-        gateOpen = true;
+        gateOpen = false;
 
     }
 
@@ -50,7 +53,7 @@ public class Storage {
     }
 
     public void updateForIfFull() {
-        current = transfer.motorEx.getCurrent(CurrentUnit.AMPS);
+        current = intake.getCurrentAmps() + transfer.motorEx.getCurrent(CurrentUnit.AMPS);
         if (!(current >= fullCurrentThreshold)) {
             fullDurationTimer.reset();
         }

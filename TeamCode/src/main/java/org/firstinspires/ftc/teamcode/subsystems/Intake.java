@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
 @Config
 public class Intake {
-    public static double SLOW_MULTIPLIER = 0.25;
+    public static double SLOW_MULTIPLIER = 0.5;
     public static double INTAKING_POWER = 1;
     private MotorEx intakeMotor;
 
@@ -39,5 +42,8 @@ public class Intake {
     public double getPower()
     {
         return intakeMotor.get();
+    }
+    public double getCurrentAmps() {
+        return intakeMotor.motorEx.getCurrent(CurrentUnit.AMPS);
     }
 }
