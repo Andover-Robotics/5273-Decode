@@ -51,6 +51,14 @@ public class Turret {
         servo2.setPosition(angle / actualRangeOfMotion);
     }
 
+    public double getServoOffset() {
+        return servoOffset;
+    }
+
+    public double getActualRangeOfMotion() {
+        return actualRangeOfMotion;
+    }
+
     // used for testing
     public void setServo1(double angle) {
         servo1.setPosition(angle / actualRangeOfMotion);
