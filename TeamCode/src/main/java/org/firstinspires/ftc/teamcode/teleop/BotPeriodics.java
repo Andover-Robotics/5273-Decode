@@ -99,8 +99,6 @@ public class BotPeriodics {
         handleAllianceSelection();
         handleTelemetry();
 
-        handleManualTurret();
-
         storage.updateForIfFull();
         outtake.periodic();
         actionHost.update();
