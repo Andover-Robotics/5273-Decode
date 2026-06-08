@@ -53,7 +53,9 @@ public class Bot extends BotPeriodics {
     // MAINLINE HANDLERS
     private void handleIntakeFeedback() {
         if(storage.isFull() && !rumbledAlready){
-            setAimlock(true);
+            if (!manualTurretAim)
+                setAimlock(true);
+
             setRumbledAlready(true);
 
             g1.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);

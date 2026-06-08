@@ -83,7 +83,7 @@ public class BotPeriodics {
             handleStorage();
         }
 
-        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT) && aimlock == false) {
             manualTurretAim = true;
         }
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
@@ -312,6 +312,7 @@ public class BotPeriodics {
         // Toggle continuous lock
         if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) || g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
             aimlock = true;
+            manualTurretAim = false;
             g1.gamepad.rumbleBlips(2);
             g2.gamepad.rumbleBlips(2);
         }
