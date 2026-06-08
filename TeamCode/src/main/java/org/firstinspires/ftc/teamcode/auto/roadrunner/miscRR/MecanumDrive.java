@@ -72,9 +72,9 @@ public final class MecanumDrive {
         // kV: 0.00036105964752604797, kS: 0.9030920235807085
         // kV: 0.00037199143511341737, kS: 0.8028058443180899 - regression vals
         public double kS = 1.822418915814533;
-        public double kV = 0.00024166397742704973;
+        public double kV = .00024;
         //KA needs serious help
-        public double kA = 6e-5;
+        public double kA = 9e-8;
 
         // path profile parameters (in inches)
 
