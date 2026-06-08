@@ -32,11 +32,12 @@ public class BotPeriodics {
     public static double BEARING_AVOID_IN_DEGREES = 20;
     protected ActionHost actionHost;
     // camera vision
-    protected boolean fieldCentric = false;
+
+    public static boolean fieldCentric = false;
     public static boolean drivetrainAim = false;
     protected boolean aimlock = false;
     public static boolean mecanumAvoid = true;
-    public static double servoOffset = 92.5;
+    private double servoOffset;
     protected long lastAimUpdate = 0;
     protected double lastTurnCorrection = 0.0;
     protected double turnCorrection = 0.0;
@@ -44,6 +45,10 @@ public class BotPeriodics {
     protected double[] targetData = {0,0,0};
 
     public static boolean continuousIntake = true;
+    public static boolean manualTurretAim = false;
+    private double manualTurretTarget = 0;
+    public static double turretlLeftStickMult = 1.0;
+    public static double turretRightStickMult = 0.25;
 
     public static double targetRPM = 2000;
     public static double outtakeEjectRpm = 670;
@@ -64,6 +69,7 @@ public class BotPeriodics {
         actionHost = new ActionHost();
         telemetry = tele;
         twoMovementMode = useMovement;
+        servoOffset = turret.getServoOffset();
     }
 
     protected void handlePeriodics()
@@ -77,12 +83,21 @@ public class BotPeriodics {
             handleStorage();
         }
 
+        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT) && aimlock == false) {
+            manualTurretAim = true;
+        }
+        if (g2.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+            manualTurretAim = false;
+        }
+
+        if (manualTurretAim) {
+            handleManualTurret();
+        }
+
         handleAimLock();
         handleMovement();
         handleAllianceSelection();
         handleTelemetry();
-
-        handleManualTurret();
 
         storage.updateForIfFull();
         outtake.periodic();
@@ -158,15 +173,18 @@ public class BotPeriodics {
     }
 
     private void handleManualTurret() {
-        // TODO:
+        double lx = g2.getLeftX();
+        double rx = g2.getRightX();
 
-        // get it to have stick 360 corresponding to turret360
-        g2.getLeftX();
-        g2.getLeftY();
+        if (Math.abs(lx) > 0.1) {
+            manualTurretTarget = wrapAngle360(manualTurretTarget + lx * turretlLeftStickMult);
+        }
+        if (Math.abs(rx) > 0.01) {
+            manualTurretTarget = wrapAngle360(manualTurretTarget + rx * turretRightStickMult);
+        }
 
-        // for fine grained control
-        g2.getRightX();
-
+        double servoPosition = manualTurretTarget / turret.getActualRangeOfMotion(); // deadzone is representative of the actual angle
+        turret.setServos(servoPosition);
     }
 
     // Periodic Handlers
@@ -201,15 +219,12 @@ public class BotPeriodics {
         double ly = g1.getLeftY();
         double rx = g1.getRightX();
 
-        boolean slow = false;
-        slow = g1.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) || g1.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON);
-        if(twoMovementMode){
-             lx = g2.getLeftX();
-             ly = g2.getLeftY();
-             rx = g2.getRightX();
-             slow = g2.getButton(GamepadKeys.Button.LEFT_STICK_BUTTON) || g2.getButton(GamepadKeys.Button.RIGHT_STICK_BUTTON);
+        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) || g2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+            movement.setSlow(true);
         }
-        movement.setSlow(slow);
+        else if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) || g2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+            movement.setSlow(false);
+        }
 
         if (aimlock) {
             //drivetrain control
@@ -233,7 +248,7 @@ public class BotPeriodics {
             } else {
                 if (mecanumAvoid) {
                     // Avoiding the heading where servo must wraparound, to disable set BEARING_AVOID_IN_DEGREES = 0
-                    double wrappedTurnCorrection = angleWrapDegrees(bearingTurnCorrection + servoOffset + 180);
+                    double wrappedTurnCorrection = angleWrapNegPos180(bearingTurnCorrection + servoOffset + 180);
                     double posLimit = 180 - BEARING_AVOID_IN_DEGREES; // counter clockwise limit
                     double negLimit = -180 + BEARING_AVOID_IN_DEGREES; // clockwise limit
 
@@ -295,6 +310,7 @@ public class BotPeriodics {
         // Toggle continuous lock
         if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) || g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
             aimlock = true;
+            manualTurretAim = false;
             g1.gamepad.rumbleBlips(2);
             g2.gamepad.rumbleBlips(2);
         }
@@ -321,8 +337,11 @@ public class BotPeriodics {
         return targetRPM;
     }
 
-    protected double angleWrapDegrees(double angle) {
+    protected double angleWrapNegPos180(double angle) {
         return ((angle + 180) % 360 + 360) % 360 - 180;
+    }
+    private double wrapAngle360(double angle) {
+        return ((angle%360)+360)%360;
     }
 
     protected void setAimlock(boolean lock) {

@@ -42,11 +42,8 @@ public class LocalizedAimingTester extends LinearOpMode {
     public static double servoOffset = 86.0;
     public static double shooterRPM;
 
-    public static double theAngle1 = 0;
-    public static double theAngle2 = 0;
-
     private boolean aimlock = false;
-    private boolean fieldCentric = false;
+    public static boolean fieldCentric = false;
     public static boolean drivetrainAim = false;
 
     public static long aimUpdateInterval = 20; // ms
@@ -65,7 +62,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         aprilTag = new AprilTag(hardwareMap, telemetry);
         aimer = new Aimer(drive);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
+        
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);
 
@@ -111,6 +108,13 @@ public class LocalizedAimingTester extends LinearOpMode {
 
         turnCorrection = lastTurnCorrection;
         // turnCorrection = 0.9 * lastTurnCorrection; - don't want this
+
+        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) || g2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+            movement.setSlow(true);
+        }
+        else if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) || g2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+            movement.setSlow(false);
+        }
 
         if (aimlock) {
             //drivetrain control
@@ -190,11 +194,6 @@ public class LocalizedAimingTester extends LinearOpMode {
                 );
             }
         }
-
-        // Toggle field centric
-        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) fieldCentric = true;
-        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) fieldCentric = false;
-
 
         // intake control
         if (g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.01) {
