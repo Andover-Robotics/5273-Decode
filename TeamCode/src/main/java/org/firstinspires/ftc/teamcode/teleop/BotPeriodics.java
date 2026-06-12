@@ -196,10 +196,11 @@ public class BotPeriodics {
         telemetry.addData("Bot Range", targetData[1]);
         telemetry.addData("Alliance selected", colorGoalSelected);
         telemetry.addData("Turn Correction:", turnCorrection);
+        telemetry.addData("Manual Turret Angle", manualTurretTarget);
         telemetry.addData("Intake power: ", intake.getPower());
         telemetry.addData("Last Turn Correction", lastTurnCorrection);
         telemetry.addData("Last Turn Correction", lastTurnCorrection);
-        telemetry.addData("Transfer Current (amps): ", storage.getCurrent());
+        telemetry.addData("Transfer and intake Current (amps): ", storage.getCurrent());
         telemetry.update();
     }
 

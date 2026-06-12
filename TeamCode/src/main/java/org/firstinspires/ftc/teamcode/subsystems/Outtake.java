@@ -45,7 +45,7 @@ public class Outtake {
     private long inRangeStartTime = -1;
     private long spinupStartTime = -1;
     public static double INTAKE_MIN_RPM = 3500.0;
-    public static double multiplierForTesting = 0.5;
+    public static double multiplierForTesting = 0.867;
 
     private static final double[][] REGRESSION_DATA = {
             {46.4, 3400},
@@ -187,10 +187,8 @@ public class Outtake {
             return INTAKE_MIN_RPM;
         }
 
-        range *= multiplierForTesting;
-
         // Just use one of the three functions above
-        return cubicRegressionRPM(range);
+        return cubicRegressionRPM(range) * multiplierForTesting;
     }
 
     // Within the range and has been in range for spinupInRangeMinTime
