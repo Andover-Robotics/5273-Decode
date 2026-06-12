@@ -42,9 +42,9 @@ public class Turret {
         double relativeToCenter = angleWrapNegPos180(targetAngle - physicalRangeCenter);
 
         if (Math.abs(relativeToCenter) > physicalRangeCenter) {
-            double deadZone = 360 - actualRangeOfMotion;
+            double deadZoneHalfway = actualRangeOfMotion + ((360.0 - actualRangeOfMotion) / 2.0);
 
-            if (relativeToCenter > 0) {
+            if (deadZoneHalfway > targetAngle) {
                 targetAngle = actualRangeOfMotion;
             }
             else {
