@@ -20,7 +20,7 @@ public class Storage {
     public static double fullDurationThreshold = 1000; // ms
     public static double fullCurrentThreshold = 15.0; // amps
     private ElapsedTime fullDurationTimer;
-    private double current = 0; // amps
+    private double    current = 0; // amps
 
     private static boolean gateOpen = false;
     public Storage (HardwareMap hardwareMap, Intake intake){
