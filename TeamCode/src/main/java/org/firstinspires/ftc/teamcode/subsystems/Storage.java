@@ -17,8 +17,8 @@ public class Storage {
     public static double gateClosedPos = 0.345;
     public static double gateOpenPos = 0.067;
     public static double TRANSFER_POWER = -1;
-    public static double fullDurationThreshold = 1000; // ms
-    public static double fullCurrentThreshold = 9.0; // amps
+    public static double fullDurationThreshold = 300; // ms
+    public static double fullCurrentThresholdAmps = 8.0; // amps
     private ElapsedTime fullDurationTimer;
     private double    current = 0; // amps
 
@@ -54,13 +54,13 @@ public class Storage {
 
     public void updateForIfFull() {
         current = intake.getCurrentAmps() + transfer.motorEx.getCurrent(CurrentUnit.AMPS);
-        if (!(current >= fullCurrentThreshold)) {
+        if (!(current >= fullCurrentThresholdAmps)) {
             fullDurationTimer.reset();
         }
     }
 
     public boolean isFull() {
-        return current >= fullCurrentThreshold && fullDurationTimer.milliseconds() >= fullDurationThreshold;
+        return current >= fullCurrentThresholdAmps && fullDurationTimer.milliseconds() >= fullDurationThreshold;
     }
 
     public double getCurrent() {
