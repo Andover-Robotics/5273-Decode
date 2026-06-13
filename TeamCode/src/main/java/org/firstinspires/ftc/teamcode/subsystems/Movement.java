@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -14,12 +15,14 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 /**
  * Represents the drivetrain.
  */
+@Config
 public class Movement {
     private final DcMotor leftFront, leftBack, rightFront, rightBack;
     private final MecanumDrive drive;
     //private final IMU imu;
     private final double STRAFE_MULTIPLIER = 1.0, ROTATION_MULTIPLIER = 0.8;
     private final double SLOW_MULTIPLIER = 0.5;
+    public static double frontFeedForward = 0.07;
     private boolean slowToggled = false;
 
     /**
@@ -60,8 +63,10 @@ public class Movement {
 
         // For smoother joystick movement
         double denominator = Math.max(1.0, Math.abs(axial) + Math.abs(lateral) + Math.abs(yaw));
+        leftFrontPower += Math.signum(leftFrontPower) * frontFeedForward;
+        rightFrontPower += Math.signum(rightFrontPower) * frontFeedForward;
 
-        leftFrontPower  /= denominator;
+        leftFrontPower /= denominator;
         rightFrontPower /= denominator;
         leftBackPower   /= denominator;
         rightBackPower  /= denominator;

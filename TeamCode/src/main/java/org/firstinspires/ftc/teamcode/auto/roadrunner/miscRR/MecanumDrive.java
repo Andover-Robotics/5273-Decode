@@ -63,18 +63,18 @@ public final class MecanumDrive {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP;
 
         // drive model parameters
-        public double inPerTick = 0.00198746791;
-        public double lateralInPerTick = 0.001401323644018724;
+        public double inPerTick = 0.00197770967;
+        public double lateralInPerTick = 0.0013645794224041547;
         //8718.210579491823
-        public double trackWidthTicks = 5644.108750580074;
+        public double trackWidthTicks = 5786.256946;
         // 0.0013065978677593046
         // feedforward parameters (in tick units)
         // kV: 0.00036105964752604797, kS: 0.9030920235807085
         // kV: 0.00037199143511341737, kS: 0.8028058443180899 - regression vals
-        public double kS = 1.822418915814533;
-        public double kV = .00024;
+        public double kS = 1.5498338600171198;
+        public double kV = 0.00023889899374716016;
         //KA needs serious help
-        public double kA = 9e-8;
+        public double kA = 9e-7;
 
         // path profile parameters (in inches)
 
@@ -89,13 +89,13 @@ public final class MecanumDrive {
         public double maxAngAccel = Math.PI;
 
         // path controller gains
-        public double axialGain = 3;
-        public double lateralGain = 1;
-        public double headingGain = 1; // shared with turn
+        public double axialGain = 2.4;
+        public double lateralGain = 3.0;
+        public double headingGain = 4; // shared with turn
 
-        public double axialVelGain = 0;
-        public double lateralVelGain = 0;
-        public double headingVelGain = 0; // shared with turn
+        public double axialVelGain = 0.3;
+        public double lateralVelGain = 0.4;
+        public double headingVelGain = 0.8; // shared with turn
     }
 
     public static Params PARAMS = new Params();
@@ -260,6 +260,7 @@ public final class MecanumDrive {
     }
 
     public void setDrivePowers(PoseVelocity2d powers) {
+        double frontFeedForward = 0.07;
         MecanumKinematics.WheelVelocities<Time> wheelVels = new MecanumKinematics(1).inverse(
                 PoseVelocity2dDual.constant(powers, 1));
 
@@ -268,8 +269,8 @@ public final class MecanumDrive {
             maxPowerMag = Math.max(maxPowerMag, power.value());
         }
 
-        leftFront.setPower(wheelVels.leftFront.get(0) / maxPowerMag);
-        leftBack.setPower(wheelVels.leftBack.get(0) / maxPowerMag);
+        leftFront.setPower(wheelVels.leftFront.get(0) /*+ Math.signum(wheelVels.leftFront.get(0)) * frontFeedForward)*// maxPowerMag);
+        leftBack.setPower(wheelVels.leftBack.get(0) /*+ Math.signum(wheelVels.leftFront.get(0))) * frontFeedForward*// maxPowerMag);
         rightBack.setPower(wheelVels.rightBack.get(0) / maxPowerMag);
         rightFront.setPower(wheelVels.rightFront.get(0) / maxPowerMag);
     }
