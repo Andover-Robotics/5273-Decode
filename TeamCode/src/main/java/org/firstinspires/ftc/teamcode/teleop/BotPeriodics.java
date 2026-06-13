@@ -53,6 +53,7 @@ public class BotPeriodics {
     public static double targetRPM = 2000;
     public static double outtakeEjectRpm = 670;
     protected static final long AIM_UPDATE_INTERVAL_MS = 20;
+    protected boolean initialBackwardsTransfer = true;
 
     protected boolean twoMovementMode;
 
@@ -81,6 +82,7 @@ public class BotPeriodics {
             handleIntake();
             handleOuttake();
             handleStorage();
+            handleAllianceSelection();
         }
 
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT) && aimlock == false) {
@@ -96,10 +98,11 @@ public class BotPeriodics {
 
         handleAimLock();
         handleMovement();
-        handleAllianceSelection();
         handleTelemetry();
 
-        storage.updateForIfFull();
+        if (!initialBackwardsTransfer)
+            storage.updateForIfFull();
+
         outtake.periodic();
         actionHost.update();
         drive.updatePoseEstimate();
@@ -121,19 +124,23 @@ public class BotPeriodics {
 
         if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
             intake.run();
-            storage.runTransfer();
+            if (!initialBackwardsTransfer)
+                storage.runTransfer();
         }
         else if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
             intake.runBackwards(); // only run intake backwards to eject only 4th ball
-            storage.stopTransfer();
+            if (!initialBackwardsTransfer)
+                storage.stopTransfer();
         }
         else if (continuousIntake) {
             intake.runSlow();
-            storage.stopTransfer();
+            if (!initialBackwardsTransfer)
+                storage.stopTransfer();
         }
         else {
             intake.stop();
-            storage.stopTransfer();
+            if (!initialBackwardsTransfer)
+                storage.stopTransfer();
         }
     }
 
@@ -159,16 +166,17 @@ public class BotPeriodics {
             storage.closeGate();
         }
 
-        if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
-            storage.runTransfer();
+        if (initialBackwardsTransfer || g2.getButton(GamepadKeys.Button.X)) {
+            storage.runTransferBackwards();
+        }
+        else if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
+            if (!initialBackwardsTransfer)
+                storage.runTransfer();
             intake.run();
         }
         else if (g1.getButton(GamepadKeys.Button.Y) || g2.getButton(GamepadKeys.Button.Y)) {
             storage.runTransferBackwards();
             intake.runBackwards();
-        }
-        else if (g2.getButton(GamepadKeys.Button.X)) {
-            storage.runTransferBackwards();
         }
     }
 
