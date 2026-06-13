@@ -37,7 +37,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     private double bearingTurnCorrection = 0;
     private double bearingAvoidCorrection = 0;
     public static double goalHeading = 0;
-    public static double BEARING_AVOID_IN_DEGREES = 30;
+    public static double BEARING_AVOID_IN_DEGREES = 26.7;
     public static boolean mecanumAvoid = true;
     public static double servoOffset = 86.0;
     public static double shooterRPM;

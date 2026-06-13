@@ -29,7 +29,7 @@ public class BotPeriodics {
     protected final Telemetry telemetry;
     protected double bearingTurnCorrection = 0;
     private double bearingAvoidCorrection = 0;
-    public static double BEARING_AVOID_IN_DEGREES = 20;
+    public static double BEARING_AVOID_IN_DEGREES = 26.7;
     protected ActionHost actionHost;
     // camera vision
 
@@ -47,8 +47,8 @@ public class BotPeriodics {
     public static boolean continuousIntake = true;
     public static boolean manualTurretAim = false;
     private double manualTurretTarget = 0;
-    public static double turretlLeftStickMult = 1.0;
-    public static double turretRightStickMult = 0.25;
+    public static double turretlLeftStickMult = 5.0;
+    public static double turretRightStickMult = 2.0;
 
     public static double targetRPM = 2000;
     public static double outtakeEjectRpm = 670;
@@ -176,10 +176,10 @@ public class BotPeriodics {
         double lx = g2.getLeftX();
         double rx = g2.getRightX();
 
-        if (Math.abs(lx) > 0.1) {
+        if (Math.abs(lx) >= 0.1) {
             manualTurretTarget = wrapAngle360(manualTurretTarget + lx * turretlLeftStickMult);
         }
-        if (Math.abs(rx) > 0.01) {
+        if (Math.abs(rx) >= 0.01) {
             manualTurretTarget = wrapAngle360(manualTurretTarget + rx * turretRightStickMult);
         }
 
@@ -196,10 +196,11 @@ public class BotPeriodics {
         telemetry.addData("Bot Range", targetData[1]);
         telemetry.addData("Alliance selected", colorGoalSelected);
         telemetry.addData("Turn Correction:", turnCorrection);
+        telemetry.addData("Manual Turret Angle", manualTurretTarget);
         telemetry.addData("Intake power: ", intake.getPower());
         telemetry.addData("Last Turn Correction", lastTurnCorrection);
         telemetry.addData("Last Turn Correction", lastTurnCorrection);
-        telemetry.addData("Transfer Current (amps): ", storage.getCurrent());
+        telemetry.addData("Transfer and intake Current (amps): ", storage.getCurrent());
         telemetry.update();
     }
 
@@ -282,7 +283,8 @@ public class BotPeriodics {
                     );
                 }
 
-                turret.rotate(bearingTurnCorrection);
+                if (!manualTurretAim)
+                    turret.rotate(bearingTurnCorrection);
             }
         }
         else {

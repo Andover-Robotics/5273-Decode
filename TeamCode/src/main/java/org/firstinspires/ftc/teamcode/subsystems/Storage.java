@@ -18,7 +18,7 @@ public class Storage {
     public static double gateOpenPos = 0.067;
     public static double TRANSFER_POWER = -1;
     public static double fullDurationThreshold = 1000; // ms
-    public static double fullCurrentThreshold = 15.0; // amps
+    public static double fullCurrentThreshold = 9.0; // amps
     private ElapsedTime fullDurationTimer;
     private double    current = 0; // amps
 
