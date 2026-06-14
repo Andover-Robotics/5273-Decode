@@ -276,12 +276,12 @@ public class BotPeriodics {
 
                     if (currentServoTargetPos >= upperLimit) {
                         // Move counterclockwise for degrees past limit
-                        double degreesPastLimit = (currentServoTargetPos - upperLimit) * turret.getActualRangeOfMotion();
-                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-degreesPastLimit);
+                        double degreesPastLimit = (currentServoTargetPos - upperLimit) * 360;
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(degreesPastLimit);
                     } else if (currentServoTargetPos <= lowerLimit) {
                         // Move clockwise for degrees past limit
-                        double degreesPastLimit = (lowerLimit - currentServoTargetPos) * turret.getActualRangeOfMotion();
-                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(degreesPastLimit);
+                        double degreesPastLimit = (lowerLimit - currentServoTargetPos) * 360;
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-degreesPastLimit);
                     } else {
                         bearingAvoidCorrection = 0;
                     }

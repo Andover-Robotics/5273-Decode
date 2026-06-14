@@ -44,7 +44,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     private boolean aimlock = false;
     public static boolean fieldCentric = false;
     public static boolean drivetrainAim = false;
-    public static double offset = 0;
+    public static double adjustDeadzoneDegrees = -20;
 
     public static long aimUpdateInterval = 20; // ms
     private static String colorGoalSelected = "";
@@ -151,12 +151,12 @@ public class LocalizedAimingTester extends LinearOpMode {
 
                     if (currentServoTargetPos >= upperLimit) {
                         // Move counterclockwise for degrees past limit
-                        double degreesPastLimit = (currentServoTargetPos - upperLimit) * turret.getActualRangeOfMotion();
-                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-degreesPastLimit);
+                        double degreesPastLimit = (currentServoTargetPos - upperLimit) * 360;
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(degreesPastLimit);
                     } else if (currentServoTargetPos <= lowerLimit) {
                         // Move clockwise for degrees past limit
-                        double degreesPastLimit = (lowerLimit - currentServoTargetPos) * turret.getActualRangeOfMotion();
-                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(degreesPastLimit);
+                        double degreesPastLimit = (lowerLimit - currentServoTargetPos) * 360;
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-degreesPastLimit);
                     } else {
                         bearingAvoidCorrection = 0;
                     }
@@ -264,6 +264,13 @@ public class LocalizedAimingTester extends LinearOpMode {
             aimlock = false;
             g1.gamepad.rumbleBlips(1);
             g2.gamepad.rumbleBlips(1);
+        }
+
+        if (g1.wasJustPressed(GamepadKeys.Button.Y)) {
+            if (colorGoalSelected.equals("Blue"))
+                aimer.localizeForAuto(Aimer.Goal.BLUE);
+            else if (colorGoalSelected.equals("Red"))
+                aimer.localizeForAuto(Aimer.Goal.RED);
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.X)) {

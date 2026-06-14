@@ -72,6 +72,17 @@ public class Aimer {
         }
     }
 
+    public void localizeForAuto(Goal goal){
+        double botWidth = 14.8;
+        double botLength = 17.0;
+        // -2.25 because turret not centered
+        if(selectedGoal == Goal.RED){
+            drive.localizer.setPose(new Pose2d(0+botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
+        } else if (selectedGoal == Goal.BLUE){
+            drive.localizer.setPose(new Pose2d(144-botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
+        }
+    }
+
     public double[] calculateLocalizedData() {
         Pose2d robotPose = drive.localizer.getPose();
 
