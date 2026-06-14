@@ -29,8 +29,8 @@ public class Aimer {
     public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
 
-    public static double goalBack = 8; //how far from the back of the field the aiming point is
-    public static double goalOut = 13.5; //how far from the side border of the field (where drivers stand) the aiming point is
+    public static double goalBack = 14; //how far from the back of the field the aiming point is
+    public static double goalOut = 25; //how far from the side border of the field (where drivers stand) the aiming point is
 
     public enum Goal {
         RED,
