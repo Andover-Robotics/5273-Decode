@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.SimpleServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Config
@@ -17,13 +16,14 @@ public class Turret {
     public Turret(HardwareMap hardwareMap) {
         servo1 = new SimpleServo(hardwareMap, "turretServo1", 0, 360);
         servo2 = new SimpleServo(hardwareMap, "turretServo2", 0, 360);
-        // set initial position
-        servo1.setPosition(0);
-        servo2.setPosition(0);
     }
 
     public double getCurrentAngle() {
         return angle;
+    }
+
+    public void initialize() {
+        setServos(wrapAngle360(180 + servoOffset));
     }
 
     public void rotate(double angle) {
@@ -38,29 +38,18 @@ public class Turret {
 
         // normalize heading error to servo's 0 to 1, negate angle based on whether turret is clockwise or counterclockwise from 0 to 1
         double targetAngle = wrapAngle360(-angle + 180 + servoOffset);
-        double physicalRangeCenter = actualRangeOfMotion / 2;
-        double relativeToCenter = angleWrapNegPos180(targetAngle - physicalRangeCenter);
-
-        if (Math.abs(relativeToCenter) > physicalRangeCenter) {
-            double deadZoneHalfway = actualRangeOfMotion + ((360.0 - actualRangeOfMotion) / 2.0);
-
-            if (deadZoneHalfway > targetAngle) {
-                targetAngle = actualRangeOfMotion;
-            }
-            else {
-                targetAngle = 0;
-            }
-        }
-
         double servoPos = targetAngle / actualRangeOfMotion;
-        servo1.setPosition(servoPos);
-        servo2.setPosition(servoPos);
+        double servoPosClamped = Math.max(0.0, Math.min(1.0, servoPos));
+
+        servo1.setPosition(servoPosClamped);
+        servo2.setPosition(servoPosClamped);
+        this.angle = servoPosClamped * actualRangeOfMotion;
     }
 
     private double wrapAngle360(double angle) {
         return ((angle%360)+360)%360;
     }
-    private double angleWrapNegPos180(double angle) {
+    private double wrapAngleNegPos180(double angle) {
         return ((angle + 180) % 360 + 360) % 360 - 180;
     }
 

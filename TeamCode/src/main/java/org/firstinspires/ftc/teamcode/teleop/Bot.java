@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.teleop;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -21,7 +22,7 @@ public class Bot extends BotPeriodics {
     public static long timeToReverseTransferAfterStartBeforeCloseGate = 500; // ms
 
     public static double withinRpmRange = 150; //
-    public static double FIRE_TIME = 3.0;
+    public static double FIRE_TIME = 2.0;
 
     public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
         super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement);
@@ -34,14 +35,16 @@ public class Bot extends BotPeriodics {
 
     public void teleopStart(){
         teleOpStartTime = System.currentTimeMillis();
-        storage.runTransferBackwards();
+        initialBackwardsTransfer = true;
+        turret.initialize();
+
     }
 
     public void teleopTick()
     {
         if (!finishedInitialGateClose && System.currentTimeMillis() >= teleOpStartTime + timeToReverseTransferAfterStartBeforeCloseGate) {
             storage.closeGate();
-            storage.stopTransfer();
+            initialBackwardsTransfer = false;
             finishedInitialGateClose = true;
         }
 
@@ -84,9 +87,7 @@ public class Bot extends BotPeriodics {
     }
 
     private Action actionFire() {
-        final double rpm = getTargetRPM();
-        return new SequentialAction(
-                new InstantAction(() -> outtake.set(rpm)),
+        Action shootingAction = new SequentialAction(
                 packet -> {
                     outtake.set(getTargetRPM());
                     return !outtake.inRange(withinRpmRange);
@@ -101,6 +102,15 @@ public class Bot extends BotPeriodics {
                 new InstantAction(storage::stopTransfer),
                 new InstantAction(() -> setAimlock(false)),
                 new InstantAction(() -> setRumbledAlready(false))
+        );
+
+        return new ParallelAction(
+                shootingAction,
+                packet -> {
+                    // Packet returns true when shootingAction ends
+                    outtake.set(getTargetRPM());
+                    return shootingAction.run(packet);
+                }
         );
     }
 
