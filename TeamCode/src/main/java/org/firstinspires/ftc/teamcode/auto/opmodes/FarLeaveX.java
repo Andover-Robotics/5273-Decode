@@ -24,8 +24,8 @@ public class FarLeaveX extends LinearOpMode {
     public void runOpMode() {
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
 
-        Hardware hardware = new Hardware(hardwareMap, telemetry, this, startPose);
-        BotActions botActions = hardware.actions;
+        Hardware hardware = new Hardware(hardwareMap, telemetry, startPose);
+        BotActions botActions = new BotActions(hardware, telemetry, this);
         MecanumDrive drive = hardware.mecanumDrive;
 
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(0));

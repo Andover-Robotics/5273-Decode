@@ -52,7 +52,7 @@ public class BotPeriodics {
 
     public static double targetRPM = 2000;
     public static double outtakeEjectRpm = 670;
-    protected static final long AIM_UPDATE_INTERVAL_MS = 20;
+    protected static final long AIM_UPDATE_INTERVAL_MS = 0;
     protected boolean initialBackwardsTransfer = true;
 
     protected boolean twoMovementMode;

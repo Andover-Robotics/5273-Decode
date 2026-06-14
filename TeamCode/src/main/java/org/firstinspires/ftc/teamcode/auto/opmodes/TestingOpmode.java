@@ -35,8 +35,8 @@ import java.util.function.IntSupplier;
             public void runOpMode() {
                 Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
 
-                Hardware hardware = new Hardware(hardwareMap, telemetry, this, startPose);
-                BotActions botActions = hardware.actions;
+                Hardware hardware = new Hardware(hardwareMap, telemetry, startPose);
+                BotActions botActions = new BotActions(hardware, telemetry, this);
 
                 MecanumDrive drive = hardware.mecanumDrive;
 
@@ -51,12 +51,12 @@ import java.util.function.IntSupplier;
 
                 Action testSomething = new SequentialAction(
                         new SequentialAction(
-                                botActions.actionSetSomeShizzle(),
+                                //botActions.actionSetSomeShizzle(),
                                 new SleepAction(2),
                                 /*botActions.actionSetIntakeReverse(),
                                 new SleepAction(2)*/
                                 //botActions.rotateToMotifColorBeforeOuttake(row, id, 2)
-                                botActions.actionQuickOuttake()
+                                botActions.actionOuttake()
                                 /*drive.actionBuilder(poseStart)
                                         .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint1)
                                         .build()*/

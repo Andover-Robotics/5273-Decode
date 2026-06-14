@@ -38,8 +38,8 @@ public class FarRedFarShooting extends LinearOpMode {
     public void runOpMode() {
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(90));
 
-        Hardware hardware = new Hardware(hardwareMap, telemetry, this, startPose);
-        BotActions botActions = hardware.actions;
+        Hardware hardware = new Hardware(hardwareMap, telemetry, startPose);
+        BotActions botActions = new BotActions(hardware, telemetry, this);
         MecanumDrive drive = hardware.mecanumDrive;
 
         Pose2d parkPose = new Pose2d(PARK_X, PARK_Y, Math.toRadians(90));
@@ -63,12 +63,12 @@ public class FarRedFarShooting extends LinearOpMode {
                         .strafeTo(shootPose.position)
                         .build(),
 
-                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.startOuttake(SHOOT_RPM),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake - 0.5),
                         new SleepAction(0.5),
-                        botActions.actionQuickOuttake()
+                        botActions.actionOuttake()
                 )
                 );
 
@@ -85,7 +85,7 @@ public class FarRedFarShooting extends LinearOpMode {
                 new ParallelAction(
                         botActions.actionPeriodic(),
                         new SequentialAction(
-                                botActions.actionScanObelisk()
+                                //botActions.actionScanObelisk()
                         ),
                         new SequentialAction(
                                 new InstantAction(() -> drive.localizer.setPose(startPose)),

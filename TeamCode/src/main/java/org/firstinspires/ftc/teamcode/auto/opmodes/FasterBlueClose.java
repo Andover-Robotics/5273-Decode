@@ -52,8 +52,8 @@ public class FasterBlueClose extends LinearOpMode {
     public void runOpMode() {
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
 
-        Hardware hardware = new Hardware(hardwareMap, telemetry, this, startPose);
-        BotActions botActions = hardware.actions;
+        Hardware hardware = new Hardware(hardwareMap, telemetry, startPose);
+        BotActions botActions = new BotActions(hardware, telemetry, this);
         MecanumDrive drive = hardware.mecanumDrive;
 
         Pose2d shootingPose = new Pose2d(
@@ -80,11 +80,11 @@ public class FasterBlueClose extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading)
                         .build(),
 
-                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.startOuttake(SHOOT_RPM),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake()
+                        botActions.actionOuttake()
                 )
         );
 
@@ -100,11 +100,11 @@ public class FasterBlueClose extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.startOuttake(SHOOT_RPM),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake),
-                        botActions.actionQuickOuttake()
+                        botActions.actionOuttake()
                 )
         );
 
@@ -116,11 +116,11 @@ public class FasterBlueClose extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.startOuttake(SHOOT_RPM),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake + 0.5),
-                        botActions.actionQuickOuttake()
+                        botActions.actionOuttake()
                 )
         );
 
@@ -150,11 +150,11 @@ public class FasterBlueClose extends LinearOpMode {
                         .strafeToSplineHeading(shootingPose.position, shootingPose.heading.plus(Math.toRadians(SHOOT_HEADING_OFFSET_AFTER_FIRSTSHOT)))
                         .build(),
 
-                botActions.actionStartOuttake(SHOOT_RPM),
+                botActions.startOuttake(SHOOT_RPM),
 
                 new SequentialAction(
                         new SleepAction(timeUntilStartOuttake + 1.0),
-                        botActions.actionQuickOuttake()
+                        botActions.actionOuttake()
                 )
         );
 
