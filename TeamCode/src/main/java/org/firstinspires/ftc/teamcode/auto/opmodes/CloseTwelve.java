@@ -26,22 +26,22 @@ public class CloseTwelve extends LinearOpMode {
     private final MecanumDrive drive = hardware.mecanumDrive;
 
     //USE SAME LOCALIZATION STYLE AS AIMER (90 degrees faces the goals, 0 degs faces side with red goal, 180 degs faces side with blue goal, +y is towards goals)
-    public static double startX = 0;
-    public static double startY = 0;
-    public static double startAngle = Math.toRadians(180);
+    public static double startX = 114.367;
+    public static double startY = 131.988;
+    public static double startAngle = Math.toRadians(90);
     // based on blue for now : ill make cross compatible soon
-    public static double intakingAngle = Math.toRadians(180);
+    public static double intakingAngle = Math.toRadians(0);
 
     //row numerations start at 0 for ease
     //array of row y, placeholder value for now
-    public static double[] rowStartY = {0, 0, 0};
-    public static double[] rowStartX = {0, 0, 0};
+    public static double[] rowStartY = {83.3, 59.2, 34.9};
+    public static double[] rowStartX = {104.9, 104.15, 104.6};
     // array of how far to go forward in each row, placeholder value for now
-    public static double[] rowForwards = {0, 0, 0};
+    public static double[] rowForwards = {10, 10, 10};
 
     //shoot pos
-    public static double shootX = 0;
-    public static double shootY = 0;
+    public static double shootX = 101.233;
+    public static double shootY = 88.6;
 
     public static Pose2d startPose = new Pose2d(startX, startY, startAngle);
     public static Pose2d rowZeroStart = new Pose2d(rowStartX[0], rowStartY[0], intakingAngle);
@@ -53,9 +53,9 @@ public class CloseTwelve extends LinearOpMode {
     public static Pose2d rowOneEnd = new Pose2d(rowStartX[1] - rowForwards[1], rowStartY[1], intakingAngle);
     public static Pose2d rowTwoEnd = new Pose2d(rowStartX[2] - rowForwards[2], rowStartY[2], intakingAngle);
 
-    public static Pose2d gatePose = new Pose2d(0, 0, Math.toRadians(0));
+    public static Pose2d gatePose = new Pose2d(131.6, 67, Math.toRadians(-90));
     public static Pose2d shootPos = new Pose2d(shootX, shootY, Math.toRadians(0));
-    public static Pose2d leavePos = new Pose2d(0, 0, Math.toRadians(0));
+    public static Pose2d leavePos = new Pose2d(101, 78, Math.toRadians(0));
 
     public static double intakeSettle = 0.25;
     public static double startAimlockTimeBeforeShoot = 0.5;
