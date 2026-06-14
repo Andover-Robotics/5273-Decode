@@ -257,14 +257,31 @@ public class BotPeriodics {
             } else {
                 if (mecanumAvoid) {
                     // Avoiding the heading where servo must wraparound, to disable set BEARING_AVOID_IN_DEGREES = 0
-                    double wrappedTurnCorrection = angleWrapNegPos180(bearingTurnCorrection + servoOffset + 180);
-                    double posLimit = 180 - BEARING_AVOID_IN_DEGREES; // counter clockwise limit
-                    double negLimit = -180 + BEARING_AVOID_IN_DEGREES; // clockwise limit
+                    double targetAngle = wrapAngle360(-bearingTurnCorrection + 180 + turret.getServoOffset());
 
-                    if (wrappedTurnCorrection >= posLimit) {
-                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-(wrappedTurnCorrection - posLimit));
-                    } else if (wrappedTurnCorrection <= negLimit) {
-                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(negLimit - wrappedTurnCorrection);
+                    // The center of the deadzone
+                    double deadZoneHalfway = turret.getActualRangeOfMotion() + ((360.0 - turret.getActualRangeOfMotion()) / 2.0);
+                    if (targetAngle > turret.getActualRangeOfMotion()) {
+                        if (targetAngle < deadZoneHalfway)
+                            targetAngle = turret.getActualRangeOfMotion();
+                        else
+                            targetAngle = 0.0;
+                    }
+
+                    double currentServoTargetPos = targetAngle / turret.getActualRangeOfMotion();
+
+                    // 0 to 1, or 0 to servo physical range of motion
+                    double lowerLimit = BEARING_AVOID_IN_DEGREES / turret.getActualRangeOfMotion();
+                    double upperLimit = 1.0 - BEARING_AVOID_IN_DEGREES / turret.getActualRangeOfMotion();
+
+                    if (currentServoTargetPos >= upperLimit) {
+                        // Move counterclockwise for degrees past limit
+                        double degreesPastLimit = (currentServoTargetPos - upperLimit) * turret.getActualRangeOfMotion();
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-degreesPastLimit);
+                    } else if (currentServoTargetPos <= lowerLimit) {
+                        // Move clockwise for degrees past limit
+                        double degreesPastLimit = (lowerLimit - currentServoTargetPos) * turret.getActualRangeOfMotion();
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(degreesPastLimit);
                     } else {
                         bearingAvoidCorrection = 0;
                     }
@@ -347,10 +364,12 @@ public class BotPeriodics {
         return targetRPM;
     }
 
-    protected double angleWrapNegPos180(double angle) {
+    // wrapped to (-180, 180)
+    protected double wrapAngleNegPos180(double angle) {
         return ((angle + 180) % 360 + 360) % 360 - 180;
     }
-    private double wrapAngle360(double angle) {
+    // wrapped to (0, 360)
+    protected double wrapAngle360(double angle) {
         return ((angle%360)+360)%360;
     }
 

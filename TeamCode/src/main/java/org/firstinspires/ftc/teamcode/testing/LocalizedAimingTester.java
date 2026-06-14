@@ -39,12 +39,12 @@ public class LocalizedAimingTester extends LinearOpMode {
     public static double goalHeading = 0;
     public static double BEARING_AVOID_IN_DEGREES = 26.7;
     public static boolean mecanumAvoid = true;
-    public static double servoOffset = 86.0;
     public static double shooterRPM;
 
     private boolean aimlock = false;
     public static boolean fieldCentric = false;
     public static boolean drivetrainAim = false;
+    public static double offset = 0;
 
     public static long aimUpdateInterval = 20; // ms
     private static String colorGoalSelected = "";
@@ -81,12 +81,6 @@ public class LocalizedAimingTester extends LinearOpMode {
         storage.closeGate();
     }
 
-    // wrapped to (-180, 180)
-    private double angleWrapDegrees(double angle) {
-        return ((angle + 180) % 360 + 360) % 360 - 180;
-    }
-
-    // teleop type shift
     public void teleopTick(GamepadEx g1, GamepadEx g2, Telemetry telemetry) {
         outtake.periodic();
         drive.updatePoseEstimate();
@@ -138,14 +132,31 @@ public class LocalizedAimingTester extends LinearOpMode {
             } else {
                 if (mecanumAvoid) {
                     // Avoiding the heading where servo must wraparound, to disable set BEARING_AVOID_IN_DEGREES = 0
-                    double wrappedTurnCorrection = angleWrapDegrees(bearingTurnCorrection + servoOffset + 180);
-                    double posLimit = 180 - BEARING_AVOID_IN_DEGREES; // counter clockwise limit
-                    double negLimit = -180 + BEARING_AVOID_IN_DEGREES; // clockwise limit
+                    double targetAngle = wrapAngle360(-bearingTurnCorrection + 180 + turret.getServoOffset());
 
-                    if (wrappedTurnCorrection >= posLimit) {
-                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-(wrappedTurnCorrection - posLimit));
-                    } else if (wrappedTurnCorrection <= negLimit) {
-                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(negLimit - wrappedTurnCorrection);
+                    // The center of the deadzone
+                    double deadZoneHalfway = turret.getActualRangeOfMotion() + ((360.0 - turret.getActualRangeOfMotion()) / 2.0);
+                    if (targetAngle > turret.getActualRangeOfMotion()) {
+                        if (targetAngle < deadZoneHalfway)
+                            targetAngle = turret.getActualRangeOfMotion();
+                        else
+                            targetAngle = 0.0;
+                    }
+
+                    double currentServoTargetPos = targetAngle / turret.getActualRangeOfMotion();
+
+                    // 0 to 1, or 0 to servo physical range of motion
+                    double lowerLimit = BEARING_AVOID_IN_DEGREES / turret.getActualRangeOfMotion();
+                    double upperLimit = 1.0 - BEARING_AVOID_IN_DEGREES / turret.getActualRangeOfMotion();
+
+                    if (currentServoTargetPos >= upperLimit) {
+                        // Move counterclockwise for degrees past limit
+                        double degreesPastLimit = (currentServoTargetPos - upperLimit) * turret.getActualRangeOfMotion();
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(-degreesPastLimit);
+                    } else if (currentServoTargetPos <= lowerLimit) {
+                        // Move clockwise for degrees past limit
+                        double degreesPastLimit = (lowerLimit - currentServoTargetPos) * turret.getActualRangeOfMotion();
+                        bearingAvoidCorrection = aimer.calculateTurnPowerFromBearing(degreesPastLimit);
                     } else {
                         bearingAvoidCorrection = 0;
                     }
@@ -300,6 +311,16 @@ public class LocalizedAimingTester extends LinearOpMode {
         telemetry.update();
         lastTick = now;
         currentTime = now;
+    }
+
+    // wrapped to (-180, 180)
+    private double wrapAngleNegPos180(double angle) {
+        return ((angle + 180) % 360 + 360) % 360 - 180;
+    }
+
+    // wrapped to (0, 360)
+    private double wrapAngle360(double angle) {
+        return ((angle%360)+360)%360;
     }
 }
 

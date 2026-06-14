@@ -38,23 +38,12 @@ public class Turret {
 
         // normalize heading error to servo's 0 to 1, negate angle based on whether turret is clockwise or counterclockwise from 0 to 1
         double targetAngle = wrapAngle360(-angle + 180 + servoOffset);
-        double physicalRangeCenter = actualRangeOfMotion / 2;
-        double relativeToCenter = wrapAngleNegPos180(targetAngle - physicalRangeCenter);
-
-        if (Math.abs(relativeToCenter) > physicalRangeCenter) {
-            double deadZoneHalfway = actualRangeOfMotion + ((360.0 - actualRangeOfMotion) / 2.0);
-
-            if (deadZoneHalfway > targetAngle) {
-                targetAngle = actualRangeOfMotion;
-            }
-            else {
-                targetAngle = 0;
-            }
-        }
-
         double servoPos = targetAngle / actualRangeOfMotion;
-        servo1.setPosition(servoPos);
-        servo2.setPosition(servoPos);
+        double servoPosClamped = Math.max(0.0, Math.min(1.0, servoPos));
+
+        servo1.setPosition(servoPosClamped);
+        servo2.setPosition(servoPosClamped);
+        this.angle = servoPosClamped * actualRangeOfMotion;
     }
 
     private double wrapAngle360(double angle) {
