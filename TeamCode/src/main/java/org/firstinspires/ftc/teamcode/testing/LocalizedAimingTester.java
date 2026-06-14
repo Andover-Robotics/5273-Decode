@@ -40,7 +40,7 @@ public class LocalizedAimingTester extends LinearOpMode {
     public static double BEARING_AVOID_IN_DEGREES = 26.7;
     public static boolean mecanumAvoid = true;
     public static double servoOffset = 86.0;
-    public static double shooterRPM;
+    public static double shooterRPM = 1500;
 
     private boolean aimlock = false;
     public static boolean fieldCentric = false;
@@ -101,7 +101,6 @@ public class LocalizedAimingTester extends LinearOpMode {
             lastAimUpdateTime = currentTime;
             data = aimer.calculateLocalizedData();
             lastTurnCorrection = data[0];
-            shooterRPM = outtake.getRegressionRPM(data[1]);
             bearingTurnCorrection = data[2];
             goalHeading = data[3];
         }
