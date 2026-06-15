@@ -87,9 +87,7 @@ public class BotActions {
 
 
     public Action startOuttake(double rpm) {
-        return new ParallelAction(
-                new InstantAction(() -> outtake.set(rpm * quickspinRpmScale))
-        );
+        return new InstantAction(() -> outtake.set(rpm * quickspinRpmScale));
     }
 
     public Action actionSetAimlock(boolean aimlock) {
@@ -109,8 +107,7 @@ public class BotActions {
                 new InstantAction(storage::closeGate),
                 new InstantAction(intake::stop),
                 new InstantAction(outtake::stop),
-                new InstantAction(storage::stopTransfer),
-                new InstantAction(() -> setAimlock(false))
+                new InstantAction(storage::stopTransfer)
         );
 
         return new ParallelAction(
@@ -137,15 +134,10 @@ public class BotActions {
                 //telemetry.addData("obelisk id: ", obeliskId);
                 //telemetry.update(); // could remove later
 
-                long now = System.currentTimeMillis();
-
-                if (now - lastAimUpdate >= AIM_UPDATE_INTERVAL_MS) {
-                    lastAimUpdate = now;
-                    targetData = aimer.calculateLocalizedData();
-                    lastTurnCorrection = targetData[0];
-                    targetRPM = outtake.getRegressionRPM(targetData[1]);
-                    bearingTurnCorrection = targetData[2];
-                }
+                targetData = aimer.calculateLocalizedData();
+                lastTurnCorrection = targetData[0];
+                targetRPM = outtake.getRegressionRPM(targetData[1]);
+                bearingTurnCorrection = targetData[2];
                 turnCorrection = lastTurnCorrection;
 
                 if (aimlock)
@@ -154,6 +146,15 @@ public class BotActions {
                 return true;
             }
         };
+    }
+
+    public Action startActions() {
+        return new SequentialAction (
+            new InstantAction(storage::closeGate),
+            new InstantAction(turret::initialize),
+            new InstantAction(intake::runSlow),
+            new InstantAction(() -> setAimlock(true))
+        );
     }
 
     public double getTargetRPM() {

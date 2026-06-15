@@ -29,8 +29,8 @@ public class Aimer {
     public static double cameraHeight = 11.815; // inches
     public static double goalAprilTagHeight = 29.5; // inches
 
-    public static double goalBack = 14; //how far from the back of the field the aiming point is
-    public static double goalOut = 25; //how far from the side border of the field (where drivers stand) the aiming point is
+    public static double goalBack = 12; //how far from the back of the field the aiming point is
+    public static double goalOut = 16; //how far from the side border of the field (where drivers stand) the aiming point is
 
     public enum Goal {
         RED,
@@ -77,9 +77,9 @@ public class Aimer {
         double botLength = 17.0;
         // -2.25 because turret not centered
         if(selectedGoal == Goal.RED){
-            drive.localizer.setPose(new Pose2d(0+botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(113, 129, Math.toRadians(90)));
         } else if (selectedGoal == Goal.BLUE){
-            drive.localizer.setPose(new Pose2d(144-botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(31, 129, Math.toRadians(90)));
         }
     }
 
