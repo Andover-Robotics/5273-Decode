@@ -266,20 +266,11 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.Y)) {
-            if (colorGoalSelected.equals("Blue"))
-                aimer.localizeForAuto(Aimer.Goal.BLUE);
-            else if (colorGoalSelected.equals("Red"))
-                aimer.localizeForAuto(Aimer.Goal.RED);
+                aimer.localizeForAuto();
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.X)) {
-            if (colorGoalSelected.equals("Blue"))
                 aimer.relocalize();
-            else if (colorGoalSelected.equals("Red"))
-                aimer.relocalize();
-            else {
-                aimer.relocalize();
-            }
         }
 
         // Alliance selection

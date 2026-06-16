@@ -32,6 +32,11 @@ public class Aimer {
     public static double goalBack = 12; //how far from the back of the field the aiming point is
     public static double goalOut = 16; //how far from the side border of the field (where drivers stand) the aiming point is
 
+    public static double centerOfRotationOffsetY = 0.0;
+
+    // Relative to center of rotation
+    public static double turretOffsetY = 0.0;
+
     public enum Goal {
         RED,
         BLUE
@@ -66,13 +71,13 @@ public class Aimer {
         double botLength = 17.0;
         // -2.25 because turret not centered
         if(selectedGoal == Goal.RED){
-            drive.localizer.setPose(new Pose2d(0+botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(botWidth/2, botLength/2 - centerOfRotationOffsetY, Math.toRadians(90)));
         } else if (selectedGoal == Goal.BLUE){
-            drive.localizer.setPose(new Pose2d(144-botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(144-botWidth/2, botLength/2 - centerOfRotationOffsetY, Math.toRadians(90)));
         }
     }
 
-    public void localizeForAuto(Goal goal){
+    public void localizeForAuto(){
         double botWidth = 14.8;
         double botLength = 17.0;
         // -2.25 because turret not centered
@@ -85,10 +90,13 @@ public class Aimer {
 
     public double[] calculateLocalizedData() {
         Pose2d robotPose = drive.localizer.getPose();
+        double headingRadians = robotPose.heading.toDouble();
 
-        // Vector from robot -> tag in field coordinates
-        double dx = tagPose.position.x - robotPose.position.x;
-        double dy = tagPose.position.y - robotPose.position.y;
+        double turretX = robotPose.position.x - (turretOffsetY * Math.sin(headingRadians));
+        double turretY = robotPose.position.y + (turretOffsetY * Math.cos(headingRadians));
+
+        double dx = tagPose.position.x - turretX;
+        double dy = tagPose.position.y - turretY;
 
         double horizontalDistance = Math.hypot(dx, dy);
 
