@@ -57,6 +57,10 @@ public class BotPeriodics {
 
     protected boolean twoMovementMode;
 
+    protected boolean rumbledAlready = false;
+    protected boolean currentAutoAimlock = true;
+    protected boolean turnCurrentSensingOff = false;
+
     public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
         intake = new Intake(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
@@ -92,6 +96,13 @@ public class BotPeriodics {
             manualTurretAim = false;
         }
 
+        if (g2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+            turnCurrentSensingOff = false;
+        }
+        else if (g2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
+            turnCurrentSensingOff = true;
+        }
+
         if (manualTurretAim) {
             handleManualTurret();
         }
@@ -100,7 +111,7 @@ public class BotPeriodics {
         handleMovement();
         handleTelemetry();
 
-        if (!initialBackwardsTransfer)
+        if (!initialBackwardsTransfer && currentAutoAimlock)
             storage.updateForIfFull();
 
         outtake.periodic();
@@ -142,6 +153,14 @@ public class BotPeriodics {
             if (!initialBackwardsTransfer)
                 storage.stopTransfer();
         }
+
+        if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
+            setCurrentAutoAimlock(false);
+            setRumbledAlready(false);
+        }
+        else {
+            setCurrentAutoAimlock(true);
+        }
     }
 
     private void handleOuttake() {
@@ -161,22 +180,26 @@ public class BotPeriodics {
 
         if (g2.wasJustPressed(openGateButton)) {
             storage.openGate();
-        }
-        else if (g2.wasJustPressed(closeGateButton)) {
+        } else if (g2.wasJustPressed(closeGateButton)) {
             storage.closeGate();
         }
 
         if (initialBackwardsTransfer || g2.getButton(GamepadKeys.Button.X)) {
             storage.runTransferBackwards();
-        }
-        else if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
+        } else if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
             if (!initialBackwardsTransfer)
                 storage.runTransfer();
             intake.run();
-        }
-        else if (g1.getButton(GamepadKeys.Button.Y) || g2.getButton(GamepadKeys.Button.Y)) {
+        } else if (g1.getButton(GamepadKeys.Button.Y) || g2.getButton(GamepadKeys.Button.Y)) {
             storage.runTransferBackwards();
             intake.runBackwards();
+        }
+
+        if (g1.getButton(GamepadKeys.Button.Y) || g2.getButton(GamepadKeys.Button.Y)) {
+            setCurrentAutoAimlock(false);
+            setRumbledAlready(false);
+        } else {
+            setCurrentAutoAimlock(true);
         }
     }
 
@@ -377,6 +400,13 @@ public class BotPeriodics {
 
     protected void setAimlock(boolean lock) {
         aimlock = lock;
+    }
+
+    protected void setRumbledAlready(boolean rumbled) {
+        rumbledAlready = rumbled;
+    }
+    protected void setCurrentAutoAimlock(boolean autoAimlock) {
+        this.currentAutoAimlock = autoAimlock;
     }
 }
 
