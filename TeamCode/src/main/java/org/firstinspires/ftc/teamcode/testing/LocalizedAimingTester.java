@@ -252,14 +252,14 @@ public class LocalizedAimingTester extends LinearOpMode {
             turret.setServos(0);
         }
 
-        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             aimlock = true;
             g1.gamepad.rumbleBlips(2);
             g2.gamepad.rumbleBlips(2);
             aprilTag.setCurrentCameraScannedId(0);
         }
 
-        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
             aimlock = false;
             g1.gamepad.rumbleBlips(1);
             g2.gamepad.rumbleBlips(1);
