@@ -73,15 +73,6 @@ public class CloseTwelveRed extends LinearOpMode {
                 .stopAndAdd(botActions.actionOuttake())
                 .stopAndAdd(botActions.stopOuttake())
 
-                //.strafeToSplineHeading(rowZeroStart.position, rowZeroStart.heading.log())
-                .stopAndAdd(botActions.startIntake())
-                .strafeTo(rowZeroEnd.position)
-                .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(botActions.startOuttake())
-                .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
-                .stopAndAdd(botActions.stopOuttake())
-
                 .strafeToSplineHeading(rowOneStart.position, rowOneStart.heading.log())
                 .stopAndAdd(botActions.startIntake())
                 .strafeTo(rowOneEnd.position)
@@ -100,6 +91,16 @@ public class CloseTwelveRed extends LinearOpMode {
                 .strafeToSplineHeading(new Vector2d(shootX - 2, shootY + 2), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake())
                 .stopAndAdd(botActions.stopOuttake())
+
+                //.strafeToSplineHeading(rowZeroStart.position, rowZeroStart.heading.log())
+                .stopAndAdd(botActions.startIntake())
+                .strafeTo(rowZeroEnd.position)
+                .stopAndAdd(botActions.runContinuousIntake())
+                .stopAndAdd(botActions.startOuttake())
+                .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
+                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.stopOuttake())
+
                 .strafeToSplineHeading(leavePos.position, leavePos.heading.log());
 
         madeAuto = builder.build();
