@@ -252,34 +252,25 @@ public class LocalizedAimingTester extends LinearOpMode {
             turret.setServos(0);
         }
 
-        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             aimlock = true;
             g1.gamepad.rumbleBlips(2);
             g2.gamepad.rumbleBlips(2);
             aprilTag.setCurrentCameraScannedId(0);
         }
 
-        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
             aimlock = false;
             g1.gamepad.rumbleBlips(1);
             g2.gamepad.rumbleBlips(1);
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.Y)) {
-            if (colorGoalSelected.equals("Blue"))
-                aimer.localizeForAuto(Aimer.Goal.BLUE);
-            else if (colorGoalSelected.equals("Red"))
-                aimer.localizeForAuto(Aimer.Goal.RED);
+                aimer.localizeForAuto();
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.X)) {
-            if (colorGoalSelected.equals("Blue"))
                 aimer.relocalize();
-            else if (colorGoalSelected.equals("Red"))
-                aimer.relocalize();
-            else {
-                aimer.relocalize();
-            }
         }
 
         // Alliance selection

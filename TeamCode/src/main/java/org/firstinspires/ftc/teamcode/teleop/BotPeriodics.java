@@ -202,6 +202,8 @@ public class BotPeriodics {
         telemetry.addData("Outtake RPM", outtake.getRPM());
         telemetry.addData("Target RMP", outtake.getTargetRPM());
         telemetry.addData("Bot Range", targetData[1]);
+        telemetry.addData("x", drive.localizer.getPose().position.x);
+        telemetry.addData("y", drive.localizer.getPose().position.y);
         telemetry.addData("Alliance selected", colorGoalSelected);
         telemetry.addData("Turn Correction:", turnCorrection);
         telemetry.addData("Manual Turret Angle", manualTurretTarget);
@@ -335,13 +337,13 @@ public class BotPeriodics {
 
     protected void handleAimLock() {
         // Toggle continuous lock
-        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) || g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) || g2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
             aimlock = true;
             manualTurretAim = false;
             g1.gamepad.rumbleBlips(2);
             g2.gamepad.rumbleBlips(2);
         }
-        if (g1.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER) || g2.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
+        if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) || g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
             aimlock = false;
             g1.gamepad.rumbleBlips(1);
             g2.gamepad.rumbleBlips(1);
