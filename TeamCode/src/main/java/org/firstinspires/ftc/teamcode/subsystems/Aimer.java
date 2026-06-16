@@ -25,12 +25,21 @@ public class Aimer {
     private long lastTimestamp = 0;
     private final MecanumDrive drive;
     //private final InertiaAutoAim inertiaAutoAim;
-    public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(90));
-    public static double turretHeight = 11.0; // inches
-    public static double goalAprilTagHeight = 29.5; // inches
 
-    public static double goalBack = 14; //how far from the back of the field the aiming point is
-    public static double goalOut = 15; //how far from the side border of the field (where drivers stand) the aiming point is
+    //for rpm power
+    public static Pose2d targetPoseForRpm = new Pose2d(0, 132, Math.toRadians(90));
+    //for bearing
+    public static Pose2d targetPoseAim = new Pose2d(0, 132, Math.toRadians(90));
+    public static double turretHeight = 11.0; // inches
+    public static double targetHeight = 29.5; // inches
+
+    //how far from the back of the field the aiming point is
+    public static double goalBackAim = 14; // Only for aiming
+    public static double goalBackForRpm = 8; // rpm depends on this
+
+    //how far from the side border of the field (where drivers stand) the aiming point is
+    public static double goalOutAim = 15; // only for aiming
+    public static double goalOutForRpm = 15; // rpm depends on this
 
     public static double centerOfRotationOffsetY = -1.85; // in
 
@@ -54,12 +63,14 @@ public class Aimer {
 
     public void setRedTarget(){
         selectedGoal = Goal.RED;
-        tagPose = new Pose2d(144-goalOut,144-goalBack, Math.toRadians(90));
+        targetPoseForRpm = new Pose2d(144-goalOutForRpm,144-goalBackForRpm, Math.toRadians(90));
+        targetPoseAim = new Pose2d(144-goalOutAim,144-goalBackAim, Math.toRadians(90));
     }
 
     public void setBlueTarget(){
         selectedGoal = Goal.BLUE;
-        tagPose = new Pose2d(goalOut,144-goalBack, Math.toRadians(90));
+        targetPoseForRpm = new Pose2d(goalOutForRpm,144-goalBackForRpm, Math.toRadians(90));
+        targetPoseAim = new Pose2d(goalOutAim,144-goalBackAim, Math.toRadians(90));
     }
 
     public Goal getGoal() {
@@ -95,19 +106,24 @@ public class Aimer {
         double turretX = robotPose.position.x - (turretOffsetY * Math.sin(headingRadians));
         double turretY = robotPose.position.y + (turretOffsetY * Math.cos(headingRadians));
 
-        double dx = tagPose.position.x - turretX;
-        double dy = tagPose.position.y - turretY;
+        double dxForRpm = targetPoseForRpm.position.x - turretX;
+        double dyForRpm = targetPoseForRpm.position.y - turretY;
 
-        double horizontalDistance = Math.hypot(dx, dy);
+        double dxAim = targetPoseAim.position.x - turretX;
+        double dyAim = targetPoseAim.position.y - turretY;
 
-        double dz = goalAprilTagHeight - turretHeight;
+        double horizontalDistanceForRpm = Math.hypot(dxForRpm, dyForRpm);
 
-        // point-to-point distance=
-        double range = Math.hypot(horizontalDistance, dz);
-
-        double desiredHeading = Math.atan2(dy, dx);
+        double dz = targetHeight - turretHeight;
 
         double currentHeading = robotPose.heading.toDouble();
+
+        // point-to-point distance, only used for outtake rpm
+        double range = Math.hypot(horizontalDistanceForRpm, dz);
+
+        // only used for aim
+        double desiredHeading = Math.atan2(dyAim, dxAim);
+
 
         double bearing = Math.toDegrees(desiredHeading - currentHeading);
         bearing = angleWrapDegrees(bearing);
