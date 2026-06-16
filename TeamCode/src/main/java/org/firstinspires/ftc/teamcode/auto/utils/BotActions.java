@@ -42,7 +42,7 @@ public class BotActions {
     private boolean aimlock = false;
     private long lastAimUpdate = 0;
     private static final long AIM_UPDATE_INTERVAL_MS = 0;
-    public static double FIRE_TIME = 2.0;
+    public static double FIRE_TIME = 0.85;
     protected double[] targetData = {0,0,0};
     public static double withinRpmRange = 150;
     public static double targetRPM = 0;
@@ -86,8 +86,12 @@ public class BotActions {
     }
 
 
-    public Action startOuttake(double rpm) {
-        return new InstantAction(() -> outtake.set(rpm * quickspinRpmScale));
+    public Action startOuttake() {
+        return new InstantAction(() -> outtake.set(getTargetRPM() * quickspinRpmScale));
+    }
+
+    public Action stopOuttake() {
+        return new InstantAction(() -> outtake.stop());
     }
 
     public Action actionSetAimlock(boolean aimlock) {
@@ -106,7 +110,6 @@ public class BotActions {
                 new SleepAction(FIRE_TIME),
                 new InstantAction(storage::closeGate),
                 new InstantAction(intake::stop),
-                new InstantAction(outtake::stop),
                 new InstantAction(storage::stopTransfer)
         );
 
@@ -148,13 +151,25 @@ public class BotActions {
         };
     }
 
-    public Action startActions() {
-        return new SequentialAction (
-            new InstantAction(storage::closeGate),
-            new InstantAction(turret::initialize),
-            new InstantAction(intake::runSlow),
-            new InstantAction(() -> setAimlock(true))
-        );
+    public Action startActions(Aimer.Goal goal) {
+        if (goal == Aimer.Goal.BLUE) {
+            return new SequentialAction (
+                    new InstantAction(aimer::setBlueTarget),
+                    new InstantAction(storage::closeGate),
+                    new InstantAction(turret::initialize),
+                    new InstantAction(intake::runSlow),
+                    new InstantAction(() -> setAimlock(true))
+            );
+        }
+        else {
+            return new SequentialAction(
+                    new InstantAction(aimer::setRedTarget),
+                    new InstantAction(storage::closeGate),
+                    new InstantAction(turret::initialize),
+                    new InstantAction(intake::runSlow),
+                    new InstantAction(() -> setAimlock(true))
+            );
+        }
     }
 
     public double getTargetRPM() {

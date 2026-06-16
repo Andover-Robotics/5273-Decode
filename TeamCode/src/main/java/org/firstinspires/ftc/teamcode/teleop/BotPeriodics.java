@@ -202,6 +202,8 @@ public class BotPeriodics {
         telemetry.addData("Outtake RPM", outtake.getRPM());
         telemetry.addData("Target RMP", outtake.getTargetRPM());
         telemetry.addData("Bot Range", targetData[1]);
+        telemetry.addData("x", drive.localizer.getPose().position.x);
+        telemetry.addData("y", drive.localizer.getPose().position.y);
         telemetry.addData("Alliance selected", colorGoalSelected);
         telemetry.addData("Turn Correction:", turnCorrection);
         telemetry.addData("Manual Turret Angle", manualTurretTarget);
