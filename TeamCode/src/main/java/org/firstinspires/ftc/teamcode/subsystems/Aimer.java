@@ -26,16 +26,16 @@ public class Aimer {
     private final MecanumDrive drive;
     //private final InertiaAutoAim inertiaAutoAim;
     public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(90));
-    public static double cameraHeight = 11.815; // inches
+    public static double turretHeight = 11.0; // inches
     public static double goalAprilTagHeight = 29.5; // inches
 
     public static double goalBack = 12; //how far from the back of the field the aiming point is
     public static double goalOut = 16; //how far from the side border of the field (where drivers stand) the aiming point is
 
-    public static double centerOfRotationOffsetY = 0.0;
+    public static double centerOfRotationOffsetY = -1.85; // in
 
     // Relative to center of rotation
-    public static double turretOffsetY = 0.0;
+    public static double turretOffsetY = -0.41; // in
 
     public enum Goal {
         RED,
@@ -71,9 +71,9 @@ public class Aimer {
         double botLength = 17.0;
         // -2.25 because turret not centered
         if(selectedGoal == Goal.RED){
-            drive.localizer.setPose(new Pose2d(botWidth/2, botLength/2 - centerOfRotationOffsetY, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(botWidth/2, botLength/2 + centerOfRotationOffsetY, Math.toRadians(90)));
         } else if (selectedGoal == Goal.BLUE){
-            drive.localizer.setPose(new Pose2d(144-botWidth/2, botLength/2 - centerOfRotationOffsetY, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(144-botWidth/2, botLength/2 + centerOfRotationOffsetY, Math.toRadians(90)));
         }
     }
 
@@ -100,7 +100,7 @@ public class Aimer {
 
         double horizontalDistance = Math.hypot(dx, dy);
 
-        double dz = goalAprilTagHeight - cameraHeight;
+        double dz = goalAprilTagHeight - turretHeight;
 
         // point-to-point distance=
         double range = Math.hypot(horizontalDistance, dz);
