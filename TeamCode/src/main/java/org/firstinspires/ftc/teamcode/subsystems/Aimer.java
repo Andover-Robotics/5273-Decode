@@ -26,11 +26,16 @@ public class Aimer {
     private final MecanumDrive drive;
     //private final InertiaAutoAim inertiaAutoAim;
     public static Pose2d tagPose = new Pose2d(0, 132, Math.toRadians(90));
-    public static double cameraHeight = 11.815; // inches
+    public static double turretHeight = 11.0; // inches
     public static double goalAprilTagHeight = 29.5; // inches
 
-    public static double goalBack = 14; //how far from the back of the field the aiming point is
-    public static double goalOut = 25; //how far from the side border of the field (where drivers stand) the aiming point is
+    public static double goalBack = 12; //how far from the back of the field the aiming point is
+    public static double goalOut = 16; //how far from the side border of the field (where drivers stand) the aiming point is
+
+    public static double centerOfRotationOffsetY = -1.85; // in
+
+    // Relative to center of rotation
+    public static double turretOffsetY = -0.41; // in
 
     public enum Goal {
         RED,
@@ -66,33 +71,36 @@ public class Aimer {
         double botLength = 17.0;
         // -2.25 because turret not centered
         if(selectedGoal == Goal.RED){
-            drive.localizer.setPose(new Pose2d(0+botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(botWidth/2, botLength/2 + centerOfRotationOffsetY, Math.toRadians(90)));
         } else if (selectedGoal == Goal.BLUE){
-            drive.localizer.setPose(new Pose2d(144-botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(144-botWidth/2, botLength/2 + centerOfRotationOffsetY, Math.toRadians(90)));
         }
     }
 
-    public void localizeForAuto(Goal goal){
+    public void localizeForAuto(){
         double botWidth = 14.8;
         double botLength = 17.0;
         // -2.25 because turret not centered
         if(selectedGoal == Goal.RED){
-            drive.localizer.setPose(new Pose2d(0+botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(113, 129, Math.toRadians(90)));
         } else if (selectedGoal == Goal.BLUE){
-            drive.localizer.setPose(new Pose2d(144-botWidth/2, 0+botLength/2 - 2.25, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(31, 129, Math.toRadians(90)));
         }
     }
 
     public double[] calculateLocalizedData() {
         Pose2d robotPose = drive.localizer.getPose();
+        double headingRadians = robotPose.heading.toDouble();
 
-        // Vector from robot -> tag in field coordinates
-        double dx = tagPose.position.x - robotPose.position.x;
-        double dy = tagPose.position.y - robotPose.position.y;
+        double turretX = robotPose.position.x - (turretOffsetY * Math.sin(headingRadians));
+        double turretY = robotPose.position.y + (turretOffsetY * Math.cos(headingRadians));
+
+        double dx = tagPose.position.x - turretX;
+        double dy = tagPose.position.y - turretY;
 
         double horizontalDistance = Math.hypot(dx, dy);
 
-        double dz = goalAprilTagHeight - cameraHeight;
+        double dz = goalAprilTagHeight - turretHeight;
 
         // point-to-point distance=
         double range = Math.hypot(horizontalDistance, dz);

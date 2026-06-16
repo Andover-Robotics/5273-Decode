@@ -16,7 +16,6 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 @Config
 public class Bot extends BotPeriodics {
     // haptics & lights
-    private boolean rumbledAlready = false;
     private boolean finishedInitialGateClose = false;
     private long teleOpStartTime;
     public static long timeToReverseTransferAfterStartBeforeCloseGate = 500; // ms
@@ -55,14 +54,16 @@ public class Bot extends BotPeriodics {
 
     // MAINLINE HANDLERS
     private void handleIntakeFeedback() {
-        if(storage.isFull() && !rumbledAlready){
+        if(storage.isFull() && !turnCurrentSensingOff){
             if (!manualTurretAim)
                 setAimlock(true);
 
-            setRumbledAlready(true);
+            if (!rumbledAlready) {
+                g1.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
+                g2.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
 
-            g1.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
-            g2.gamepad.rumbleBlips(TeleopConstants.Gamepad.FULL_WARNING_RUMBLES);
+                setRumbledAlready(true);
+            }
         }
     }
 
@@ -112,9 +113,5 @@ public class Bot extends BotPeriodics {
                     return shootingAction.run(packet);
                 }
         );
-    }
-
-    private void setRumbledAlready(boolean rumbled) {
-        rumbledAlready = rumbled;
     }
 }

@@ -27,10 +27,10 @@ public class Outtake {
     private final PIDController controller;
 
     // Dashboard-tunable gains
-    public static double p = 0.000567;
+    public static double p = 0.0015;
     public static double i = 0.0;
     public static double d = 0.0;
-    public static double f = 0.00021;   // 1 / maxrpm and then tuned
+    public static double f = 0.000176;   // 1 / maxrpm and then tuned
 
     // Mode + state
     public Mode mode;
@@ -40,7 +40,7 @@ public class Outtake {
 
     private final double TPR = 28.0;   // encoder ticks per rotation
 
-    public static double spinupInRangeMinTime = 200; // ms
+    public static double spinupInRangeMinTime = 150; // ms
     public static double spinupMaxTime = 2750; // ms
     private long inRangeStartTime = -1;
     private long spinupStartTime = -1;
