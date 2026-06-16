@@ -71,10 +71,10 @@ public final class MecanumDrive {
         // feedforward parameters (in tick units)
         // kV: 0.00036105964752604797, kS: 0.9030920235807085
         // kV: 0.00037199143511341737, kS: 0.8028058443180899 - regression vals
-        public double kS = 1.5310552344183175;
-        public double kV = 0.00024081102246988593;
+        public double kS = 1.20552344183175;
+        public double kV = 0.00018081102246988593;
         //KA needs serious help
-        public double kA = 9e-7;
+        public double kA = 1.4e-4;
 
         // path profile parameters (in inches)
 
