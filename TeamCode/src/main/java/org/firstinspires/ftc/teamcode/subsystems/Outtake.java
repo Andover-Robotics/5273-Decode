@@ -182,7 +182,7 @@ public class Outtake {
         }
 
         // Just use one of the three functions above
-        return cubicRegressionRPM(range) * multiplierForTesting;
+        return linearInterpolationRegressionRPM(range) * multiplierForTesting;
     }
 
     // Within the range and has been in range for spinupInRangeMinTime
