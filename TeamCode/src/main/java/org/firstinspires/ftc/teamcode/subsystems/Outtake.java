@@ -45,7 +45,7 @@ public class Outtake {
     private long inRangeStartTime = -1;
     private long spinupStartTime = -1;
     public static double INTAKE_MIN_RPM = 3500.0;
-    public static double multiplierForTesting = 0.867;
+    public static double multiplierForTesting = 1;
 
     private static final double[][] REGRESSION_DATA = {
             {46.4, 3400},
@@ -157,10 +157,10 @@ public class Outtake {
         return range * (range * (range * (range * -0.000297337 + 0.0958661) - 11.09971) + 562.06918) - 6981.95351;
     }
 
+    //horners form for some reason
     private double cubicRegressionRPM(double range) {
-        return range * (range * (range * -0.000281754 + 0.228245) - 13.14333) + 3623.28132;
+        return range * (range * (range * -0.00357213 + 1.03639) - 71.30215) + 4339;
     }
-
     private double linearInterpolation(double range, double[][] data) {
         double sum = 0;
         for (int i = 0; i < data.length - 1; i++) {
