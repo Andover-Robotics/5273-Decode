@@ -90,15 +90,15 @@ public final class MecanumDrive {
 
         // path controller gains
         public double axialGain = 5;
-        public double lateralGain = 6;
+        public double lateralGain = 12;
         public double headingGain = 8; // shared with turn
 
         public double axialVelGain = 0.2;
-        public double lateralVelGain = 0.2;
+        public double lateralVelGain = 0.3;
         public double headingVelGain = 1.8; // shared with turn
     }
 
-    public static Params PARAMS = new Params();s
+    public static Params PARAMS = new Params();
 
     public final MecanumKinematics kinematics = new MecanumKinematics(
             PARAMS.inPerTick * PARAMS.trackWidthTicks, PARAMS.inPerTick / PARAMS.lateralInPerTick);
