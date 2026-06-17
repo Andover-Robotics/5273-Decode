@@ -290,7 +290,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         telemetry.addData("A: Set intaking, B: Reset Localized Pose, X/Y: lock in/unlock, Dpad left: Scan Obelisk Id, Dpad Up/Down: actuator, Dpad Right:", "index");
         telemetry.addData("Target RPM", outtake.getTargetRPM());
         telemetry.addData("Bot Range", data[1]); // moved limelight
-        telemetry.addData("measured RPM", outtake.getRPM());
+        telemetry.addData("measured RPM", outtake.getMeasuredRPM());
         telemetry.addData("Outtake Power", outtake.getPower());
         telemetry.addData("Localized Lock", aimlock);
         telemetry.addData("x", drive.localizer.getPose().position.x);

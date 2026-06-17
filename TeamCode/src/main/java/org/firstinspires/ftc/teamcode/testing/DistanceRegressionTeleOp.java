@@ -162,7 +162,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         }
 
         telemetry.addData("Target RPM", shooterRPM);
-        telemetry.addData("Measured RPM", outtake.getRPM());
+        telemetry.addData("Measured RPM", outtake.getMeasuredRPM());
         telemetry.addData("Turn Correction", turnCorrection);
         telemetry.addData("Heading Error (deg)", bearingTurnCorrection);
         telemetry.addData("April Lock", continuousAprilTagLock);

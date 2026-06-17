@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
-@TeleOp(name = "MainTeleOp", group = "AA_main")
+@TeleOp(name = "AA_MainTeleOp", group = "AA_main")
 public class MainTeleop extends LinearOpMode {
 
     public static Pose2d startPose = new Pose2d(0, 0, 0);

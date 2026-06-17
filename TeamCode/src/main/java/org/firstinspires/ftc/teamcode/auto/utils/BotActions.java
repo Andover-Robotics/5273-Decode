@@ -32,19 +32,12 @@ public class BotActions {
     public final AprilTag aprilTag;
     private final MecanumDrive drive;
 
-    public static double NON_INDEX_SPIN_TIME = 2.5; //seconds of full-power indexer blast
-    public static double FULL_BLAST_POWER = 0.25;
-
-    public static double ball1TimeDisp = 0.66;
-    public static double  ball2TimeDisp = 1.10;
-    public static double  timeToIntake = 2.50;
-
     private boolean aimlock = false;
     private long lastAimUpdate = 0;
     private static final long AIM_UPDATE_INTERVAL_MS = 0;
     public static double FIRE_TIME = 0.85;
     protected double[] targetData = {0,0,0};
-    public static double withinRpmRange = 150;
+    public static double withinRpmRange = 225;
     public static double targetRPM = 0;
     private double turnCorrection = 0.0;
     private double bearingTurnCorrection = 0.0;
@@ -102,7 +95,7 @@ public class BotActions {
         Action shootingAction = new SequentialAction(
                 packet -> {
                     outtake.set(getTargetRPM());
-                    return !outtake.inRange(withinRpmRange);
+                    return !outtake.inRange(withinRpmRange, 75);
                 },
                 new InstantAction(intake::run),
                 new InstantAction(storage::runTransfer),
@@ -110,7 +103,8 @@ public class BotActions {
                 new SleepAction(FIRE_TIME),
                 new InstantAction(storage::closeGate),
                 new InstantAction(intake::stop),
-                new InstantAction(storage::stopTransfer)
+                new InstantAction(storage::stopTransfer),
+                new InstantAction(() -> setAimlock(false))
         );
 
         return new ParallelAction(
