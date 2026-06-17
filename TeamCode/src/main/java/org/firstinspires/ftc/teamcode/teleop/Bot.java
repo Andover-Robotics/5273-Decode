@@ -39,7 +39,7 @@ public class Bot extends BotPeriodics {
 
     }
 
-    public void teleopTick()
+    public void teleopTick(boolean isFarShooting)
     {
         if (!finishedInitialGateClose && System.currentTimeMillis() >= teleOpStartTime + timeToReverseTransferAfterStartBeforeCloseGate) {
             storage.closeGate();
@@ -47,7 +47,7 @@ public class Bot extends BotPeriodics {
             finishedInitialGateClose = true;
         }
 
-        handlePeriodics();
+        handlePeriodics(isFarShooting);
         handleIntakeFeedback();
         handleOuttakeActions();
     }

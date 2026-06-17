@@ -77,7 +77,7 @@ public class BotPeriodics {
         servoOffset = turret.getServoOffset();
     }
 
-    protected void handlePeriodics()
+    protected void handlePeriodics(boolean isFarShooting)
     {
         g1.readButtons();
         g2.readButtons();
@@ -124,7 +124,7 @@ public class BotPeriodics {
             lastAimUpdate = now;
             targetData = aimer.calculateLocalizedData();
             lastTurnCorrection = targetData[0];
-            targetRPM = outtake.getRegressionRPM(targetData[1]);
+            targetRPM = outtake.getRegressionRPM(targetData[1], isFarShooting);
             bearingTurnCorrection = targetData[2];
         }
         turnCorrection = lastTurnCorrection;

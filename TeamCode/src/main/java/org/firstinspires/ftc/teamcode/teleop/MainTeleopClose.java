@@ -6,19 +6,23 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.auto.opmodes.CloseTwelveBlue;
+import org.firstinspires.ftc.teamcode.auto.opmodes.CloseTwelveRed;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
-@TeleOp(name = "OneDriver", group = "AA_main")
-public class OneDriverTeleop extends LinearOpMode {
+@TeleOp(name = "AA_MainTeleOp_Close", group = "AA_main")
+public class MainTeleopClose extends LinearOpMode {
+
+    public static Pose2d startPose = new Pose2d(0, 0, 0);
+
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0)));
-        Bot bot = new Bot(hardwareMap, telemetry, drive, gamepad1, gamepad2,true);
+        MecanumDrive drive = new MecanumDrive(hardwareMap,startPose);
+        Bot bot = new Bot(hardwareMap, telemetry, drive, gamepad1, gamepad2,false);
         bot.teleopInit();
         waitForStart();
         bot.teleopStart();
-
         boolean isFarShooting = false;
         while (opModeIsActive() && !isStopRequested()) {
             bot.teleopTick(isFarShooting);

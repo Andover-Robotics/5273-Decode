@@ -6,10 +6,12 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.auto.opmodes.CloseTwelveBlue;
+import org.firstinspires.ftc.teamcode.auto.opmodes.CloseTwelveRed;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 
-@TeleOp(name = "AA_MainTeleOp", group = "AA_main")
-public class MainTeleop extends LinearOpMode {
+@TeleOp(name = "AA_MainTeleOp_Far", group = "AA_main")
+public class MainTeleopFar extends LinearOpMode {
 
     public static Pose2d startPose = new Pose2d(0, 0, 0);
 
@@ -21,8 +23,9 @@ public class MainTeleop extends LinearOpMode {
         bot.teleopInit();
         waitForStart();
         bot.teleopStart();
+        boolean isFarShooting = true;
         while (opModeIsActive() && !isStopRequested()) {
-            bot.teleopTick();
+            bot.teleopTick(isFarShooting);
         }
     }
 }

@@ -46,7 +46,7 @@ public class Outtake {
     public static double INTAKE_MIN_RPM = 3200.0;
     public static double multiplierForTesting = 1;
 
-    private static final double[][] REGRESSION_DATA = {
+    private static final double[][] REGRESSION_DATA_CLOSE = {
             {44.82, 2810},
             {46.11, 2820},
             {48.20, 2830},
@@ -70,6 +70,25 @@ public class Outtake {
             {92.66, 3520},
             {96.16, 3610},
             {100.00, 3750}
+    };
+
+    private static final double[][] REGRESSION_DATA_FAR = {
+            {123.22, 4080},
+            {125.21, 4100},
+            {127.06, 4130},
+            {129.16, 4150},
+            {131.23, 4190},
+            {133.24, 4220},
+            {135.04, 4240},
+            {137.15, 4265},
+            {139.06, 4310},
+            {141.02, 4370},
+            {143.26, 4420},
+            {145.26, 4480},
+            {147.24, 4550},
+            {149.19, 4610},
+            {151.35, 4690},
+            {153.26, 4820}
     };
 
     private static final double[][] REGRESSION_DATA_REDUCED = {
@@ -166,22 +185,30 @@ public class Outtake {
         return sum;
     }
 
-    private double linearInterpolationRegressionRPM(double range) {
-        return linearInterpolation(range, REGRESSION_DATA);
+    private double linearInterpolationCloseRegressionRPM(double range) {
+        return linearInterpolation(range, REGRESSION_DATA_CLOSE);
     }
 
-    private double linearInterpolationRegressionReducedRPM(double range) {
+    private double linearInterpolationFarRegressionRPM(double range) {
+        return linearInterpolation(range, REGRESSION_DATA_CLOSE);
+    }
+
+    private double linearInterpolationCloseRegressionReducedRPM(double range) {
         return linearInterpolation(range, REGRESSION_DATA_REDUCED);
     }
 
-    public double getRegressionRPM(double range)
+    public double getRegressionRPM(double range, boolean isFarShooting)
     {
         if (Double.isNaN(range) || range <= 0) {
             return INTAKE_MIN_RPM;
         }
 
-        // Just use one of the three functions above
-        return linearInterpolationRegressionRPM(range) * multiplierForTesting;
+        if (isFarShooting) {
+            return linearInterpolationFarRegressionRPM(range)/* * multiplierForTesting*/;
+        }
+        else {
+            return linearInterpolationCloseRegressionRPM(range)/* * multiplierForTesting*/;
+        }
     }
 
     // Within the range and has been in range for spinupInRangeMinTime
