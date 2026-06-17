@@ -31,14 +31,17 @@ public class CloseTwelveRed extends LinearOpMode {
 
     //row numerations start at 0 for ease
     //array of row y
-    public static double[] rowStartY = {81.2, 54.12, 33.0};
-    public static double[] rowStartX = {103.0, 102.0, 94.0};
+    public static double[] rowStartY = {83.2, 54.12, 35.0};
+    public static double[] rowStartX = {107.0, 102.0, 94.0};
     // array of how far to go forward in each row
-    public static double[] rowForwards = {20, 28, 30};
+    public static double[] rowForwards = {28, 34, 38};
+
+    public static double gateShootOffsetX = -8;
+    public static double gateShootOffsetY = -8;
 
     //shoot pos
-    public static double shootY = 81.0;
-    public static double shootX = 94.0;
+    public static double shootY = 83.0;
+    public static double shootX = 92.0;
 
     public static Pose2d startPose = new Pose2d(startX, startY, startAngle);
 
@@ -54,7 +57,7 @@ public class CloseTwelveRed extends LinearOpMode {
 
     public static Pose2d gatePose = new Pose2d(131.6, 67, Math.toRadians(-90));
     public static Pose2d shootPos = new Pose2d(shootX, shootY, Math.toRadians(0));
-    public static Pose2d leavePos = new Pose2d(103, 76, Math.toRadians(0));
+    public static Pose2d leavePos = new Pose2d(103, 72, Math.toRadians(0));
 
     public static double intakeSettle = 0.25;
 
@@ -69,6 +72,7 @@ public class CloseTwelveRed extends LinearOpMode {
         builder = builder
                 .stopAndAdd(botActions.startActions(Aimer.Goal.RED))
                 .stopAndAdd(botActions.startOuttake())
+                .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake())
                 .stopAndAdd(botActions.stopOuttake())
@@ -79,7 +83,8 @@ public class CloseTwelveRed extends LinearOpMode {
                 .stopAndAdd(botActions.runContinuousIntake())
                 .strafeToSplineHeading(gatePose.position, gatePose.heading.log())
                 .stopAndAdd(botActions.startOuttake())
-                .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
+                .stopAndAdd(botActions.actionSetAimlock(true))
+                .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake())
                 .stopAndAdd(botActions.stopOuttake())
 
@@ -88,7 +93,8 @@ public class CloseTwelveRed extends LinearOpMode {
                 .strafeTo(rowTwoEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
                 .stopAndAdd(botActions.startOuttake())
-                .strafeToSplineHeading(new Vector2d(shootX - 2, shootY + 2), shootPos.heading.log())
+                .stopAndAdd(botActions.actionSetAimlock(true))
+                .strafeToSplineHeading(new Vector2d(shootX - 6, shootY - 6), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake())
                 .stopAndAdd(botActions.stopOuttake())
 
@@ -97,6 +103,7 @@ public class CloseTwelveRed extends LinearOpMode {
                 .strafeTo(rowZeroEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
                 .stopAndAdd(botActions.startOuttake())
+                .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake())
                 .stopAndAdd(botActions.stopOuttake())

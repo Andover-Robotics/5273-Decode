@@ -36,11 +36,10 @@ public class Outtake {
     public Mode mode;
     private double motorPower = 0.0;
     public static double targetRPM = 2800.0; // without seeing any tags
-    private double currentRPM = 0.0;
+    private double measuredRPM = 0.0;
 
     private final double TPR = 28.0;   // encoder ticks per rotation
 
-    public static double spinupInRangeMinTime = 150; // ms
     public static double spinupMaxTime = 2750; // ms
     private long inRangeStartTime = -1;
     private long spinupStartTime = -1;
@@ -113,13 +112,13 @@ public class Outtake {
     }
 
 
-    public double getRPM() { return currentRPM; }
+    public double getMeasuredRPM() { return measuredRPM; }
     public double getTargetRPM() { return targetRPM; }
     public double getPower() { return motorPower; }
 
     public void periodic() {
         // Update current RPM from motor encoder
-        currentRPM = shooter.getVelocity() / TPR * 60.0;
+        measuredRPM = shooter.getVelocity() / TPR * 60.0;
 
         if (mode == Mode.POWER) {
             // Open-loop mode
@@ -132,7 +131,7 @@ public class Outtake {
         controller.setPID(p, i, d);
 
         // Compute PID term
-        double pid = controller.calculate(currentRPM, targetRPM);
+        double pid = controller.calculate(measuredRPM, targetRPM);
 
         // Compute feedforward term from earlier code
         double ff = targetRPM * f;
@@ -186,14 +185,14 @@ public class Outtake {
     }
 
     // Within the range and has been in range for spinupInRangeMinTime
-    public boolean inRange(double tolerance) {
+    public boolean inRange(double tolerance, double spinupInRangeMinTime) {
         long currentTime = System.currentTimeMillis();
         if (spinupStartTime == -1)
         {
             spinupStartTime = currentTime;
         }
 
-        boolean withinTolerance = Math.abs(currentRPM - targetRPM) <= tolerance;
+        boolean withinTolerance = Math.abs(measuredRPM - targetRPM) <= tolerance;
 
         if (withinTolerance)
         {

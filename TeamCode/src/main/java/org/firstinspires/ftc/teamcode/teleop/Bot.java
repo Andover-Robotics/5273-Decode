@@ -21,7 +21,7 @@ public class Bot extends BotPeriodics {
     public static long timeToReverseTransferAfterStartBeforeCloseGate = 500; // ms
 
     public static double withinRpmRange = 150; //
-    public static double FIRE_TIME = 2.0;
+    public static double FIRE_TIME = 1.0;
 
     public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
         super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement);
@@ -91,7 +91,7 @@ public class Bot extends BotPeriodics {
         Action shootingAction = new SequentialAction(
                 packet -> {
                     outtake.set(getTargetRPM());
-                    return !outtake.inRange(withinRpmRange);
+                    return !outtake.inRange(withinRpmRange, 150);
                 },
                 new InstantAction(intake::run),
                 new InstantAction(storage::runTransfer),

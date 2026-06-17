@@ -222,7 +222,7 @@ public class BotPeriodics {
     protected void handleTelemetry()
     {
         telemetry.addData("Field Centric", fieldCentric);
-        telemetry.addData("Outtake RPM", outtake.getRPM());
+        telemetry.addData("Outtake RPM", outtake.getMeasuredRPM());
         telemetry.addData("Target RMP", outtake.getTargetRPM());
         telemetry.addData("Bot Range", targetData[1]);
         telemetry.addData("x", drive.localizer.getPose().position.x);

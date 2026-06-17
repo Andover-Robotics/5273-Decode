@@ -35,11 +35,11 @@ public class Aimer {
 
     //how far from the back of the field the aiming point is
     public static double goalBackAim = 14; // Only for aiming
-    public static double goalBackForRpm = 8; // rpm depends on this
+    public static double goalBackForRpm = 7; // rpm depends on this // normal val: 8
 
     //how far from the side border of the field (where drivers stand) the aiming point is
-    public static double goalOutAim = 15; // only for aiming
-    public static double goalOutForRpm = 15; // rpm depends on this
+    public static double goalOutAim = 18; // only for aiming
+    public static double goalOutForRpm = 11; // rpm depends on this // normal val: 15
 
     public static double centerOfRotationOffsetY = -1.85; // in
 
