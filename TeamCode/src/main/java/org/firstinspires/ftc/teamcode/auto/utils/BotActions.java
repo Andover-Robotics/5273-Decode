@@ -117,7 +117,7 @@ public class BotActions {
         );
     }
 
-    public Action actionPeriodic() {
+    public Action actionPeriodic(boolean isFarShooting) {
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
@@ -133,7 +133,7 @@ public class BotActions {
 
                 targetData = aimer.calculateLocalizedData();
                 lastTurnCorrection = targetData[0];
-                targetRPM = outtake.getRegressionRPM(targetData[1]);
+                targetRPM = outtake.getRegressionRPM(targetData[1], isFarShooting);
                 bearingTurnCorrection = targetData[2];
                 turnCorrection = lastTurnCorrection;
 

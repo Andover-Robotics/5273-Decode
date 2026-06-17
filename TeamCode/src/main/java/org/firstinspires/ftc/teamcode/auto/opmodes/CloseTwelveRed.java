@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.subsystems.Aimer;
-import org.firstinspires.ftc.teamcode.teleop.MainTeleop;
+import org.firstinspires.ftc.teamcode.teleop.MainTeleopClose;
 
 @Config
 @Autonomous(name = "Close Twelve Ball Red Gate No Intake Auto", group = "Autonomous")
@@ -22,6 +22,8 @@ public class CloseTwelveRed extends LinearOpMode {
     private Hardware hardware;
     private BotActions botActions;
     private MecanumDrive drive;
+
+    private boolean isFarShooting = false;
 
     //USE SAME LOCALIZATION STYLE AS AIMER (90 degrees faces the goals, 0 degs faces side with red goal, 180 degs faces side with blue goal, +y is towards goals)
     public static double startX = 113.0;
@@ -60,7 +62,6 @@ public class CloseTwelveRed extends LinearOpMode {
     public static Pose2d shootPos = new Pose2d(shootX, shootY, Math.toRadians(0));
     public static Pose2d leavePos = new Pose2d(103, 72, Math.toRadians(0));
 
-    public static double intakeSettle = 0.25;
 
 
     public Action madeAuto;
@@ -132,10 +133,14 @@ public class CloseTwelveRed extends LinearOpMode {
 
         if (madeAuto == null) makeAuto();
 
-        Actions.runBlocking(new ParallelAction(
-                botActions.actionPeriodic(),
-                madeAuto
-        ));
-        MainTeleop.startPose = drive.localizer.getPose();
+        try {
+            while (opModeIsActive() && !isStopRequested() && madeAuto.run(new com.acmerobotics.dashboard.telemetry.TelemetryPacket())) {
+                botActions.actionPeriodic(isFarShooting).run(new com.acmerobotics.dashboard.telemetry.TelemetryPacket());
+            }
+        }
+        finally {
+            drive.updatePoseEstimate();
+            MainTeleopClose.startPose = drive.localizer.getPose();
+        }
     }
 }

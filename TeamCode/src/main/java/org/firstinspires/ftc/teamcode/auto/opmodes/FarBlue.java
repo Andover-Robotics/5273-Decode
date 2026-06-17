@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.auto.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ParallelAction;
@@ -15,11 +14,11 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.subsystems.Aimer;
-import org.firstinspires.ftc.teamcode.teleop.MainTeleopClose;
+import org.firstinspires.ftc.teamcode.teleop.MainTeleopFar;
 
 @Config
-@Autonomous(name = "Close Twelve Ball Blue Gate No Intake Auto", group = "Autonomous")
-public class CloseTwelveBlue extends LinearOpMode {
+@Autonomous(name = "Far Ball Blue Auto", group = "Autonomous")
+public class FarBlue extends LinearOpMode {
     private Hardware hardware;
     private BotActions botActions;
     private MecanumDrive drive;
@@ -27,42 +26,38 @@ public class CloseTwelveBlue extends LinearOpMode {
     private boolean isFarShooting = false;
 
     //USE SAME LOCALIZATION STYLE AS AIMER (90 degrees faces the goals, 0 degs faces side with red goal, 180 degs faces side with blue goal, +y is towards goals)
-    public static double startX = 144 - CloseTwelveRed.startX;
-    public static double startY = CloseTwelveRed.startY;
-    public static double startAngle = Math.toRadians(90);
+    public static double startX = 144 - FarRed.startX;
+    public static double startY = FarRed.startY;
+    public static double startAngle = Math.toRadians(180);
 
     public static double intakingAngle = Math.toRadians(180);
 
-    //row numerations start at 0 for ease
-    //array of row y
-    public static double[] rowStartY = {CloseTwelveRed.rowStartY[0], CloseTwelveRed.rowStartY[1], CloseTwelveRed.rowStartY[2]};
-    public static double[] rowStartX = {144 - CloseTwelveRed.rowStartX[0], 144 - CloseTwelveRed.rowStartX[1], 144 - CloseTwelveRed.rowStartX[2]};
-    // array of how far to go forward in each row
-    public static double[] rowForwards = CloseTwelveRed.rowForwards;
+    public static double rowStartY = FarRed.rowStartY;
+    public static double rowStartX = 144 - FarRed.rowStartX;
 
-    public static double gateShootOffsetX = -CloseFifteenRedGateIntake.gateShootOffsetX;
-    public static double gateShootOffsetY = CloseFifteenRedGateIntake.gateShootOffsetY;
+    public static double cornerStartY = FarRed.cornerStartY;
+    public static double cornerStartX = 144 - FarRed.cornerStartX;
 
     //shoot pos
-    public static double shootY = CloseTwelveRed.shootY;
-    public static double shootX = 144 - CloseTwelveRed.shootX;
+    public static double shootY = FarRed.shootY;
+    public static double shootX = 144 - FarRed.shootX;
+
+    public static double rowForwards = -FarRed.rowForwards;
+    public static double cornerForwards = -FarRed.cornerForwards;
 
     public static Pose2d startPose = new Pose2d(startX, startY, startAngle);
 
-    // Not necessary, can go directly from shooting pos
-    public static Pose2d rowZeroStart = new Pose2d(rowStartX[0], rowStartY[0], intakingAngle);
-    public static Pose2d rowOneStart = new Pose2d(rowStartX[1], rowStartY[1], intakingAngle);
-    public static Pose2d rowTwoStart = new Pose2d(rowStartX[2], rowStartY[2], intakingAngle);
+    public static Pose2d rowStart = new Pose2d(rowStartX, rowStartY, intakingAngle);
+
+    public static Pose2d cornerStart = new Pose2d(cornerStartX, cornerStartY, intakingAngle);
 
     //end poses based on rowForwards: +x for red, -x for blue
-    public static Pose2d rowZeroEnd = new Pose2d(rowStartX[0] - rowForwards[0], rowStartY[0], intakingAngle);
-    public static Pose2d rowOneEnd = new Pose2d(rowStartX[1] - rowForwards[1], rowStartY[1], intakingAngle);
-    public static Pose2d rowTwoEnd = new Pose2d(rowStartX[2] - rowForwards[2], rowStartY[2], intakingAngle);
+    public static Pose2d rowEnd = new Pose2d(rowStartX + rowForwards, rowStartY, intakingAngle);
+    public static Pose2d cornerEnd = new Pose2d(cornerStartX + cornerForwards, cornerStartY, intakingAngle);
 
-    public static Pose2d gatePose = new Pose2d(144 - CloseTwelveRed.gatePose.position.x, CloseTwelveRed.gatePose.position.y, CloseTwelveRed.gatePose.heading.log());
-    public static Pose2d shootPos = new Pose2d(shootX, shootY, Math.toRadians(180));
-    public static Pose2d leavePos = new Pose2d(144 - CloseTwelveRed.leavePos.position.x, CloseTwelveRed.leavePos.position.y, Math.toRadians(180));
-
+    public static Pose2d gatePose = new Pose2d(144 - FarRed.gatePose.position.x, FarRed.gatePose.position.y, FarRed.gatePose.heading.log());
+    public static Pose2d shootPos = new Pose2d(shootX, shootY, Math.toRadians(150));
+    public static Pose2d leavePos = new Pose2d(144 - FarRed.leavePos.position.x, FarRed.leavePos.position.y, Math.toRadians(180));
 
 
     public Action madeAuto;
@@ -73,37 +68,37 @@ public class CloseTwelveBlue extends LinearOpMode {
         TrajectoryActionBuilder builder = drive.actionBuilder(startPose);
 
         builder = builder
+                .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.startActions(Aimer.Goal.BLUE))
+                .stopAndAdd(botActions.actionSetAimlock(true))
+                .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
+                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.stopOuttake())
+
+                .strafeToSplineHeading(rowStart.position, rowStart.heading.log())
+                .stopAndAdd(botActions.startIntake())
+                .strafeTo(rowEnd.position)
+                .stopAndAdd(botActions.runContinuousIntake())
+                //.strafeToSplineHeading(gatePose.position, gatePose.heading.log())
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake())
                 .stopAndAdd(botActions.stopOuttake())
 
-                .strafeToSplineHeading(rowOneStart.position, rowOneStart.heading.log())
+                .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
                 .stopAndAdd(botActions.startIntake())
-                .strafeTo(rowOneEnd.position)
+                .strafeTo(cornerEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
-                .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake())
                 .stopAndAdd(botActions.stopOuttake())
 
-                .strafeToSplineHeading(rowTwoStart.position, rowTwoStart.heading.log())
+                .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
                 .stopAndAdd(botActions.startIntake())
-                .strafeTo(rowTwoEnd.position)
-                .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(botActions.startOuttake())
-                .stopAndAdd(botActions.actionSetAimlock(true))
-                .strafeToSplineHeading(new Vector2d(shootX + 6, shootY - 6), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
-                .stopAndAdd(botActions.stopOuttake())
-
-                //.strafeToSplineHeading(rowZeroStart.position, rowZeroStart.heading.log())
-                .stopAndAdd(botActions.startIntake())
-                .strafeTo(rowZeroEnd.position)
+                .strafeTo(cornerEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
@@ -123,7 +118,7 @@ public class CloseTwelveBlue extends LinearOpMode {
 
         while (opModeInInit() && !isStarted() && !isStopRequested()) {
             //temporarily
-            telemetry.addData("allicance sleetced", "Blue");
+            telemetry.addData("allicance sleetced", "Red");
             telemetry.addData("yo is the auto bilt gng", madeAuto != null);
 
             telemetry.update();
@@ -141,7 +136,7 @@ public class CloseTwelveBlue extends LinearOpMode {
         }
         finally {
             drive.updatePoseEstimate();
-            MainTeleopClose.startPose = drive.localizer.getPose();
+            MainTeleopFar.startPose = drive.localizer.getPose();
         }
     }
 }
