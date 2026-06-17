@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.subsystems.Aimer;
+import org.firstinspires.ftc.teamcode.teleop.MainTeleop;
 
 @Config
 @Autonomous(name = "Close Twelve Ball Red Gate No Intake Auto", group = "Autonomous")
@@ -128,5 +129,6 @@ public class CloseTwelveRed extends LinearOpMode {
                 botActions.actionPeriodic(),
                 madeAuto
         ));
+        MainTeleop.startPose = drive.localizer.getPose();
     }
 }

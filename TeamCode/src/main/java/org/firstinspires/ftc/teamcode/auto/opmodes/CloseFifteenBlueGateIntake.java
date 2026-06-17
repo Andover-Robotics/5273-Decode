@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.subsystems.Aimer;
+import org.firstinspires.ftc.teamcode.teleop.MainTeleop;
 
 @Config
 @Autonomous(name = "Close Fifteen Ball Blue Gate Intake Auto", group = "Autonomous")
@@ -170,5 +171,6 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
                 botActions.actionPeriodic(),
                 madeAuto
         ));
+        MainTeleop.startPose = drive.localizer.getPose();
     }
 }

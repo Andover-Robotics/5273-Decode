@@ -11,14 +11,12 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 @TeleOp(name = "MainTeleOp", group = "AA_main")
 public class MainTeleop extends LinearOpMode {
 
-    public static double startX = 0;
-    public static double startY = 0;
-    public static double startHeading = 0;
+    public static Pose2d startPose = new Pose2d(0, 0, 0);
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(startX, startY, Math.toRadians(startHeading)));
+        MecanumDrive drive = new MecanumDrive(hardwareMap,startPose);
         Bot bot = new Bot(hardwareMap, telemetry, drive, gamepad1, gamepad2,false);
         bot.teleopInit();
         waitForStart();
