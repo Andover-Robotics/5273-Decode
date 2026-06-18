@@ -379,7 +379,7 @@ public class BotPeriodics {
             aimer.localizeForFront();
         }
 
-        if (targetData[1] <= 102) {
+        if (targetData[1] <= 102 && aimlock) {
             setMecanumAvoiding(true);
         }
     }
