@@ -190,7 +190,7 @@ public class Outtake {
     }
 
     private double linearInterpolationFarRegressionRPM(double range) {
-        return linearInterpolation(range, REGRESSION_DATA_CLOSE);
+        return linearInterpolation(range, REGRESSION_DATA_FAR);
     }
 
     private double linearInterpolationCloseRegressionReducedRPM(double range) {

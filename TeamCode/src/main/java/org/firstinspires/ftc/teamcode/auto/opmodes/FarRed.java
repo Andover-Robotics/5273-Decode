@@ -23,7 +23,7 @@ public class FarRed extends LinearOpMode {
     private BotActions botActions;
     private MecanumDrive drive;
 
-    private boolean isFarShooting = false;
+    private boolean isFarShooting = true;
 
     //USE SAME LOCALIZATION STYLE AS AIMER (90 degrees faces the goals, 0 degs faces side with red goal, 180 degs faces side with blue goal, +y is towards goals)
     public static double startY = 6.65;
@@ -31,9 +31,10 @@ public class FarRed extends LinearOpMode {
     public static double startAngle = Math.toRadians(0);
 
     public static double intakingAngle = Math.toRadians(0);
+    public static double cornerIntakingAngle = -7;
 
     public static double rowStartY = 35;
-    public static double rowStartX = 94.0;
+    public static double rowStartX = 98.0;
 
     public static double cornerStartY = 6.65;
     public static double cornerStartX = 118.0;
@@ -42,19 +43,19 @@ public class FarRed extends LinearOpMode {
     public static double shootY = 19.8;
     public static double shootX = 82.95;
 
-    public static double rowForwards = 30;
-    public static double cornerForwards = 20;
+    public static double rowForwards = 40;
+    public static double cornerForwards = 28;
 
 
     public static Pose2d startPose = new Pose2d(startX, startY, startAngle);
 
     public static Pose2d rowStart = new Pose2d(rowStartX, rowStartY, intakingAngle);
 
-    public static Pose2d cornerStart = new Pose2d(cornerStartX, cornerStartY, intakingAngle);
+    public static Pose2d cornerStart = new Pose2d(cornerStartX, cornerStartY, Math.toRadians(cornerIntakingAngle));
 
     //end poses based on rowForwards: +x for red, -x for blue
     public static Pose2d rowEnd = new Pose2d(rowStartX + rowForwards, rowStartY, intakingAngle);
-    public static Pose2d cornerEnd = new Pose2d(cornerStartX + cornerForwards, cornerStartY, intakingAngle);
+    public static Pose2d cornerEnd = new Pose2d(cornerStartX + cornerForwards, cornerStartY, Math.toRadians(cornerIntakingAngle));
 
     public static Pose2d gatePose = new Pose2d(131.6, 67, Math.toRadians(-90));
     public static Pose2d shootPos = new Pose2d(shootX, shootY, Math.toRadians(0));
@@ -73,7 +74,7 @@ public class FarRed extends LinearOpMode {
                 .stopAndAdd(botActions.startActions(Aimer.Goal.RED))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(true))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(rowStart.position, rowStart.heading.log())
@@ -84,7 +85,7 @@ public class FarRed extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(true))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
@@ -94,7 +95,7 @@ public class FarRed extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(true))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
@@ -104,7 +105,7 @@ public class FarRed extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(true))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(leavePos.position, leavePos.heading.log());

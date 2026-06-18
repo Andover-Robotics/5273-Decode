@@ -266,7 +266,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.Y)) {
-                aimer.localizeForAuto();
+                aimer.localizeForFront();
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.X)) {

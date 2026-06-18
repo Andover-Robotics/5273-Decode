@@ -73,11 +73,11 @@ public class CloseTwelveBlue extends LinearOpMode {
         TrajectoryActionBuilder builder = drive.actionBuilder(startPose);
 
         builder = builder
-                .stopAndAdd(botActions.startActions(Aimer.Goal.BLUE))
                 .stopAndAdd(botActions.startOuttake())
+                .stopAndAdd(botActions.startActions(Aimer.Goal.BLUE))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(false))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(rowOneStart.position, rowOneStart.heading.log())
@@ -88,7 +88,7 @@ public class CloseTwelveBlue extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(false))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(rowTwoStart.position, rowTwoStart.heading.log())
@@ -98,7 +98,7 @@ public class CloseTwelveBlue extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootX + 6, shootY - 6), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(false))
                 .stopAndAdd(botActions.stopOuttake())
 
                 //.strafeToSplineHeading(rowZeroStart.position, rowZeroStart.heading.log())
@@ -108,7 +108,7 @@ public class CloseTwelveBlue extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(false))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(leavePos.position, leavePos.heading.log());

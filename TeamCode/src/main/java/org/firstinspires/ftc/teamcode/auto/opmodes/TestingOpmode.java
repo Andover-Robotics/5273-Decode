@@ -58,7 +58,7 @@ public class TestingOpmode extends LinearOpMode {
                         /*botActions.actionSetIntakeReverse(),
                         new SleepAction(2)*/
                         //botActions.rotateToMotifColorBeforeOuttake(row, id, 2)
-                        botActions.actionOuttake()
+                        botActions.actionOuttake(false)
                         /*drive.actionBuilder(poseStart)
                                 .strafeToLinearHeading(endPose.position, endPose.heading, velConstraint1)
                                 .build()*/

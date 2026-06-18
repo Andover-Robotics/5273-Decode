@@ -23,7 +23,7 @@ public class FarBlue extends LinearOpMode {
     private BotActions botActions;
     private MecanumDrive drive;
 
-    private boolean isFarShooting = false;
+    private boolean isFarShooting = true;
 
     //USE SAME LOCALIZATION STYLE AS AIMER (90 degrees faces the goals, 0 degs faces side with red goal, 180 degs faces side with blue goal, +y is towards goals)
     public static double startX = 144 - FarRed.startX;
@@ -31,6 +31,7 @@ public class FarBlue extends LinearOpMode {
     public static double startAngle = Math.toRadians(180);
 
     public static double intakingAngle = Math.toRadians(180);
+    public static double cornerIntakingAngle = 180 - FarRed.intakingAngle;
 
     public static double rowStartY = FarRed.rowStartY;
     public static double rowStartX = 144 - FarRed.rowStartX;
@@ -48,12 +49,11 @@ public class FarBlue extends LinearOpMode {
     public static Pose2d startPose = new Pose2d(startX, startY, startAngle);
 
     public static Pose2d rowStart = new Pose2d(rowStartX, rowStartY, intakingAngle);
-
-    public static Pose2d cornerStart = new Pose2d(cornerStartX, cornerStartY, intakingAngle);
+    public static Pose2d cornerStart = new Pose2d(cornerStartX, cornerStartY, Math.toRadians(cornerIntakingAngle));
 
     //end poses based on rowForwards: +x for red, -x for blue
     public static Pose2d rowEnd = new Pose2d(rowStartX + rowForwards, rowStartY, intakingAngle);
-    public static Pose2d cornerEnd = new Pose2d(cornerStartX + cornerForwards, cornerStartY, intakingAngle);
+    public static Pose2d cornerEnd = new Pose2d(cornerStartX + cornerForwards, cornerStartY, Math.toRadians(cornerIntakingAngle));
 
     public static Pose2d gatePose = new Pose2d(144 - FarRed.gatePose.position.x, FarRed.gatePose.position.y, FarRed.gatePose.heading.log());
     public static Pose2d shootPos = new Pose2d(shootX, shootY, Math.toRadians(150));
@@ -72,7 +72,7 @@ public class FarBlue extends LinearOpMode {
                 .stopAndAdd(botActions.startActions(Aimer.Goal.BLUE))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(true))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(rowStart.position, rowStart.heading.log())
@@ -83,7 +83,7 @@ public class FarBlue extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(true))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
@@ -93,7 +93,7 @@ public class FarBlue extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(true))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
@@ -103,7 +103,7 @@ public class FarBlue extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake())
+                .stopAndAdd(botActions.actionOuttake(true))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(leavePos.position, leavePos.heading.log());

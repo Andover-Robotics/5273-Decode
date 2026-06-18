@@ -88,7 +88,7 @@ public class Aimer {
         }
     }
 
-    public void localizeForAuto(){
+    public void localizeForFront(){
         double botWidth = 14.8;
         double botLength = 17.0;
         // -2.25 because turret not centered

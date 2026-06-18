@@ -49,7 +49,7 @@ public class Bot extends BotPeriodics {
 
         handlePeriodics(isFarShooting);
         handleIntakeFeedback();
-        handleOuttakeActions();
+        handleOuttakeActions(isFarShooting);
     }
 
     // MAINLINE HANDLERS
@@ -67,9 +67,9 @@ public class Bot extends BotPeriodics {
         }
     }
 
-    private void handleOuttakeActions() {
+    private void handleOuttakeActions(boolean isFarShooting) {
         if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.A) && aimlock) {
-            actionHost.start(actionFire());
+            actionHost.start(actionFire(isFarShooting));
         }
     }
 
@@ -87,14 +87,14 @@ public class Bot extends BotPeriodics {
         }
     }
 
-    private Action actionFire() {
+    private Action actionFire(boolean isFarShooting) {
         Action shootingAction = new SequentialAction(
                 packet -> {
                     outtake.set(getTargetRPM());
                     return !outtake.inRange(withinRpmRange, 150);
                 },
                 new InstantAction(intake::run),
-                new InstantAction(storage::runTransfer),
+                new InstantAction(() -> storage.runTransfer(isFarShooting)),
                 new InstantAction(storage::openGate),
                 new SleepAction(FIRE_TIME),
                 new InstantAction(storage::closeGate),
@@ -102,7 +102,8 @@ public class Bot extends BotPeriodics {
                 new InstantAction(outtake::stop),
                 new InstantAction(storage::stopTransfer),
                 new InstantAction(() -> setAimlock(false)),
-                new InstantAction(() -> setRumbledAlready(false))
+                new InstantAction(() -> setRumbledAlready(false)),
+                new InstantAction(() -> setMecanumAvoiding(false))
         );
 
         return new ParallelAction(

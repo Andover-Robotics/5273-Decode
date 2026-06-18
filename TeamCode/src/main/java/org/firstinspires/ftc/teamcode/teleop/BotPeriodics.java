@@ -36,7 +36,8 @@ public class BotPeriodics {
     public static boolean fieldCentric = false;
     public static boolean drivetrainAim = false;
     protected boolean aimlock = false;
-    public static boolean mecanumAvoid = true;
+    public static boolean useMecanumAvoid = true;
+    protected boolean mecanumAvoiding = false;
     private double servoOffset;
     protected long lastAimUpdate = 0;
     protected double lastTurnCorrection = 0.0;
@@ -83,9 +84,9 @@ public class BotPeriodics {
         g2.readButtons();
 
         if (!actionHost.isRunning()) {
-            handleIntake();
+            handleIntake(isFarShooting);
             handleOuttake();
-            handleStorage();
+            handleStorage(isFarShooting);
             handleAllianceSelection();
         }
 
@@ -129,14 +130,14 @@ public class BotPeriodics {
         }
         turnCorrection = lastTurnCorrection;
     }
-    private void handleIntake() {
+    private void handleIntake(boolean isFarShooting) {
         double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
         if (rightTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
             intake.run();
             if (!initialBackwardsTransfer)
-                storage.runTransfer();
+                storage.runTransfer(isFarShooting);
         }
         else if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
             intake.runBackwards(); // only run intake backwards to eject only 4th ball
@@ -173,7 +174,7 @@ public class BotPeriodics {
         else outtake.stop();
     }
 
-    private void handleStorage() {
+    private void handleStorage(boolean isFarShooting) {
         GamepadKeys.Button openGateButton = GamepadKeys.Button.DPAD_UP;
         GamepadKeys.Button closeGateButton = GamepadKeys.Button.DPAD_DOWN;
         double leftTrigger = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
@@ -188,7 +189,7 @@ public class BotPeriodics {
             storage.runTransferBackwards();
         } else if (leftTrigger > TeleopConstants.Gamepad.TRIGGER_DEADZONE) {
             if (!initialBackwardsTransfer)
-                storage.runTransfer();
+                storage.runTransfer(isFarShooting);
             intake.run();
         } else if (g1.getButton(GamepadKeys.Button.Y) || g2.getButton(GamepadKeys.Button.Y)) {
             storage.runTransferBackwards();
@@ -280,7 +281,7 @@ public class BotPeriodics {
                     );
                 }
             } else {
-                if (mecanumAvoid) {
+                if (useMecanumAvoid && mecanumAvoiding) {
                     // Avoiding the heading where servo must wraparound, to disable set BEARING_AVOID_IN_DEGREES = 0
                     double targetAngle = wrapAngle360(-bearingTurnCorrection + 180 + turret.getServoOffset());
 
@@ -368,20 +369,18 @@ public class BotPeriodics {
         }
         if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER) || g2.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
             aimlock = false;
+            setMecanumAvoiding(false);
             g1.gamepad.rumbleBlips(1);
             g2.gamepad.rumbleBlips(1);
         }
-        if (g1.wasJustPressed(GamepadKeys.Button.X)) {
-            if (colorGoalSelected.equals("Blue"))
-                aimer.relocalize();
-            else if (colorGoalSelected.equals("Red"))
-                aimer.relocalize();
-            else {
-                aimer.relocalize();
-            }
+        if (g1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+            aimer.relocalize();
+        } else if (g1.wasJustPressed(GamepadKeys.Button.DPAD_UP)){
+            aimer.localizeForFront();
         }
-        if (!aimlock){
-            turnCorrection = 0;
+
+        if (targetData[1] <= 102) {
+            setMecanumAvoiding(true);
         }
     }
 
@@ -407,6 +406,10 @@ public class BotPeriodics {
     }
     protected void setCurrentAutoAimlock(boolean autoAimlock) {
         this.currentAutoAimlock = autoAimlock;
+    }
+
+    protected void setMecanumAvoiding(boolean mecanumAvoiding) {
+        this.mecanumAvoiding = mecanumAvoiding;
     }
 }
 

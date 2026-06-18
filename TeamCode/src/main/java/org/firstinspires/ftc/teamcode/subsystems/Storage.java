@@ -16,7 +16,8 @@ public class Storage {
 
     public static double gateClosedPos = 0.345;
     public static double gateOpenPos = 0.067;
-    public static double TRANSFER_POWER = -0.7;
+    public static double TRANSFER_POWER_CLOSE = -0.7;
+    public static double TRANSFER_POWER_FAR = -0.6;
     public static double fullDurationThreshold = 367; // ms
     public static double fullCurrentThresholdAmps = 6.5; // amps
     private ElapsedTime fullDurationTimer;
@@ -40,8 +41,17 @@ public class Storage {
 
     }
 
+    public void runTransfer(boolean isFarShooting) {
+        if (isFarShooting) {
+            transfer.set(TRANSFER_POWER_FAR);
+        }
+        else {
+            transfer.set(TRANSFER_POWER_CLOSE);
+        }
+    }
+
     public void runTransfer() {
-        transfer.set(TRANSFER_POWER);
+        transfer.set(TRANSFER_POWER_CLOSE);
     }
 
     public void stopTransfer() {
@@ -49,7 +59,7 @@ public class Storage {
     }
 
     public void runTransferBackwards() {
-        transfer.set(-TRANSFER_POWER);
+        transfer.set(-1);
     }
 
     public void updateForIfFull() {

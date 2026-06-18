@@ -87,7 +87,7 @@ class IntakeTransferTestBot {
         if (gamepad.wasJustPressed(GamepadKeys.Button.B)) {
             transferHolding = !transferHolding;
             if (transferHolding) {
-                storage.runTransfer();  // Uses TRANSFER_POWER = -1 by default
+                storage.runTransfer();
                 // For holding, we could manually set a lower power if needed
             } else {
                 storage.stopTransfer();
