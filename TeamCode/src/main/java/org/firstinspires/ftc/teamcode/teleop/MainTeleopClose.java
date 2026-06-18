@@ -19,7 +19,7 @@ public class MainTeleopClose extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         MecanumDrive drive = new MecanumDrive(hardwareMap,startPose);
-        Bot bot = new Bot(hardwareMap, telemetry, drive, gamepad1, gamepad2,false);
+        Bot bot = new Bot(hardwareMap, telemetry, drive, gamepad1, gamepad2,false, false);
         bot.teleopInit();
         waitForStart();
         bot.teleopStart();

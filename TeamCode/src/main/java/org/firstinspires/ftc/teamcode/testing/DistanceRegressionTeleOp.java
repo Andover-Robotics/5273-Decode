@@ -34,6 +34,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
     private double bearingTurnCorrection = 0;
 
     public static double shooterRPM = 1000;
+    public static boolean isFarShoting = false;
 
     private boolean continuousAprilTagLock = false;
     private boolean fieldCentric = false;
@@ -49,7 +50,7 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
         movement = new Movement(hardwareMap, drive);
 
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aprilAimer = new Aimer(drive);
+        aprilAimer = new Aimer(drive, isFarShoting);
 
         GamepadEx gp1 = new GamepadEx(gamepad1);
         GamepadEx gp2 = new GamepadEx(gamepad2);

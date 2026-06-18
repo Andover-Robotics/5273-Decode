@@ -33,18 +33,26 @@ public class Aimer {
     public static double turretHeight = 11.0; // inches
     public static double targetHeight = 29.5; // inches
 
+    // For Close Shooting
     //how far from the back of the field the aiming point is
-    public static double goalBackAim = 14; // Only for aiming
-    public static double goalBackForRpm = 7; // rpm depends on this // normal val: 8
+    public static double goalBackAimClose = 14; // Only for aiming
+    public static double goalBackForRpmClose = 7; // rpm depends on this // normal val: 8
+    public static double goalBackAimFar = 14; // Only for aiming
+    public static double goalBackForRpmFar = 7; // rpm depends on this // normal val: 8
 
+    // For Far Shooting
     //how far from the side border of the field (where drivers stand) the aiming point is
-    public static double goalOutAim = 17; // only for aiming
-    public static double goalOutForRpm = 10; // rpm depends on this // normal val: 15
+    public static double goalOutAimClose = 17; // only for aiming
+    public static double goalOutForRpmClose = 10; // rpm depends on this // normal val: 15
+    public static double goalOutAimFar = 17; // only for aiming
+    public static double goalOutForRpmFar = 10; // rpm depends on this // normal val: 15
 
     public static double centerOfRotationOffsetY = -1.85; // in
 
     // Relative to center of rotation
     public static double turretOffsetY = -0.41; // in
+
+    private boolean isFarShooting = false;
 
     public enum Goal {
         RED,
@@ -53,24 +61,38 @@ public class Aimer {
 
     public static Goal selectedGoal = Goal.RED;
 
-    public Aimer(MecanumDrive mecanumDrive) {
+    public Aimer(MecanumDrive mecanumDrive, boolean isFarShooting) {
         this.drive = mecanumDrive;
         //defaults to red goal
+        this.isFarShooting = isFarShooting;
         setRedTarget();
-        relocalize();
         //inertiaAutoAim = new InertiaAutoAim();
     }
 
     public void setRedTarget(){
         selectedGoal = Goal.RED;
-        targetPoseForRpm = new Pose2d(144-goalOutForRpm,144-goalBackForRpm, Math.toRadians(90));
-        targetPoseAim = new Pose2d(144-goalOutAim,144-goalBackAim, Math.toRadians(90));
+
+        if (isFarShooting) {
+            targetPoseForRpm = new Pose2d(144 - goalOutForRpmFar, 144 - goalBackForRpmFar, Math.toRadians(90));
+            targetPoseAim = new Pose2d(144 - goalOutAimFar, 144 - goalBackAimFar, Math.toRadians(90));
+        }
+        else {
+            targetPoseForRpm = new Pose2d(144 - goalOutForRpmClose, 144 - goalBackForRpmClose, Math.toRadians(90));
+            targetPoseAim = new Pose2d(144 - goalOutAimClose, 144 - goalBackAimClose, Math.toRadians(90));
+        }
     }
 
     public void setBlueTarget(){
         selectedGoal = Goal.BLUE;
-        targetPoseForRpm = new Pose2d(goalOutForRpm,144-goalBackForRpm, Math.toRadians(90));
-        targetPoseAim = new Pose2d(goalOutAim,144-goalBackAim, Math.toRadians(90));
+
+        if (isFarShooting) {
+            targetPoseForRpm = new Pose2d(goalOutForRpmFar,144- goalBackForRpmFar, Math.toRadians(90));
+            targetPoseAim = new Pose2d(goalOutAimFar,144- goalBackAimFar, Math.toRadians(90));
+        }
+        else {
+            targetPoseForRpm = new Pose2d(goalOutForRpmClose, 144 - goalBackForRpmClose, Math.toRadians(90));
+            targetPoseAim = new Pose2d(goalOutAimClose, 144 - goalBackAimClose, Math.toRadians(90));
+        }
     }
 
     public Goal getGoal() {

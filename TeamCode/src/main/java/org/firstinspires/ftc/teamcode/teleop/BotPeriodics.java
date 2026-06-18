@@ -57,19 +57,21 @@ public class BotPeriodics {
     protected boolean initialBackwardsTransfer = true;
 
     protected boolean twoMovementMode;
+    protected boolean isFarShooting = false;
 
     protected boolean rumbledAlready = false;
     protected boolean currentAutoAimlock = true;
     protected boolean turnCurrentSensingOff = false;
 
-    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement) {
+    public BotPeriodics(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean useMovement, boolean isFarShooting) {
+        this.isFarShooting = isFarShooting;
         intake = new Intake(hardwareMap);
         outtake = new Outtake(hardwareMap, Outtake.Mode.RPM);
         drive = mecanumDrive;
         storage = new Storage(hardwareMap, intake);
         turret = new Turret(hardwareMap);
         movement = new Movement(hardwareMap, drive);
-        aimer = new Aimer(drive);
+        aimer = new Aimer(drive, isFarShooting);
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
         actionHost = new ActionHost();
@@ -78,15 +80,15 @@ public class BotPeriodics {
         servoOffset = turret.getServoOffset();
     }
 
-    protected void handlePeriodics(boolean isFarShooting)
+    protected void handlePeriodics()
     {
         g1.readButtons();
         g2.readButtons();
 
         if (!actionHost.isRunning()) {
-            handleIntake(isFarShooting);
+            handleIntake();
             handleOuttake();
-            handleStorage(isFarShooting);
+            handleStorage();
             handleAllianceSelection();
         }
 
@@ -130,7 +132,7 @@ public class BotPeriodics {
         }
         turnCorrection = lastTurnCorrection;
     }
-    private void handleIntake(boolean isFarShooting) {
+    private void handleIntake() {
         double leftTrigger = g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         double rightTrigger = g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
 
@@ -174,7 +176,7 @@ public class BotPeriodics {
         else outtake.stop();
     }
 
-    private void handleStorage(boolean isFarShooting) {
+    private void handleStorage() {
         GamepadKeys.Button openGateButton = GamepadKeys.Button.DPAD_UP;
         GamepadKeys.Button closeGateButton = GamepadKeys.Button.DPAD_DOWN;
         double leftTrigger = g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);

@@ -16,11 +16,11 @@ import org.firstinspires.ftc.teamcode.teleop.TeleopConstants;
 
 @TeleOp(name = "Demo", group = "AA_main")
 public class Demo extends LinearOpMode {
-
+    public static boolean isFarShooting = false;
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        DemoBot bot = new DemoBot(hardwareMap, telemetry, new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0))), gamepad1, gamepad2,false);
+        DemoBot bot = new DemoBot(hardwareMap, telemetry, new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0))), gamepad1, gamepad2,false, isFarShooting);
         bot.teleopInit();
         waitForStart();
         bot.teleopStart();
@@ -40,8 +40,8 @@ class DemoBot extends BotPeriodics {
     public static double RPM =  1800.0;
     public static boolean isFarShooting = false;
 
-    public DemoBot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive drive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
-        super(hardwareMap, tele, drive, gamepad1, gamepad2, twoMovement);
+    public DemoBot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive drive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement, boolean isFrShooting) {
+        super(hardwareMap, tele, drive, gamepad1, gamepad2, twoMovement, isFrShooting);
     }
 
     public void teleopInit() {
@@ -54,7 +54,7 @@ class DemoBot extends BotPeriodics {
 
     public void teleopTick()
     {
-        handlePeriodics(isFarShooting);
+        handlePeriodics();
         handleDemo();
     }
 

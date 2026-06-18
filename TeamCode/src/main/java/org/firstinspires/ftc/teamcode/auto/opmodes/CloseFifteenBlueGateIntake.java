@@ -177,7 +177,7 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
     }
 
     public void runOpMode() throws InterruptedException {
-        hardware = new Hardware(hardwareMap, telemetry, startPose);
+        hardware = new Hardware(hardwareMap, telemetry, startPose, false);
         drive = hardware.mecanumDrive;
         botActions = new BotActions(hardware, telemetry, this);
 

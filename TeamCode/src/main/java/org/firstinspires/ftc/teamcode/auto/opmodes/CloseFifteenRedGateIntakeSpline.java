@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Aimer;
 import org.firstinspires.ftc.teamcode.teleop.MainTeleopClose;
 
 @Config
-@Autonomous(name = "Close Fifteen Ball Red Gate Intake Auto", group = "Autonomous")
-public class CloseFifteenRedGateIntake extends LinearOpMode {
+@Autonomous(name = "Close Fifteen Ball Red Gate Intake Auto With Splines", group = "Autonomous")
+public class CloseFifteenRedGateIntakeSpline extends LinearOpMode {
     private Hardware hardware;
     private BotActions botActions;
     private MecanumDrive drive;
@@ -86,93 +86,61 @@ public class CloseFifteenRedGateIntake extends LinearOpMode {
         TrajectoryActionBuilder builder = drive.actionBuilder(startPose);
 
         builder = builder
-                // preload
+                // --- PRELOAD ---
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.startActions(Aimer.Goal.RED))
                 .stopAndAdd(botActions.actionSetAimlock(true))
-                .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
+                .splineToLinearHeading(shootPos, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(false))
                 .stopAndAdd(botActions.stopOuttake())
 
-                // row 1
-                .strafeToSplineHeading(rowOneStart.position, rowOneStart.heading.log())
-                .stopAndAdd(botActions.startIntake())
-                .strafeTo(rowOneEnd.position)
+                // --- ROW 1 (Merged Intake) ---
+                // Drive directly to the end of the row, starting the intake 3 inches into the move
+                .splineToLinearHeading(rowOneEnd, rowOneEnd.heading.log())
+                .afterDisp(3.0, botActions.startIntake())
+
+                // Once at the end of the row, prep the outtake and curve back to shoot
                 .stopAndAdd(botActions.runContinuousIntake())
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
-                .strafeToSplineHeading(new Vector2d(shootPos.position.x + secondShootRowOffsetX, shootPos.position.y + secondShootRowOffsetY), shootPos.heading.log())
+                .splineToLinearHeading(new Pose2d(new Vector2d(shootPos.position.x + secondShootRowOffsetX, shootPos.position.y + secondShootRowOffsetY), shootPos.heading.log()), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(false))
                 .stopAndAdd(botActions.stopOuttake())
 
-                // Gate intake 1
-                .strafeToSplineHeading(gatePoseStart.position, gatePoseStart.heading.log())
-                .stopAndAdd(botActions.startIntake())
-                .strafeToSplineHeading(gatePoseEnd.position, gatePoseEnd.heading.log())
-                .waitSeconds(gateWaitSeconds)
-                .stopAndAdd(botActions.runContinuousIntake())
+                // --- GATE INTAKE 1 (Merged Intake) ---
+                .splineToLinearHeading(gatePoseEnd, gatePoseEnd.heading.log())
+                .afterDisp(2.0, botActions.startIntake())
+                .waitSeconds(gateWaitSeconds) // Necessary pause to grab game elements
 
+                .stopAndAdd(botActions.runContinuousIntake())
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
-                .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
+                .splineToLinearHeading(new Pose2d(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log()), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(false))
                 .stopAndAdd(botActions.stopOuttake())
 
-                // Gate intake 2
-                .strafeToSplineHeading(gatePoseStart.position, gatePoseStart.heading.log())
-                .stopAndAdd(botActions.startIntake())
-                .strafeToSplineHeading(new Vector2d(gatePoseEndX - gate2YOffset, gatePoseEndY - gate2YOffset), gatePoseEnd.heading.log())
-                .waitSeconds(gateWaitSeconds)
-                .stopAndAdd(botActions.runContinuousIntake())
+                // --- GATE INTAKE 2 (Merged Intake) ---
+                .splineToLinearHeading(new Pose2d(new Vector2d(gatePoseEndX - gate2YOffset, gatePoseEndY - gate2YOffset), gatePoseEnd.heading.log()), gatePoseEnd.heading.log())
+                .afterDisp(2.0, botActions.startIntake())
+                .waitSeconds(gateWaitSeconds) // Necessary pause
 
+                .stopAndAdd(botActions.runContinuousIntake())
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
-                .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
+                .splineToLinearHeading(new Pose2d(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log()), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(false))
                 .stopAndAdd(botActions.stopOuttake())
 
-                /*
-                // Gate intake 3
-                .strafeToSplineHeading(gatePoseStart.position, gatePoseStart.heading.log())
-                .stopAndAdd(botActions.startIntake())
-                .strafeToSplineHeading(new Vector2d(gatePoseEndX - gate2YOffset, gatePoseEndY - gate2YOffset), gatePoseEnd.heading.log())
-                .waitSeconds(gateWaitSeconds)
-                .stopAndAdd(botActions.runContinuousIntake())
+                // --- ROW 0 (Merged Intake) ---
+                .splineToLinearHeading(rowZeroEnd, rowZeroEnd.heading.log())
+                .afterDisp(3.0, botActions.startIntake())
 
-                .stopAndAdd(botActions.startOuttake())
-                .stopAndAdd(botActions.actionSetAimlock(true))
-                .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
-                .stopAndAdd(botActions.stopOuttake())
-                */
-
-                // row 0
-
-
-
-                //.strafeToSplineHeading(rowZeroStart.position, rowZeroStart.heading.log())
-                .stopAndAdd(botActions.startIntake())
-                .strafeTo(rowZeroEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
                 .stopAndAdd(botActions.startOuttake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
-                .strafeToSplineHeading(new Vector2d(shootPos.position.x + 15, shootPos.position.y + 18), shootPos.heading.log())
+                .splineToLinearHeading(new Pose2d(new Vector2d(shootPos.position.x + 15, shootPos.position.y + 18), shootPos.heading.log()), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(false))
                 .stopAndAdd(botActions.stopOuttake());
-
-                /*
-                // row 2
-                .strafeToSplineHeading(rowTwoStart.position, rowTwoStart.heading.log())
-                .stopAndAdd(botActions.startIntake())
-                .strafeTo(rowTwoEnd.position)
-                .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(botActions.startOuttake())
-                .stopAndAdd(botActions.actionSetAimlock(true))
-                .strafeToSplineHeading(new Vector2d(shootX - 2, shootY + 2), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
-                .stopAndAdd(botActions.stopOuttake())
-                */
-                //.strafeToSplineHeading(leavePos.position, leavePos.heading.log());
 
         madeAuto = builder.build();
     }

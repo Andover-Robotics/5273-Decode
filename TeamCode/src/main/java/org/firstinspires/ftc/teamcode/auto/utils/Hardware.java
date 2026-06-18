@@ -17,7 +17,7 @@ public class Hardware {
     public final Aimer aimer;
     public final MecanumDrive mecanumDrive;
 
-    public Hardware(HardwareMap hardwareMap, Telemetry telemetry, Pose2d startPose) {
+    public Hardware(HardwareMap hardwareMap, Telemetry telemetry, Pose2d startPose, boolean isFarShooting) {
         mecanumDrive = new MecanumDrive(
                 hardwareMap,
                 startPose
@@ -28,6 +28,6 @@ public class Hardware {
         outtake  = new Outtake(hardwareMap, Outtake.Mode.RPM);
         turret = new Turret(hardwareMap);
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aimer = new Aimer(mecanumDrive);
+        aimer = new Aimer(mecanumDrive, isFarShooting);
     }
 }

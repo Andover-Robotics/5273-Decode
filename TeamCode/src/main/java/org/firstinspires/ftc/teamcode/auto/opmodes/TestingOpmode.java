@@ -37,7 +37,7 @@ public class TestingOpmode extends LinearOpMode {
     public void runOpMode() {
         Pose2d startPose = new Pose2d(0, 0, Math.toRadians(0));
 
-        Hardware hardware = new Hardware(hardwareMap, telemetry, startPose);
+        Hardware hardware = new Hardware(hardwareMap, telemetry, startPose, false);
         BotActions botActions = new BotActions(hardware, telemetry, this);
 
         MecanumDrive drive = hardware.mecanumDrive;

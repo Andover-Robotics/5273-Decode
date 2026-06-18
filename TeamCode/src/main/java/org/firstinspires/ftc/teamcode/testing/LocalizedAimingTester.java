@@ -41,6 +41,8 @@ public class LocalizedAimingTester extends LinearOpMode {
     public static boolean mecanumAvoid = true;
     public static double shooterRPM;
 
+    public static boolean isFarShooting = false;
+
     private boolean aimlock = false;
     public static boolean fieldCentric = false;
     public static boolean drivetrainAim = false;
@@ -60,7 +62,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         turret = new Turret(hardwareMap);
 
         aprilTag = new AprilTag(hardwareMap, telemetry);
-        aimer = new Aimer(drive);
+        aimer = new Aimer(drive, isFarShooting);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         
         GamepadEx gp1 = new GamepadEx(gamepad1);

@@ -23,8 +23,8 @@ public class Bot extends BotPeriodics {
     public static double withinRpmRange = 150; //
     public static double FIRE_TIME = 1.0;
 
-    public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement) {
-        super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement);
+    public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement, boolean isFarShooting) {
+        super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement, isFarShooting);
         hardwareMap.voltageSensor.iterator().next().getVoltage(); // ensure voltage sensor is initialized before teleop starts
     }
 
@@ -47,9 +47,9 @@ public class Bot extends BotPeriodics {
             finishedInitialGateClose = true;
         }
 
-        handlePeriodics(isFarShooting);
+        handlePeriodics();
         handleIntakeFeedback();
-        handleOuttakeActions(isFarShooting);
+        handleOuttakeActions();
     }
 
     // MAINLINE HANDLERS
@@ -67,7 +67,7 @@ public class Bot extends BotPeriodics {
         }
     }
 
-    private void handleOuttakeActions(boolean isFarShooting) {
+    private void handleOuttakeActions() {
         if (!actionHost.isRunning() && g2.wasJustPressed(GamepadKeys.Button.A) && aimlock) {
             actionHost.start(actionFire(isFarShooting));
         }
