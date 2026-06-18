@@ -90,6 +90,7 @@ public class BotPeriodics {
             handleOuttake();
             handleStorage();
             handleAllianceSelection();
+            handleAimLock();
         }
 
         if (g2.wasJustPressed(GamepadKeys.Button.DPAD_LEFT) && aimlock == false) {
@@ -110,7 +111,6 @@ public class BotPeriodics {
             handleManualTurret();
         }
 
-        handleAimLock();
         handleMovement();
         handleTelemetry();
 
@@ -224,19 +224,19 @@ public class BotPeriodics {
     // Periodic Handlers
     protected void handleTelemetry()
     {
-        telemetry.addData("Field Centric", fieldCentric);
+        /*telemetry.addData("Field Centric", fieldCentric);
         telemetry.addData("Outtake RPM", outtake.getMeasuredRPM());
-        telemetry.addData("Target RMP", outtake.getTargetRPM());
+        telemetry.addData("Target RMP", outtake.getTargetRPM());*/
         telemetry.addData("Bot Range", targetData[1]);
         telemetry.addData("x", drive.localizer.getPose().position.x);
         telemetry.addData("y", drive.localizer.getPose().position.y);
         telemetry.addData("Alliance selected", colorGoalSelected);
-        telemetry.addData("Turn Correction:", turnCorrection);
+        /*telemetry.addData("Turn Correction:", turnCorrection);
         telemetry.addData("Manual Turret Angle", manualTurretTarget);
         telemetry.addData("Intake power: ", intake.getPower());
         telemetry.addData("Last Turn Correction", lastTurnCorrection);
         telemetry.addData("Last Turn Correction", lastTurnCorrection);
-        telemetry.addData("Transfer and intake Current (amps): ", storage.getCurrent());
+        telemetry.addData("Transfer and intake Current (amps): ", storage.getCurrent());*/
         telemetry.update();
     }
 
@@ -381,7 +381,7 @@ public class BotPeriodics {
             aimer.localizeForFront();
         }
 
-        if (targetData[1] <= 102 && aimlock) {
+        if ((targetData[1] <= 102 && aimlock) || (isFarShooting && aimlock)) {
             setMecanumAvoiding(true);
         }
     }

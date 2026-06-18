@@ -154,6 +154,25 @@ public class Aimer {
         return new double[]{turnPower, range, bearing, Math.toDegrees(desiredHeading)};
     }
 
+    public double calculateRangeGivenPose(double xPos, double yPos, double headingRadians) {
+        Pose2d givenPose = new Pose2d(xPos, yPos, headingRadians);
+
+        double turretX = givenPose.position.x - (turretOffsetY * Math.sin(headingRadians));
+        double turretY = givenPose.position.y + (turretOffsetY * Math.cos(headingRadians));
+
+        double dxForRpm = targetPoseForRpm.position.x - turretX;
+        double dyForRpm = targetPoseForRpm.position.y - turretY;
+
+        double horizontalDistanceForRpm = Math.hypot(dxForRpm, dyForRpm);
+
+        double dz = targetHeight - turretHeight;
+
+        // point-to-point distance
+        double range = Math.hypot(horizontalDistanceForRpm, dz);
+
+        return range;
+    }
+
     private double angleWrapDegrees(double angle) {
         return (angle + 180) % 360 - 180;
     }

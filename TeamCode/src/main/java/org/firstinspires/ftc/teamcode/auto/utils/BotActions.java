@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -44,7 +45,7 @@ public class BotActions {
 
 
     public static double cooldownFeedbackIntake = 0;
-    public static double quickspinRpmScale = 0.93;
+    //public static double quickspinRpmScale = 0.93;
     private double lastTurnCorrection;
     private int obeliskId = 0;
 
@@ -79,8 +80,8 @@ public class BotActions {
     }
 
 
-    public Action startOuttake() {
-        return new InstantAction(() -> outtake.set(getTargetRPM() * quickspinRpmScale));
+    public Action startOuttake(Vector2d pos, double headingRadians) {
+        return new InstantAction(() -> outtake.set(aimer.calculateRangeGivenPose(pos.x, pos.y , headingRadians)/** quickspinRpmScale*/));
     }
 
     public Action stopOuttake() {
