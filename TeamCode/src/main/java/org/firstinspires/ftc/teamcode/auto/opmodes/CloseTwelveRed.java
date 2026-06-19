@@ -76,7 +76,7 @@ public class CloseTwelveRed extends LinearOpMode {
                 .stopAndAdd(botActions.startActions(Aimer.Goal.RED))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
+                .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(rowOneStart.position, rowOneStart.heading.log())
@@ -87,7 +87,7 @@ public class CloseTwelveRed extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
+                .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(rowTwoStart.position, rowTwoStart.heading.log())
@@ -97,7 +97,7 @@ public class CloseTwelveRed extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake(new Vector2d(shootX - 6, shootY - 6), shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootX - 6, shootY - 6), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
+                .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 .stopAndAdd(botActions.stopOuttake())
 
                 //.strafeToSplineHeading(rowZeroStart.position, rowZeroStart.heading.log())
@@ -107,7 +107,7 @@ public class CloseTwelveRed extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
+                .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(leavePos.position, leavePos.heading.log());

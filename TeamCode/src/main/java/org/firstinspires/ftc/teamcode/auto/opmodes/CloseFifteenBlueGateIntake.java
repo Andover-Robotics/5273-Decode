@@ -93,7 +93,7 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
                 .stopAndAdd(botActions.startActions(Aimer.Goal.BLUE))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
+                .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 .stopAndAdd(botActions.stopOuttake())
 
                 // row 1
@@ -104,7 +104,7 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake(new Vector2d(shootPos.position.x + secondShootRowOffsetX, shootPos.position.y + secondShootRowOffsetY), shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPos.position.x + secondShootRowOffsetX, shootPos.position.y + secondShootRowOffsetY), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
+                .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 .stopAndAdd(botActions.stopOuttake())
 
                 // Gate intake 1
@@ -117,7 +117,7 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
+                .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 .stopAndAdd(botActions.stopOuttake())
 
                 // Gate intake 2
@@ -130,7 +130,7 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
                 .stopAndAdd(botActions.startOuttake(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
+                .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 .stopAndAdd(botActions.stopOuttake())
 
                 /*
