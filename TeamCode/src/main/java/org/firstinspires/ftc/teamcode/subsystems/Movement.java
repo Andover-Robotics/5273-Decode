@@ -20,8 +20,8 @@ public class Movement {
     private final DcMotor leftFront, leftBack, rightFront, rightBack;
     private final MecanumDrive drive;
     //private final IMU imu;
-    private final double STRAFE_MULTIPLIER = 1.0, ROTATION_MULTIPLIER = 0.8;
-    private final double SLOW_MULTIPLIER = 0.5;
+    private final double STRAFE_MULTIPLIER = 1.0, ROTATION_MULTIPLIER = 1.0;
+    private final double SLOW_MULTIPLIER = 1.0;
     public static double frontFeedForward = 0.07;
     private boolean slowToggled = false;
 
