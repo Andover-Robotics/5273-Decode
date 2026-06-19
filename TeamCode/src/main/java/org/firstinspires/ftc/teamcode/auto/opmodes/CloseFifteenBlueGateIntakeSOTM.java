@@ -93,8 +93,8 @@ public class CloseFifteenBlueGateIntakeSOTM extends LinearOpMode {
 
         builder = builder
                 // preload
-                .stopAndAdd(botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
                 .stopAndAdd(botActions.startActions(Aimer.Goal.RED))
+                .stopAndAdd(botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPosStart.position, shootPosStart.heading.log())
                 .stopAndAdd(SOTM(drive, new Pose2d(shootPosStart.position, shootPosStart.heading.log()), shootPosEnd))

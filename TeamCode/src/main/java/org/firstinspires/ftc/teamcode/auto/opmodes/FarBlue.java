@@ -68,8 +68,8 @@ public class FarBlue extends LinearOpMode {
         TrajectoryActionBuilder builder = drive.actionBuilder(startPose);
 
         builder = builder
-                .stopAndAdd(botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.startActions(Aimer.Goal.BLUE))
+                .stopAndAdd(botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
