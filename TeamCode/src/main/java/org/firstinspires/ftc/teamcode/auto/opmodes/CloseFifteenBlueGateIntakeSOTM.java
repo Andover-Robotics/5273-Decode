@@ -94,7 +94,7 @@ public class CloseFifteenBlueGateIntakeSOTM extends LinearOpMode {
         builder = builder
                 // preload
                 .stopAndAdd(botActions.startActions(Aimer.Goal.RED))
-                .stopAndAdd(botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
+                .stopAndAdd(() -> botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPosStart.position, shootPosStart.heading.log())
                 .stopAndAdd(SOTM(drive, new Pose2d(shootPosStart.position, shootPosStart.heading.log()), shootPosEnd))
@@ -105,7 +105,7 @@ public class CloseFifteenBlueGateIntakeSOTM extends LinearOpMode {
                 .stopAndAdd(botActions.startIntake())
                 .strafeTo(rowOneEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
+                .stopAndAdd(() -> botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPosStart.position.x - 20, shootPosStart.position.y), shootPosStart.heading.log())
                 .strafeToSplineHeading(shootPosStart.position, shootPosStart.heading.log())
@@ -119,7 +119,7 @@ public class CloseFifteenBlueGateIntakeSOTM extends LinearOpMode {
                 .waitSeconds(gateWaitSeconds)
                 .stopAndAdd(botActions.runContinuousIntake())
 
-                .stopAndAdd(botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
+                .stopAndAdd(() -> botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPosStart.position, shootPosStart.heading.log())
                 .stopAndAdd(SOTM(drive, new Pose2d(shootPosStart.position, shootPosStart.heading.log()), shootPosEnd))
@@ -132,7 +132,7 @@ public class CloseFifteenBlueGateIntakeSOTM extends LinearOpMode {
                 .waitSeconds(gateWaitSeconds)
                 .stopAndAdd(botActions.runContinuousIntake())
 
-                .stopAndAdd(botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
+                .stopAndAdd(() -> botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPosStart.position, shootPosStart.heading.log())
                 .stopAndAdd(SOTM(drive, new Pose2d(shootPosStart.position, shootPosStart.heading.log()), shootPosEnd))
@@ -146,7 +146,7 @@ public class CloseFifteenBlueGateIntakeSOTM extends LinearOpMode {
                 .waitSeconds(gateWaitSeconds)
                 .stopAndAdd(botActions.runContinuousIntake())
 
-                .stopAndAdd(botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
+                .stopAndAdd(() -> botActions.startOuttake(shootPosStart.position, shootPosStart.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPosStart.position.x + gateShootOffsetX, shootPosStart.position.y + gateShootOffsetY), shootPosStart.heading.log())
                 .stopAndAdd(botActions.actionOuttake(false))
@@ -158,7 +158,7 @@ public class CloseFifteenBlueGateIntakeSOTM extends LinearOpMode {
                 .stopAndAdd(botActions.startIntake())
                 .strafeTo(rowZeroEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(botActions.startOuttake(new Vector2d(shootPosStart.position.x - 15, shootPosStart.position.y + 18), shootPosStart.heading.log()))
+                .stopAndAdd(() -> botActions.startOuttake(new Vector2d(shootPosStart.position.x - 15, shootPosStart.position.y + 18), shootPosStart.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPosStart.position.x - 15, shootPosStart.position.y + 18), shootPosStart.heading.log())
                 .stopAndAdd(botActions.actionOuttake(false))
@@ -170,7 +170,7 @@ public class CloseFifteenBlueGateIntakeSOTM extends LinearOpMode {
                 .stopAndAdd(botActions.startIntake())
                 .strafeTo(rowTwoEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(botActions.startOuttake(shootPosStart.position, shootPos.heading.log()))
+                .stopAndAdd(() -> botActions.startOuttake(shootPosStart.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootX + 2, shootY + 2), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(false))

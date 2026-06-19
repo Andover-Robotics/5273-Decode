@@ -81,7 +81,8 @@ public class BotActions {
 
 
     public Action startOuttake(Vector2d pos, double headingRadians) {
-        return new InstantAction(() -> outtake.set(aimer.calculateRangeGivenPose(pos.x, pos.y , headingRadians)/** quickspinRpmScale*/));
+        return new InstantAction(() -> outtake.set(aimer.calculateRangeGivenPose(pos.x, pos.y, headingRadians)/** quickspinRpmScale*/));
+        // return new InstantAction(() -> outtake.set(getTargetRPM()/** quickspinRpmScale*/));
     }
 
     public Action stopOuttake() {
