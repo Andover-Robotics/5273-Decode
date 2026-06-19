@@ -36,13 +36,13 @@ public class Aimer {
     // For Close Shooting
     //how far from the back of the field the aiming point is
     public static double goalBackAimClose = 14; // Only for aiming
-    public static double goalBackForRpmClose = 7; // rpm depends on this // normal val: 8
+    public static double goalBackForRpmClose = 5.5; // rpm depends on this // normal val: 8
     public static double goalBackAimFar = 14; // Only for aiming
     public static double goalBackForRpmFar = 7; // rpm depends on this // normal val: 8
 
     // For Far Shooting
     //how far from the side border of the field (where drivers stand) the aiming point is
-    public static double goalOutAimClose = 17; // only for aiming
+    public static double goalOutAimClose = 20.0; // only for aiming
     public static double goalOutForRpmClose = 10; // rpm depends on this // normal val: 15
     public static double goalOutAimFar = 17; // only for aiming
     public static double goalOutForRpmFar = 10; // rpm depends on this // normal val: 15
@@ -99,7 +99,11 @@ public class Aimer {
         return selectedGoal;
     }
 
-    public void relocalize(){
+    public void localize(Pose2d pose) {
+        drive.localizer.setPose(pose);
+    }
+
+    public void relocalizeForBack(){
         double botWidth = 14.8;
         double botLength = 17.0;
         // -2.25 because turret not centered
@@ -115,9 +119,9 @@ public class Aimer {
         double botLength = 17.0;
         // -2.25 because turret not centered
         if(selectedGoal == Goal.RED){
-            drive.localizer.setPose(new Pose2d(113, 129, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(110, 131, Math.toRadians(90)));
         } else if (selectedGoal == Goal.BLUE){
-            drive.localizer.setPose(new Pose2d(31, 129, Math.toRadians(90)));
+            drive.localizer.setPose(new Pose2d(34, 131, Math.toRadians(90)));
         }
     }
 

@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.subsystems.Aimer;
+import org.firstinspires.ftc.teamcode.teleop.Bot;
+import org.firstinspires.ftc.teamcode.teleop.BotPeriodics;
 import org.firstinspires.ftc.teamcode.teleop.MainTeleopClose;
 
 @Config
@@ -26,15 +28,15 @@ public class CloseTwelveRed extends LinearOpMode {
     private boolean isFarShooting = false;
 
     //USE SAME LOCALIZATION STYLE AS AIMER (90 degrees faces the goals, 0 degs faces side with red goal, 180 degs faces side with blue goal, +y is towards goals)
-    public static double startX = 113.0;
-    public static double startY = 129;
+    public static double startX = 110.0;
+    public static double startY = 131;
     public static double startAngle = Math.toRadians(90);
 
     public static double intakingAngle = Math.toRadians(0);
 
     //row numerations start at 0 for ease
     //array of row y
-    public static double[] rowStartY = {83.2, 54.12, 35.0};
+    public static double[] rowStartY = {86.5, 57.12, 38.0};
     public static double[] rowStartX = {107.0, 102.0, 94.0};
     // array of how far to go forward in each row
     public static double[] rowForwards = {28, 34, 38};
@@ -43,8 +45,8 @@ public class CloseTwelveRed extends LinearOpMode {
     public static double gateShootOffsetY = -8;
 
     //shoot pos
-    public static double shootY = 83.0;
-    public static double shootX = 92.0;
+    public static double shootY = 88.0;
+    public static double shootX = 90.0;
 
     public static Pose2d startPose = new Pose2d(startX, startY, startAngle);
 
@@ -73,11 +75,9 @@ public class CloseTwelveRed extends LinearOpMode {
 
         builder = builder
                 .stopAndAdd(botActions.startActions(Aimer.Goal.RED))
-                .stopAndAdd(() -> botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
+                
 
                 .strafeToSplineHeading(rowOneStart.position, rowOneStart.heading.log())
                 .stopAndAdd(botActions.startIntake())
@@ -87,8 +87,7 @@ public class CloseTwelveRed extends LinearOpMode {
                 .stopAndAdd(() -> botActions.startOuttake(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
+                
 
                 .strafeToSplineHeading(rowTwoStart.position, rowTwoStart.heading.log())
                 .stopAndAdd(botActions.startIntake())
@@ -97,8 +96,7 @@ public class CloseTwelveRed extends LinearOpMode {
                 .stopAndAdd(() -> botActions.startOuttake(new Vector2d(shootX - 6, shootY - 6), shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootX - 6, shootY - 6), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
+                
 
                 //.strafeToSplineHeading(rowZeroStart.position, rowZeroStart.heading.log())
                 .stopAndAdd(botActions.startIntake())
@@ -107,8 +105,6 @@ public class CloseTwelveRed extends LinearOpMode {
                 .stopAndAdd(() -> botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
 
                 .strafeToSplineHeading(leavePos.position, leavePos.heading.log());
 
@@ -141,6 +137,8 @@ public class CloseTwelveRed extends LinearOpMode {
         finally {
             drive.updatePoseEstimate();
             MainTeleopClose.startPose = drive.localizer.getPose();
+            Bot.startPose = drive.localizer.getPose();
+            BotPeriodics.goal = Aimer.Goal.RED;
         }
     }
 }

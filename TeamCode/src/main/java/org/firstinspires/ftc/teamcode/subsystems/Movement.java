@@ -62,6 +62,7 @@ public class Movement {
         double rightBackPower  = axial + lateral - yaw;
 
         // For smoother joystick movement
+
         double denominator = Math.max(1.0, Math.abs(axial) + Math.abs(lateral) + Math.abs(yaw));
         leftFrontPower += Math.signum(leftFrontPower) * frontFeedForward;
         rightFrontPower += Math.signum(rightFrontPower) * frontFeedForward;

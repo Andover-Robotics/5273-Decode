@@ -42,7 +42,9 @@ public class BotPeriodics {
     protected long lastAimUpdate = 0;
     protected double lastTurnCorrection = 0.0;
     protected double turnCorrection = 0.0;
-    protected String colorGoalSelected = "";
+
+    public static Aimer.Goal goal;
+
     protected double[] targetData = {0,0,0};
 
     public static boolean continuousIntake = true;
@@ -230,7 +232,12 @@ public class BotPeriodics {
         telemetry.addData("Bot Range", targetData[1]);
         telemetry.addData("x", drive.localizer.getPose().position.x);
         telemetry.addData("y", drive.localizer.getPose().position.y);
-        telemetry.addData("Alliance selected", colorGoalSelected);
+
+        if (goal == Aimer.Goal.BLUE)
+            telemetry.addData("Alliance selected", "Blue");
+        else if (goal == Aimer.Goal.BLUE)
+            telemetry.addData("Alliance selected", "Red");
+
         /*telemetry.addData("Turn Correction:", turnCorrection);
         telemetry.addData("Manual Turret Angle", manualTurretTarget);
         telemetry.addData("Intake power: ", intake.getPower());
@@ -243,11 +250,11 @@ public class BotPeriodics {
     protected void handleAllianceSelection() {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK) || g2.wasJustPressed(GamepadKeys.Button.BACK)) {
             aimer.setBlueTarget();
-            colorGoalSelected = "Blue";
+            goal = Aimer.Goal.BLUE;
         }
         if (g1.wasJustPressed(GamepadKeys.Button.START) || g2.wasJustPressed(GamepadKeys.Button.START)) {
             aimer.setRedTarget();
-            colorGoalSelected = "Red";
+            goal = Aimer.Goal.RED;
         }
     }
 
@@ -256,12 +263,14 @@ public class BotPeriodics {
         double ly = g1.getLeftY();
         double rx = g1.getRightX();
 
+        /*
         if (g1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) || g2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
             movement.setSlow(true);
         }
         else if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) || g2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
             movement.setSlow(false);
         }
+        */
 
         if (aimlock) {
             //drivetrain control
@@ -376,12 +385,12 @@ public class BotPeriodics {
             g2.gamepad.rumbleBlips(1);
         }
         if (g1.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
-            aimer.relocalize();
+            aimer.relocalizeForBack();
         } else if (g1.wasJustPressed(GamepadKeys.Button.DPAD_UP)){
             aimer.localizeForFront();
         }
 
-        if ((targetData[1] <= 102 && aimlock) || (isFarShooting && aimlock)) {
+        if ((targetData[1] <= 62 && aimlock) || (isFarShooting && aimlock)) {
             setMecanumAvoiding(true);
         }
     }

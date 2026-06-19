@@ -9,8 +9,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
 public class Intake {
-    public static double SLOW_MULTIPLIER = 0.5;
-    public static double INTAKING_POWER = 1;
+    public static double SLOW_MULTIPLIER = 0.15;
+    public static double INTAKING_POWER = 0.80;
     private MotorEx intakeMotor;
 
     public Intake(HardwareMap hardwareMap)

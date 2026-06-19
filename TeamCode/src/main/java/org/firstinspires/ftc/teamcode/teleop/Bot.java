@@ -4,14 +4,17 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.Aimer;
 
 @Config
 public class Bot extends BotPeriodics {
@@ -22,6 +25,8 @@ public class Bot extends BotPeriodics {
 
     public static double withinRpmRange = 150; //
     public static double FIRE_TIME = 1.0;
+
+    public static Pose2d startPose = new Pose2d(0, 0, 0);
 
     public Bot(HardwareMap hardwareMap, Telemetry tele, MecanumDrive mecanumDrive, Gamepad gamepad1, Gamepad gamepad2, boolean twoMovement, boolean isFarShooting) {
         super(hardwareMap, tele, mecanumDrive, gamepad1, gamepad2, twoMovement, isFarShooting);
@@ -36,7 +41,13 @@ public class Bot extends BotPeriodics {
         teleOpStartTime = System.currentTimeMillis();
         initialBackwardsTransfer = true;
         turret.initialize();
-
+        aimer.localize(startPose);
+        if (goal == Aimer.Goal.BLUE) {
+            aimer.setBlueTarget();
+        }
+        else {
+            aimer.setRedTarget();
+        }
     }
 
     public void teleopTick(boolean isFarShooting)
@@ -78,12 +89,12 @@ public class Bot extends BotPeriodics {
         if (g1.wasJustPressed(GamepadKeys.Button.BACK) || g2.wasJustPressed(GamepadKeys.Button.BACK)) {
             aimer.setBlueTarget();
             g1.gamepad.setLedColor(0, 0, 1, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
-            colorGoalSelected = "Blue";
+            goal = Aimer.Goal.RED;
         }
         if (g1.wasJustPressed(GamepadKeys.Button.START) || g2.wasJustPressed(GamepadKeys.Button.START)) {
             aimer.setRedTarget();
             g1.gamepad.setLedColor(1, 0, 0, TeleopConstants.Gamepad.GAMEPAD_LIGHT_COLOR_DURATION);
-            colorGoalSelected = "Red";
+            goal = Aimer.Goal.RED;
         }
     }
 
@@ -91,7 +102,7 @@ public class Bot extends BotPeriodics {
         Action shootingAction = new SequentialAction(
                 packet -> {
                     outtake.set(getTargetRPM());
-                    return !outtake.inRange(withinRpmRange, 150);
+                    return !outtake.inRange(withinRpmRange, 75);
                 },
                 new InstantAction(intake::run),
                 new InstantAction(() -> storage.runTransfer(isFarShooting)),

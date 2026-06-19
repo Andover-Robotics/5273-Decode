@@ -16,6 +16,8 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.subsystems.Aimer;
+import org.firstinspires.ftc.teamcode.teleop.Bot;
+import org.firstinspires.ftc.teamcode.teleop.BotPeriodics;
 import org.firstinspires.ftc.teamcode.teleop.MainTeleopClose;
 
 @Config
@@ -90,22 +92,18 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
         builder = builder
                 // preload
                 .stopAndAdd(botActions.startActions(Aimer.Goal.BLUE))
-                .stopAndAdd(() -> botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
 
                 // row 1
                 .strafeToSplineHeading(rowOneStart.position, rowOneStart.heading.log())
                 .stopAndAdd(botActions.startIntake())
                 .strafeTo(rowOneEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(() -> botActions.startOuttake(new Vector2d(shootPos.position.x + secondShootRowOffsetX, shootPos.position.y + secondShootRowOffsetY), shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPos.position.x + secondShootRowOffsetX, shootPos.position.y + secondShootRowOffsetY), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
 
                 // Gate intake 1
                 .strafeToSplineHeading(gatePoseStart.position, gatePoseStart.heading.log())
@@ -114,11 +112,9 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
                 .waitSeconds(gateWaitSeconds)
                 .stopAndAdd(botActions.runContinuousIntake())
 
-                .stopAndAdd(() -> botActions.startOuttake(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
 
                 // Gate intake 2
                 .strafeToSplineHeading(gatePoseStart.position, gatePoseStart.heading.log())
@@ -127,11 +123,9 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
                 .waitSeconds(gateWaitSeconds)
                 .stopAndAdd(botActions.runContinuousIntake())
 
-                .stopAndAdd(() -> botActions.startOuttake(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
 
                 /*
                 // Gate intake 3
@@ -141,11 +135,9 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
                 .waitSeconds(gateWaitSeconds)
                 .stopAndAdd(botActions.runContinuousIntake())
 
-                .stopAndAdd(() -> botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootPos.position.x + gateShootOffsetX, shootPos.position.y + gateShootOffsetY), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(false))
-                .stopAndAdd(botActions.stopOuttake())
                 */
 
                 // row 0
@@ -153,11 +145,9 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
                 .stopAndAdd(botActions.startIntake())
                 .strafeTo(rowZeroEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(() -> botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
-                .strafeToSplineHeading(new Vector2d(shootPos.position.x + 15, shootPos.position.y + 18), shootPos.heading.log())
-                .stopAndAdd(botActions.actionOuttake(false))
-                .stopAndAdd(botActions.stopOuttake());
+                .strafeToSplineHeading(new Vector2d(shootPos.position.x + 10, shootPos.position.y + 18), shootPos.heading.log())
+                .stopAndAdd(botActions.actionOuttake(false));
 
                 /*
                 // row 2
@@ -165,11 +155,9 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
                 .stopAndAdd(botActions.startIntake())
                 .strafeTo(rowTwoEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(() -> botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(new Vector2d(shootX + 2, shootY + 2), shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(false))
-                .stopAndAdd(botActions.stopOuttake())
                  */
                 //.strafeToSplineHeading(leavePos.position, leavePos.heading.log());
 
@@ -202,6 +190,8 @@ public class CloseFifteenBlueGateIntake extends LinearOpMode {
         finally {
             drive.updatePoseEstimate();
             MainTeleopClose.startPose = drive.localizer.getPose();
+            Bot.startPose = drive.localizer.getPose();
+            BotPeriodics.goal = Aimer.Goal.BLUE;
         }
     }
 }

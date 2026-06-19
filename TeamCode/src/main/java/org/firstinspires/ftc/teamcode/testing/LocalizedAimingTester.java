@@ -104,12 +104,14 @@ public class LocalizedAimingTester extends LinearOpMode {
         turnCorrection = lastTurnCorrection;
         // turnCorrection = 0.9 * lastTurnCorrection; - don't want this
 
+        /*
         if (g1.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON) || g2.wasJustPressed(GamepadKeys.Button.LEFT_STICK_BUTTON)) {
             movement.setSlow(true);
         }
         else if (g1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON) || g2.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
             movement.setSlow(false);
         }
+        */
 
         if (aimlock) {
             //drivetrain control
@@ -272,7 +274,7 @@ public class LocalizedAimingTester extends LinearOpMode {
         }
 
         if (g1.wasJustPressed(GamepadKeys.Button.X)) {
-                aimer.relocalize();
+                aimer.relocalizeForBack();
         }
 
         // Alliance selection

@@ -115,6 +115,8 @@ public class Outtake {
         shooter2.stopMotor();
         motorPower = 0.0;
         targetRPM = 0.0;
+        spinupStartTime = -1;
+        inRangeStartTime = -1;
     }
 
     /** Unified setter */

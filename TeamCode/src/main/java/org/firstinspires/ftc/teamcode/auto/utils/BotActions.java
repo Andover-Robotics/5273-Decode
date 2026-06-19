@@ -38,7 +38,7 @@ public class BotActions {
     private static final long AIM_UPDATE_INTERVAL_MS = 0;
     public static double FIRE_TIME = 0.85;
     protected double[] targetData = {0,0,0};
-    public static double withinRpmRange = 225;
+    public static double withinRpmRange = 150;
     public static double targetRPM = 0;
     private double turnCorrection = 0.0;
     private double bearingTurnCorrection = 0.0;
@@ -79,15 +79,13 @@ public class BotActions {
         );
     }
 
-
     public Action startOuttake(Vector2d pos, double headingRadians) {
-        return new InstantAction(() -> outtake.set(aimer.calculateRangeGivenPose(pos.x, pos.y, headingRadians)/** quickspinRpmScale*/));
-        // return new InstantAction(() -> outtake.set(getTargetRPM()/** quickspinRpmScale*/));
+        return new InstantAction(() -> outtake.set(getTargetRPM()/** quickspinRpmScale*/));
     }
 
-    public Action stopOuttake() {
+    /* public Action stopOuttake() {
         return new InstantAction(() -> outtake.stop());
-    }
+    }*/
 
     public Action actionSetAimlock(boolean aimlock) {
         return new InstantAction(() -> setAimlock(aimlock));
@@ -109,10 +107,10 @@ public class BotActions {
                 new InstantAction(() -> setAimlock(false))
         );
 
+        // Remove shootingAction from the constructor array
+        // so it only gets evaluated exactly once inside the lambda wrapper
         return new ParallelAction(
-                shootingAction,
                 packet -> {
-                    // Packet returns true when shootingAction ends
                     outtake.set(getTargetRPM());
                     return shootingAction.run(packet);
                 }
@@ -128,6 +126,7 @@ public class BotActions {
                 }
 
                 drive.updatePoseEstimate();
+                outtake.set(targetRPM);
                 outtake.periodic();
 
                 //telemetry.addData("obelisk id: ", obeliskId);

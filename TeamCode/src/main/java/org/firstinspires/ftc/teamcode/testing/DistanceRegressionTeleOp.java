@@ -144,11 +144,11 @@ public class DistanceRegressionTeleOp extends LinearOpMode {
 
         if (g1.wasJustPressed(GamepadKeys.Button.X)) {
             if (colorGoalSelected.equals("Blue"))
-                aprilAimer.relocalize();
+                aprilAimer.relocalizeForBack();
             else if (colorGoalSelected.equals("Red"))
-                aprilAimer.relocalize();
+                aprilAimer.relocalizeForBack();
             else {
-                aprilAimer.relocalize();
+                aprilAimer.relocalizeForBack();
             }
         }
 

@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.auto.roadrunner.miscRR.MecanumDrive;
 import org.firstinspires.ftc.teamcode.auto.utils.BotActions;
 import org.firstinspires.ftc.teamcode.auto.utils.Hardware;
 import org.firstinspires.ftc.teamcode.subsystems.Aimer;
+import org.firstinspires.ftc.teamcode.teleop.Bot;
+import org.firstinspires.ftc.teamcode.teleop.BotPeriodics;
 import org.firstinspires.ftc.teamcode.teleop.MainTeleopFar;
 
 @Config
@@ -75,7 +77,7 @@ public class FarRed extends LinearOpMode {
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
+                
 
                 .strafeToSplineHeading(rowStart.position, rowStart.heading.log())
                 .stopAndAdd(botActions.startIntake())
@@ -86,7 +88,7 @@ public class FarRed extends LinearOpMode {
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
+                
 
                 .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
                 .stopAndAdd(botActions.startIntake())
@@ -96,7 +98,7 @@ public class FarRed extends LinearOpMode {
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
+                
 
                 .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
                 .stopAndAdd(botActions.startIntake())
@@ -106,7 +108,7 @@ public class FarRed extends LinearOpMode {
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
-                .stopAndAdd(botActions.stopOuttake())
+                
 
                 .strafeToSplineHeading(leavePos.position, leavePos.heading.log());
 
@@ -139,6 +141,8 @@ public class FarRed extends LinearOpMode {
         finally {
             drive.updatePoseEstimate();
             MainTeleopFar.startPose = drive.localizer.getPose();
+            Bot.startPose = drive.localizer.getPose();
+            BotPeriodics.goal = Aimer.Goal.RED;
         }
     }
 }
