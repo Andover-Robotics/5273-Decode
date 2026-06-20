@@ -35,17 +35,17 @@ public class Aimer {
 
     // For Close Shooting
     //how far from the back of the field the aiming point is
-    public static double goalBackAimClose = 14; // Only for aiming
+    public static double goalBackAimClose = 12.5; // Only for aiming
     public static double goalBackForRpmClose = 5.5; // rpm depends on this // normal val: 8
     public static double goalBackAimFar = 14; // Only for aiming
     public static double goalBackForRpmFar = 5; // rpm depends on this // normal val: 8
 
     // For Far Shooting
     //how far from the side border of the field (where drivers stand) the aiming point is
-    public static double goalOutAimClose = 18.5; // only for aiming
+    public static double goalOutAimClose = 20.0; // only for aiming
     public static double goalOutForRpmClose = 10; // rpm depends on this // normal val: 15
     public static double goalOutAimFar = 14; // only for aiming
-    public static double goalOutForRpmFar = 8; // rpm depends on this // normal val: 15
+    public static double goalOutForRpmFar = 10; // rpm depends on this // normal val: 15
 
     public static double centerOfRotationOffsetY = -1.85; // in
 

@@ -46,9 +46,9 @@ public class CloseFifteenRedGateIntake extends LinearOpMode {
     public static double shootY = CloseTwelveRed.shootY;
     public static double shootX = CloseTwelveRed.shootX;
     public static double secondShootRowOffsetX = -12;
-    public static double secondShootRowOffsetY = -10;
+    public static double secondShootRowOffsetY = -12;
     public static double gateShootOffsetX = -12;
-    public static double gateShootOffsetY = -10;
+    public static double gateShootOffsetY = -12;
 
     public static double gatePoseStartY = 59.5;
     public static double gatePoseStartX = 133.0;
