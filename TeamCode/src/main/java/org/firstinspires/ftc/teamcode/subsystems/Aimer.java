@@ -35,7 +35,7 @@ public class Aimer {
 
     // For Close Shooting
     //how far from the back of the field the aiming point is
-    public static double goalBackAimClose = 12.5; // Only for aiming
+    public static double goalBackAimClose = 13.0; // Only for aiming
     public static double goalBackForRpmClose = 5.5; // rpm depends on this // normal val: 8
     public static double goalBackAimFar = 14; // Only for aiming
     public static double goalBackForRpmFar = 5; // rpm depends on this // normal val: 8
