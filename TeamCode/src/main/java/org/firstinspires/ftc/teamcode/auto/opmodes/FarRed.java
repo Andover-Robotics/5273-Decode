@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -33,20 +34,20 @@ public class FarRed extends LinearOpMode {
     public static double startAngle = Math.toRadians(0);
 
     public static double intakingAngle = Math.toRadians(0);
-    public static double cornerIntakingAngle = -7;
+    public static double cornerIntakingAngle = -78.5;
 
     public static double rowStartY = 35;
     public static double rowStartX = 98.0;
 
-    public static double cornerStartY = 6.65;
-    public static double cornerStartX = 118.0;
+    public static double cornerStartY = 21.0;
+    public static double cornerStartX = 135.34;
 
     //shoot pos
-    public static double shootY = 19.8;
+    public static double shootY = 16.0;
     public static double shootX = 82.95;
 
     public static double rowForwards = 40;
-    public static double cornerForwards = 28;
+    public static double cornerBackwards = 24;
 
 
     public static Pose2d startPose = new Pose2d(startX, startY, startAngle);
@@ -57,12 +58,14 @@ public class FarRed extends LinearOpMode {
 
     //end poses based on rowForwards: +x for red, -x for blue
     public static Pose2d rowEnd = new Pose2d(rowStartX + rowForwards, rowStartY, intakingAngle);
-    public static Pose2d cornerEnd = new Pose2d(cornerStartX + cornerForwards, cornerStartY, Math.toRadians(cornerIntakingAngle));
+    public static Pose2d cornerEnd = new Pose2d(cornerStartX, cornerStartY - cornerBackwards, Math.toRadians(cornerIntakingAngle));
 
     public static Pose2d gatePose = new Pose2d(131.6, 67, Math.toRadians(-90));
     public static Pose2d shootPos = new Pose2d(shootX, shootY, Math.toRadians(0));
     public static Pose2d leavePos = new Pose2d(103, 32, Math.toRadians(0));
 
+    public static double cornerIntakeMaxVel = 15;
+    public static TranslationalVelConstraint cornerIntakeVelConstraint = new TranslationalVelConstraint(cornerIntakeMaxVel);
 
     public Action madeAuto;
 
@@ -73,7 +76,6 @@ public class FarRed extends LinearOpMode {
 
         builder = builder
                 .stopAndAdd(botActions.startActions(Aimer.Goal.RED))
-                .stopAndAdd(botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
@@ -84,7 +86,6 @@ public class FarRed extends LinearOpMode {
                 .strafeTo(rowEnd.position)
                 .stopAndAdd(botActions.runContinuousIntake())
                 //.strafeToSplineHeading(gatePose.position, gatePose.heading.log())
-                .stopAndAdd(botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
@@ -92,9 +93,8 @@ public class FarRed extends LinearOpMode {
 
                 .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
                 .stopAndAdd(botActions.startIntake())
-                .strafeTo(cornerEnd.position)
+                .strafeTo(cornerEnd.position, cornerIntakeVelConstraint)
                 .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
@@ -102,9 +102,8 @@ public class FarRed extends LinearOpMode {
 
                 .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
                 .stopAndAdd(botActions.startIntake())
-                .strafeTo(cornerEnd.position)
+                .strafeTo(cornerEnd.position, cornerIntakeVelConstraint)
                 .stopAndAdd(botActions.runContinuousIntake())
-                .stopAndAdd(botActions.startOuttake(shootPos.position, shootPos.heading.log()))
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
