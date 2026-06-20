@@ -67,7 +67,7 @@ public class BotActions {
 
     public Action startIntake() {
         return new ParallelAction(
-                new InstantAction(intake::run),
+                new InstantAction(intake::runIntakeAuto),
                 new InstantAction(() -> storage.runTransfer()) // isFarShooting doesn't matter when intaking
         );
     }
@@ -95,7 +95,7 @@ public class BotActions {
         Action shootingAction = new SequentialAction(
                 packet -> {
                     outtake.set(getTargetRPM());
-                    return !outtake.inRange(withinRpmRange, 75);
+                    return !outtake.inRange(withinRpmRange, 100);
                 },
                 new InstantAction(intake::run),
                 new InstantAction(() -> storage.runTransfer(isFarShooting)),
