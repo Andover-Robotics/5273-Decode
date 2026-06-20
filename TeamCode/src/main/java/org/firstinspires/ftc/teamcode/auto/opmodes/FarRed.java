@@ -4,10 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -34,13 +31,13 @@ public class FarRed extends LinearOpMode {
     public static double startAngle = Math.toRadians(0);
 
     public static double intakingAngle = Math.toRadians(0);
-    public static double cornerIntakingAngle = -78.5;
+    public static double cornerIntakingAngle = -83.5;
 
     public static double rowStartY = 35;
     public static double rowStartX = 98.0;
 
-    public static double cornerStartY = 21.0;
-    public static double cornerStartX = 135.34;
+    public static double cornerInitialStartY = 21.0;
+    public static double cornerInitialStartX = 135.34;
 
     //shoot pos
     public static double shootY = 16.0;
@@ -54,11 +51,13 @@ public class FarRed extends LinearOpMode {
 
     public static Pose2d rowStart = new Pose2d(rowStartX, rowStartY, intakingAngle);
 
-    public static Pose2d cornerStart = new Pose2d(cornerStartX, cornerStartY, Math.toRadians(cornerIntakingAngle));
+    public static Pose2d cornerInitialStart = new Pose2d(cornerInitialStartX, cornerInitialStartY, Math.toRadians(cornerIntakingAngle));
 
     //end poses based on rowForwards: +x for red, -x for blue
     public static Pose2d rowEnd = new Pose2d(rowStartX + rowForwards, rowStartY, intakingAngle);
-    public static Pose2d cornerEnd = new Pose2d(cornerStartX, cornerStartY - cornerBackwards, Math.toRadians(cornerIntakingAngle));
+    public static Pose2d cornerInitialEnd = new Pose2d(cornerInitialStartX, cornerInitialStartY - cornerBackwards, Math.toRadians(cornerIntakingAngle));
+
+    public static Pose2d cornerIntakeEnd = new Pose2d(cornerInitialStartX, cornerInitialStartY - cornerBackwards, Math.toRadians(cornerIntakingAngle));
 
     public static Pose2d gatePose = new Pose2d(131.6, 67, Math.toRadians(-90));
     public static Pose2d shootPos = new Pose2d(shootX, shootY, Math.toRadians(0));
@@ -91,20 +90,19 @@ public class FarRed extends LinearOpMode {
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 
 
-                .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
+                .strafeToSplineHeading(cornerInitialStart.position, cornerInitialEnd.heading.log())
                 .stopAndAdd(botActions.startIntake())
-                .strafeTo(cornerEnd.position, cornerIntakeVelConstraint)
+                .strafeTo(cornerInitialEnd.position, cornerIntakeVelConstraint)
                 .stopAndAdd(botActions.runContinuousIntake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 
 
-                .strafeToSplineHeading(cornerStart.position, cornerEnd.heading.log())
                 .stopAndAdd(botActions.startIntake())
-                .strafeTo(cornerEnd.position, cornerIntakeVelConstraint)
-                .stopAndAdd(botActions.runContinuousIntake())
+                .strafeTo(cornerIntakeEnd.position)
                 .stopAndAdd(botActions.actionSetAimlock(true))
+                .stopAndAdd(botActions.runContinuousIntake())
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
                 .stopAndAdd(botActions.actionOuttake(isFarShooting))
                 
@@ -115,7 +113,7 @@ public class FarRed extends LinearOpMode {
     }
 
     public void runOpMode() throws InterruptedException {
-        hardware = new Hardware(hardwareMap, telemetry, startPose, true);
+        hardware = new Hardware(hardwareMap, telemetry, startPose, isFarShooting);
         drive = hardware.mecanumDrive;
         botActions = new BotActions(hardware, telemetry, this);
 

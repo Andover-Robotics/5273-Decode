@@ -14,14 +14,14 @@ public class Storage {
     private final SimpleServo gate;
     private final Intake intake;
 
-    public static double gateClosedPos = 0.345;
-    public static double gateOpenPos = 0.067;
+    public static double gateClosedPos = 0.29;
+    public static double gateOpenPos = 0.05;
     public static double TRANSFER_POWER_CLOSE = -0.7;
     public static double TRANSFER_POWER_FAR = -0.6;
-    public static double fullDurationThreshold = 200; // ms
-    public static double fullCurrentThresholdAmps = 6.5; // amps
+    public static double fullDurationThreshold = 300; // ms
+    public static double fullCurrentThresholdAmps = 7.0; // amps
     private ElapsedTime fullDurationTimer;
-    private double    current = 0; // amps
+    private double current = 0; // amps
 
     private static boolean gateOpen = false;
     public Storage (HardwareMap hardwareMap, Intake intake){

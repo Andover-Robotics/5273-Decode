@@ -44,7 +44,7 @@ public class Aimer {
     //how far from the side border of the field (where drivers stand) the aiming point is
     public static double goalOutAimClose = 20.0; // only for aiming
     public static double goalOutForRpmClose = 10; // rpm depends on this // normal val: 15
-    public static double goalOutAimFar = 17; // only for aiming
+    public static double goalOutAimFar = 8; // only for aiming
     public static double goalOutForRpmFar = 10; // rpm depends on this // normal val: 15
 
     public static double centerOfRotationOffsetY = -1.85; // in
@@ -86,8 +86,8 @@ public class Aimer {
         selectedGoal = Goal.BLUE;
 
         if (isFarShooting) {
-            targetPoseForRpm = new Pose2d(goalOutForRpmFar,144- goalBackForRpmFar, Math.toRadians(90));
-            targetPoseAim = new Pose2d(goalOutAimFar,144- goalBackAimFar, Math.toRadians(90));
+            targetPoseForRpm = new Pose2d(goalOutForRpmFar,144 - goalBackForRpmFar, Math.toRadians(90));
+            targetPoseAim = new Pose2d(goalOutAimFar,144 - goalBackAimFar, Math.toRadians(90));
         }
         else {
             targetPoseForRpm = new Pose2d(goalOutForRpmClose, 144 - goalBackForRpmClose, Math.toRadians(90));
