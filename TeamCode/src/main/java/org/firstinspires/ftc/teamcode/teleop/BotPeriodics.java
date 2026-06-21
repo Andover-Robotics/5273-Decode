@@ -29,7 +29,7 @@ public class BotPeriodics {
     protected final Telemetry telemetry;
     protected double bearingTurnCorrection = 0;
     private double bearingAvoidCorrection = 0;
-    public static double BEARING_AVOID_IN_DEGREES = 26.7;
+    public static double BEARING_AVOID_IN_DEGREES = 0.0;
     protected ActionHost actionHost;
     // camera vision
 

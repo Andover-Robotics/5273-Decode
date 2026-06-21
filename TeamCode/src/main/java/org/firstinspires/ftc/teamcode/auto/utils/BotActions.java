@@ -74,7 +74,7 @@ public class BotActions {
 
     public Action runContinuousIntake() {
         return new ParallelAction(
-                new InstantAction(intake::runSlow),
+                new InstantAction(intake::runSlowForAuto),
                 new InstantAction(storage::stopTransfer)
         );
     }

@@ -20,8 +20,8 @@ import org.firstinspires.ftc.teamcode.teleop.BotPeriodics;
 import org.firstinspires.ftc.teamcode.teleop.MainTeleopClose;
 
 @Config
-@Autonomous(name = "Close Fifteen Ball Red Gate Intake Auto", group = "Autonomous")
-public class CloseFifteenRedGateIntake extends LinearOpMode {
+@Autonomous(name = "Close Fifteen Ball Red Gate Intake Overflow Auto", group = "Autonomous")
+public class CloseFifteenRedGateIntakeOverflow extends LinearOpMode {
     private Hardware hardware;
     private BotActions botActions;
     private MecanumDrive drive;
@@ -46,7 +46,7 @@ public class CloseFifteenRedGateIntake extends LinearOpMode {
     public static double shootY = CloseTwelveRed.shootY;
     public static double shootX = CloseTwelveRed.shootX;
     public static double secondShootRowOffsetX = -12;
-    public static double secondShootRowOffsetY = -10;
+    public static double secondShootRowOffsetY = -11;
     public static double gateShootOffsetX = -12;
     public static double gateShootOffsetY = -11;
 
@@ -54,6 +54,10 @@ public class CloseFifteenRedGateIntake extends LinearOpMode {
     public static double gatePoseStartX = 133.0;
     public static double gatePoseEndY = 61.5;
     public static double gatePoseEndX = 134.5;
+
+    public static double gatePoseOverflowAngle = 0;
+    public static double gatePoseOverflowY = 63.0;
+    public static double gatePoseOverflowX = 127.0;
 
     public static double gate2YOffset = 0.0;
 
@@ -74,10 +78,14 @@ public class CloseFifteenRedGateIntake extends LinearOpMode {
     public static Pose2d gatePoseStart = new Pose2d(gatePoseStartX, gatePoseStartY, Math.toRadians(gateAngle));
     public static Pose2d gatePoseEnd = new Pose2d(gatePoseEndX, gatePoseEndY, Math.toRadians(gateAngle));
 
+    public static Pose2d gatePoseOverflow = new Pose2d(gatePoseOverflowX, gatePoseOverflowY, Math.toRadians(gatePoseOverflowAngle));
+
+
     public static Pose2d shootPos = new Pose2d(shootX, shootY, Math.toRadians(0));
     public static Pose2d leavePos = CloseTwelveRed.leavePos;
 
     public static double gateWaitSeconds = 1.6;
+    public static double gateOverflowWaitSeconds = 0.0;
 
 
     public Action madeAuto;
@@ -108,6 +116,8 @@ public class CloseFifteenRedGateIntake extends LinearOpMode {
                 .stopAndAdd(botActions.startIntake())
                 .strafeToSplineHeading(gatePoseEnd.position, gatePoseEnd.heading.log())
                 .waitSeconds(gateWaitSeconds)
+                .strafeToSplineHeading(gatePoseOverflow.position, gatePoseOverflow.heading.log())
+                .waitSeconds(gateOverflowWaitSeconds)
                 .stopAndAdd(botActions.runContinuousIntake())
 
                 .stopAndAdd(botActions.actionSetAimlock(true))
