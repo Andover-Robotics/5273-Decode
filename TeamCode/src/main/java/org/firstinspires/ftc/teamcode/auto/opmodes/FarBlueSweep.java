@@ -39,9 +39,9 @@ public class FarBlueSweep extends LinearOpMode {
     public static double cornerInitialStartY = FarRed.cornerInitialStartY;
     public static double cornerInitialStartX = 144 - FarRed.cornerInitialStartX;
 
-    public static double cornerIntakeEndAngle = 180 - FarRed.cornerIntakeEndAngle;
-    public static double cornerIntakeEndY = FarRed.cornerIntakeEndY;
-    public static double cornerIntakeEndX = 144 - FarRed.cornerIntakeEndX;
+    public static double cornerIntakeEndAngle = 180 - FarRedSweep.cornerIntakeEndAngle;
+    public static double cornerIntakeEndY = FarRedSweep.cornerIntakeEndY;
+    public static double cornerIntakeEndX = 144 - FarRedSweep.cornerIntakeEndX;
 
     public static double sweepEndAngle = 180 - FarRedSweep.sweepEndAngle;
     public static double sweepEndY = FarRedSweep.sweepEndY;
@@ -115,7 +115,8 @@ public class FarBlueSweep extends LinearOpMode {
 
                 // Overflow intake 2
                 .stopAndAdd(botActions.startIntake())
-                .strafeToSplineHeading(cornerIntakeEnd.position, cornerIntakeEnd.heading.log())
+                .splineToLinearHeading(new Pose2d(cornerIntakeEnd.position.x, cornerIntakeEnd.position.y, cornerIntakeEnd.heading.log()), Math.toRadians(180))
+                .strafeToLinearHeading(sweepEnd.position, sweepEnd.heading.log())
                 .stopAndAdd(botActions.runContinuousIntake())
                 .stopAndAdd(botActions.actionSetAimlock(true))
                 .strafeToSplineHeading(shootPos.position, shootPos.heading.log())
